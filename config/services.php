@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    'square' => [
+        'env'         => env('SQUARE_ENV', 'sandbox'),
+        'token'       => env('SQUARE_ACCESS_TOKEN'),
+        'location_id' => env('SQUARE_LOCATION_ID'),
+        'version'     => env('SQUARE_VERSION'),
+        'webhook_key' => env('SQUARE_WEBHOOK_SIGNATURE_KEY'),
+        'webhook_url' => env('SQUARE_WEBHOOK_URL'),
+    ],
+
+    'doordash' => [
+        'developer_id'   => env('DOORDASH_DEVELOPER_ID'),
+        'key_id'         => env('DOORDASH_KEY_ID'),
+        'signing_secret' => env('DOORDASH_SIGNING_SECRET'),
+    ],
+
+    'anthropic' => [
+        'key'   => env('ANTHROPIC_API_KEY'),
+        'model' => env('ASHA_MODEL'),
+    ],
+
 ];

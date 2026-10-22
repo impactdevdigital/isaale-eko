@@ -13,6 +13,11 @@ class Country extends Model
         'sort_order' => 'integer',
     ];
 
+    public function flagUrl(): ?string
+    {
+        return $this->code ? asset('images/flags/'.strtolower($this->code).'.svg') : null;
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

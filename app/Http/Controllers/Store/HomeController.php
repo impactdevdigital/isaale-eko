@@ -27,7 +27,7 @@ class HomeController extends Controller
                 ->take(3)
                 ->get(),
             'categories' => Category::featured()->get(),
-            'countries' => Country::orderBy('sort_order')->get(),
+            'countries' => Country::whereNotNull('image')->orderBy('sort_order')->get(),
         ]);
     }
 

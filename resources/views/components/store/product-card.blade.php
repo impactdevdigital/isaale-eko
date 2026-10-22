@@ -16,19 +16,21 @@
         'aspect-[109/106]' => $compact,
         'aspect-[5/4] md:aspect-[7/8]' => ! $compact,
     ])>
-        <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" loading="lazy"
-             @class(['size-full object-cover', 'opacity-40' => ! $inStock])>
+        <a href="{{ route('product', $product) }}" wire:navigate tabindex="-1" aria-hidden="true" class="block size-full">
+            <img src="{{ asset($product->image) }}" alt="" loading="lazy"
+                 @class(['size-full object-cover', 'opacity-40' => ! $inStock])>
+        </a>
 
         @if ($inStock)
             <x-store.product-badges :product="$product" :compact="$compact" />
 
             @unless ($compact)
-                <button type="button" class="absolute bottom-2 left-2 flex size-12 items-center justify-center rounded-full bg-surface md:hidden" aria-label="Quick view {{ $product->name }}">
+                <a href="{{ route('product', $product) }}" wire:navigate class="absolute bottom-2 left-2 flex size-12 items-center justify-center rounded-full bg-surface md:hidden" aria-label="Quick view {{ $product->name }}">
                     <x-store.icon name="eye" />
-                </button>
+                </a>
             @endunless
         @else
-            <div class="absolute inset-0 bg-[#CCCCCC]/70"></div>
+            <div class="pointer-events-none absolute inset-0 bg-[#CCCCCC]/70"></div>
             <span class="absolute bottom-[9px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[2px] bg-black px-4 py-1 text-badge-sm leading-[10px] uppercase text-white">Out of stock</span>
         @endif
     </div>
@@ -43,7 +45,7 @@
             'capitalize',
             'min-h-[34px] pb-2 text-link' => $compact,
             'pb-[23px] text-button-sm' => ! $compact,
-        ])>{{ $product->name }}</h3>
+        ])><a href="{{ route('product', $product) }}" wire:navigate class="hover:underline">{{ $product->name }}</a></h3>
 
         @if (! $compact && $variation?->name)
             <p class="text-body-xs text-body-muted">{{ $variation->name }}</p>

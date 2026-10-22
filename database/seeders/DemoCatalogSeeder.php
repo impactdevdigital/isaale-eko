@@ -29,21 +29,42 @@ class DemoCatalogSeeder extends Seeder
     ];
 
     /**
-     * "Shop by category" tiles on the home page.
+     * "Shop by category" tiles on the home page: name => [emoji, menu group it belongs to].
      */
-    private const FEATURED = ['Rice & beans', 'Sauces', 'Seasonings', 'Fresh produce', 'Meat & fish', 'Snacks', 'Drinks', 'Beauty & home'];
+    private const FEATURED = [
+        'Rice & beans' => ['🌾', 'Food & pastry'],
+        'Sauces' => ['🥫', 'Food & pastry'],
+        'Seasonings' => ['🌶️', 'Food & pastry'],
+        'Fresh produce' => ['🥬', 'Food & pastry'],
+        'Meat & fish' => ['🐟', 'Frozen foods'],
+        'Snacks' => ['🍪', 'Snacks & treats'],
+        'Drinks' => ['🧃', null],
+        'Beauty & home' => ['🧴', 'Home & household'],
+    ];
 
+    /**
+     * [name, ISO code, demonym, tile tagline, tile theme, has tile artwork]
+     */
     private const COUNTRIES = [
-        ['Nigeria', 'Naija, your favourites are here.', 'green'],
-        ['Ghana', 'Chale, home is closer than you think.', 'yellow'],
-        ['Jamaica', 'Straight from yard to your kitchen.', 'green'],
-        ['Cameroon', 'Chale, home is closer than you think.', 'yellow'],
-        ['Trinidad & Tobago', 'Chale, home is closer than you think.', 'green'],
-        ['Ethiopia', 'Chale, home is closer than you think.', 'green'],
+        ['Nigeria', 'NG', 'Nigerian', 'Naija, your favourites are here.', 'green', true],
+        ['Ghana', 'GH', 'Ghanaian', 'Chale, home is closer than you think.', 'yellow', true],
+        ['Jamaica', 'JM', 'Jamaican', 'Straight from yard to your kitchen.', 'green', true],
+        ['Cameroon', 'CM', 'Cameroonian', 'Chale, home is closer than you think.', 'yellow', true],
+        ['Trinidad & Tobago', 'TT', 'Trinidadian', 'Chale, home is closer than you think.', 'green', true],
+        ['Ethiopia', 'ET', 'Ethiopian', 'Chale, home is closer than you think.', 'green', true],
+        ['Kenya', 'KE', 'Kenyan', 'Karibu, a taste of home.', 'green', false],
+    ];
+
+    /**
+     * Country page banners that exist in Figma.
+     */
+    private const COUNTRY_BANNERS = [
+        'Nigeria' => 'images/store/countries/banners/nigeria.webp',
     ];
 
     /**
      * name => [size, price, previous price, stock, category, country, badges]
+     * badges: trending, hot, bestseller (rank), discount (estimate %), label (custom purple tag), gallery (image count)
      */
     private const PRODUCTS = [
         'Black Eyed Beans' => ['1kg pouch', 399, 499, 40, 'Rice & beans', 'Nigeria'],
@@ -51,7 +72,7 @@ class DemoCatalogSeeder extends Seeder
         'Ripe Plantain' => ['4 pieces', 329, 419, 60, 'Fresh produce', 'Jamaica', ['trending' => true, 'discount' => 24]],
         'Indomie' => ['70g pack', 449, 599, 120, 'Snacks', 'Nigeria', ['bestseller' => 6]],
         'Zobo Hibiscus Drink' => ['500ml bottle', 289, 359, 30, 'Drinks', 'Nigeria', ['hot' => true]],
-        'Dried Hibiscus Petals' => ['200g pouch', 349, 439, 25, 'Seasonings', 'Nigeria', ['bestseller' => 3, 'discount' => 24]],
+        'Dried Hibiscus Petals' => ['200g pouch', 349, 499, 25, 'Drinks', 'Nigeria', ['bestseller' => 3, 'discount' => 24, 'gallery' => 4]],
         'Fresh Okra' => ['300g bunch', 249, 319, 35, 'Fresh produce', 'Nigeria'],
         'White Garri' => ['1kg pouch', 449, 539, 50, 'Rice & beans', 'Nigeria', ['bestseller' => 5]],
         'Groundnut Paste' => ['400g jar', 399, 479, 20, 'Sauces', 'Ghana'],
@@ -72,14 +93,37 @@ class DemoCatalogSeeder extends Seeder
         'Red Palm Oil' => [null, 349, null, 40, 'Sauces', 'Nigeria', ['hot' => true]],
         'Vegetable' => [null, 249, null, 20, 'Fresh produce', null],
         'Dried Stockfish' => [null, 599, null, 18, 'Meat & fish', 'Nigeria'],
-        'Dried Cryfish' => [null, 299, null, 22, 'Meat & fish', 'Nigeria'],
+        'Dried Crayfish' => ['100g pack', 299, 349, 22, 'Meat & fish', 'Nigeria', ['trending' => true]],
+        'Sardines in Tomato Sauce' => ['155g can', 129, 169, 60, 'Meat & fish', 'Ghana', ['discount' => 24]],
+        'Pure Red Palm Oil' => ['1L bottle', 499, 799, 30, 'Sauces', 'Nigeria', ['trending' => true]],
+        'Fresh Green Plantain' => ['1 bunch (approx 1.5kg)', 349, 399, 40, 'Fresh produce', 'Ghana', ['hot' => true]],
+        'Ground Egusi Seeds' => ['250g pouch', 499, 599, 35, 'Seasonings', 'Nigeria', ['bestseller' => 7]],
+        'Fresh Spinach' => ['200g bag', 149, 199, 3, 'Fresh produce', null],
+        'Seasoning Stock Cubes' => ['60 cubes pack', 249, 299, 80, 'Seasonings', 'Ghana', ['bestseller' => 8]],
+        'Rich Tomato Paste' => ['400g can', 199, 249, 45, 'Sauces', 'Ghana', ['discount' => 20]],
+        'Pounded Yam Flour' => ['1.5kg bag', 449, 849, 25, 'Rice & beans', 'Nigeria', ['bestseller' => 9]],
+        'Indomie Chicken Noodles' => ['70g pack', 79, 99, 150, 'Snacks', 'Nigeria', ['label' => 'Popular']],
+        'Capri-Sun Tropical' => ['200ml pouch', 99, 129, 70, 'Drinks', null, ['label' => 'Kids fave']],
+        'Golden Penny Semovita' => ['1kg pack', 399, 449, 40, 'Rice & beans', 'Nigeria', ['bestseller' => 10]],
+        'Nestlé Milo' => ['400g tin', 599, 699, 30, 'Drinks', 'Nigeria', ['bestseller' => 11]],
+        'Supligen Vanilla Drink' => ['290ml can', 179, 229, 48, 'Drinks', 'Nigeria'],
+        'Chief Curry Powder' => ['85g pack', 249, 299, 2, 'Seasonings', 'Nigeria'],
+        'Mama Gold Garri' => ['1kg pack', 249, 299, 0, 'Rice & beans', 'Nigeria'],
+        'Bournvita Chocolate Drink' => ['500g jar', 649, 749, 26, 'Drinks', 'Nigeria'],
+        'Knorr Chicken Seasoning' => ['100g jar', 279, 329, 33, 'Seasonings', 'Nigeria'],
+        'Ofada Rice' => ['2kg pack', 699, 899, 18, 'Rice & beans', 'Nigeria', ['label' => 'Popular']],
+        'Basmati Rice' => ['5kg bag', 899, 1099, 20, 'Rice & beans', 'Nigeria'],
+        'Ginger' => [null, 249, null, 50, 'Fresh produce', null],
+        'Clove' => [null, 279, null, 40, 'Seasonings', null, ['bestseller' => 12]],
+        'Pineapple' => [null, 499, null, 25, 'Fresh produce', 'Ghana'],
     ];
 
     private const RECIPES = [
         'Jollof Rice' => ['Smoky, rich and always a good idea.', 50, 'Nigeria', ['Premium Parboiled Rice', 'Gino Tomato Paste', 'Scotch Bonnet Peppers', 'Mamador Pure Oil', 'Maggi Seasoning Cubes']],
         'Egusi Soup' => ['Nutty, hearty and full of flavour.', 45, 'Nigeria', ['Fresh Beef', 'Gino Tomato Paste', 'Red Palm Oil', 'Vegetable', 'Maggi Seasoning Cubes', 'Dried Stockfish']],
-        'Banga Soup' => ['A true taste of the Niger Delta.', 70, 'Nigeria', ['Dried Cryfish', 'Red Palm Oil', 'Fresh Beef', 'Dried Stockfish', 'Vegetable']],
+        'Banga Soup' => ['A true taste of the Niger Delta.', 70, 'Nigeria', ['Dried Crayfish', 'Red Palm Oil', 'Fresh Beef', 'Dried Stockfish', 'Vegetable']],
         'Curry Goat' => ['Slow-cooked, fragrant and made for sharing.', 90, 'Jamaica', []],
+        'Zobo Hibiscus Drink' => ['A refreshing, ruby-red Nigerian classic.', 30, 'Nigeria', ['Dried Hibiscus Petals', 'Ginger', 'Clove', 'Pineapple']],
     ];
 
     private const COLLECTIONS = [
@@ -98,24 +142,38 @@ class DemoCatalogSeeder extends Seeder
             }
         }
 
-        // Home page tiles sit outside the menu tree until the Square taxonomy replaces both.
-        foreach (self::FEATURED as $i => $name) {
-            $this->category($name, [
+        // Home page tiles are part of the tree so the shop filters find their products.
+        // "Drinks" is itself a menu group, so it stays a root.
+        foreach (array_keys(self::FEATURED) as $i => $name) {
+            [$emoji, $group] = self::FEATURED[$name];
+
+            $this->category($name, array_filter([
+                'parent_id' => $group ? Category::where('slug', $this->slug($group))->value('id') : null,
                 'is_featured' => true,
+                'featured_order' => $i,
+                'emoji' => $emoji,
                 'image' => 'images/store/categories/'.$this->slug($name).'.webp',
-                'sort_order' => 100 + $i,
-            ]);
+                // Keep a menu group's own menu position; tiles go after the designed subcategories.
+                'sort_order' => $group ? 100 + $i : null,
+            ], fn ($value) => $value !== null));
         }
 
-        foreach (self::COUNTRIES as $i => [$name, $tagline, $theme]) {
+        foreach (self::COUNTRIES as $i => [$name, $code, $demonym, $tagline, $theme, $hasTile]) {
             Country::updateOrCreate(['slug' => $this->slug($name)], [
                 'name' => $name,
+                'code' => $code,
+                'demonym' => $demonym,
                 'tagline' => $tagline,
                 'theme' => $theme,
-                'image' => 'images/store/countries/'.$this->slug($name).'.webp',
+                'image' => $hasTile ? 'images/store/countries/'.$this->slug($name).'.webp' : null,
+                'banner_image' => self::COUNTRY_BANNERS[$name] ?? null,
+                'banner_description' => "Find familiar {$demonym} staples, pantry favourites and flavours from home — all in one place.",
                 'sort_order' => $i,
             ]);
         }
+
+        // Earlier demo data spelt this "Cryfish"; rename in place so existing baskets keep working.
+        Product::where('slug', 'dried-cryfish')->update(['slug' => 'dried-crayfish']);
 
         foreach (self::PRODUCTS as $name => $row) {
             [$size, $price, $previous, $stock, $category, $country] = $row;
@@ -130,6 +188,10 @@ class DemoCatalogSeeder extends Seeder
                 'is_hot' => $badges['hot'] ?? false,
                 'bestseller_rank' => $badges['bestseller'] ?? null,
                 'discount_estimate' => $badges['discount'] ?? null,
+                'badge_label' => $badges['label'] ?? null,
+                'gallery' => isset($badges['gallery'])
+                    ? array_map(fn (int $n) => 'images/store/gallery/'.$this->slug($name)."-{$n}.webp", range(1, $badges['gallery']))
+                    : null,
             ]);
 
             $product->variations()->updateOrCreate(['sort_order' => 0], [
@@ -150,8 +212,10 @@ class DemoCatalogSeeder extends Seeder
                 'duration_minutes' => $minutes,
                 'country_id' => Country::where('slug', $this->slug($country))->value('id'),
                 'image' => $ingredients ? "images/store/recipes/{$slug}.webp" : null,
-                'thumbnail' => "images/store/recipes/thumbs/{$slug}.webp",
-                'is_featured' => (bool) $ingredients,
+                'thumbnail' => file_exists(public_path("images/store/recipes/thumbs/{$slug}.webp"))
+                    ? "images/store/recipes/thumbs/{$slug}.webp"
+                    : "images/store/recipes/{$slug}.webp",
+                'is_featured' => $i < 3,
                 'sort_order' => $i,
             ]);
 

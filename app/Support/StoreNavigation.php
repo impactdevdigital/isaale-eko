@@ -11,7 +11,7 @@ use App\Models\Recipe;
 class StoreNavigation
 {
     /**
-     * @return array<int, array{label: string, menu?: string}>
+     * @return array<int, array{label: string, menu?: string, url?: string}>
      */
     public static function links(): array
     {
@@ -19,12 +19,12 @@ class StoreNavigation
             ['label' => 'Shop', 'menu' => 'shop'],
             ['label' => 'Discover', 'menu' => 'discover'],
             ['label' => 'Help', 'menu' => 'help'],
-            ['label' => 'Country'],
-            ['label' => 'New arrivals'],
-            ['label' => 'Best sellers'],
-            ['label' => 'Special deals'],
-            ['label' => 'Community'],
-            ['label' => 'About'],
+            ['label' => 'Country', 'url' => route('home').'#shop-by-country'],
+            ['label' => 'New arrivals', 'url' => route('shop', ['sort' => 'new'])],
+            ['label' => 'Best sellers', 'url' => route('shop', ['sort' => 'bestsellers'])],
+            ['label' => 'Special deals', 'url' => route('shop', ['sort' => 'discounted'])],
+            ['label' => 'Community', 'url' => '#'],
+            ['label' => 'About', 'url' => '#'],
         ];
     }
 
@@ -37,10 +37,17 @@ class StoreNavigation
     {
         return [
             'shop' => [
-                'sidebar' => ['Categories', 'Country', 'New arrivals', 'Best sellers', 'Wholesale'],
+                'sidebar' => [
+                    'Categories' => route('shop'),
+                    'Country' => route('home').'#shop-by-country',
+                    'New arrivals' => route('shop', ['sort' => 'new']),
+                    'Best sellers' => route('shop', ['sort' => 'bestsellers']),
+                    'Wholesale' => '#',
+                ],
                 'eyebrow' => 'Start with what you need',
                 'title' => 'Shop Categories',
                 'link' => 'All products',
+                'url' => route('shop'),
                 'groups' => Category::roots()
                     ->has('children')
                     ->with('children')
@@ -49,15 +56,17 @@ class StoreNavigation
                         $group->name => $group->children->map(fn (Category $child) => [
                             'name' => $child->name,
                             'image' => $child->image,
+                            'url' => route('shop', ['category' => $child->slug]),
                         ])->all(),
                     ])
                     ->all(),
             ],
             'discover' => [
-                'sidebar' => ['Recipes', 'Food stories', 'Product stories'],
+                'sidebar' => ['Recipes' => '#', 'Food stories' => '#', 'Product stories' => '#'],
                 'eyebrow' => 'Discover Ìsàlèè Èkó',
                 'title' => 'Cook Something Good',
                 'link' => 'View all',
+                'url' => '#',
                 'recipes' => Recipe::with('country')
                     ->orderBy('sort_order')
                     ->take(4)
@@ -70,10 +79,11 @@ class StoreNavigation
                     ->all(),
             ],
             'help' => [
-                'sidebar' => ['Ask Asha', 'Delivery & pickup', 'FAQ', 'Contact us'],
+                'sidebar' => ['Ask Asha' => '#', 'Delivery & pickup' => '#', 'FAQ' => '#', 'Contact us' => '#'],
                 'eyebrow' => 'Here to help',
                 'title' => 'Ask Asha Anything',
                 'link' => 'Talk to Asha',
+                'url' => '#',
                 'body' => 'Get practical answers about ingredients, recipes, delivery and your order. Asha stays with you wherever you browse.',
             ],
         ];

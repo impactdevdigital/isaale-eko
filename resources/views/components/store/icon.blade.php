@@ -121,4 +121,16 @@
     @case('minus')
         <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-3']) }} viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><path d="M2.5 6h7"/></svg>
         @break
+    @case('box')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-4']) }} viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5 3 6v8l7 3.5 7-3.5V6l-7-3.5Z"/><path d="M3 6l7 3.5L17 6M10 9.5v8M6.5 4.25l7 3.5"/></svg>
+        @break
+
+    @case('returns')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7v6" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1.2" fill="white"/></svg>
+        @break
+
+    @case('shield')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        @break
+
 @endswitch

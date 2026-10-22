@@ -1,9 +1,14 @@
 @php
     $columns = [
-        'Shop' => ['All products', 'New arrivals', 'Best sellers', 'Deals'],
-        'Discover' => ['Recipes', 'Food stories', 'Product stories'],
-        'Help' => ['Delivery & pickup', 'FAQs', 'Contact us'],
-        'Community' => ['Our market', 'About Ìsàlèè Èkó', 'Wholesale portal', 'Join our community'],
+        'Shop' => [
+            'All products' => route('shop'),
+            'New arrivals' => route('shop', ['sort' => 'new']),
+            'Best sellers' => route('shop', ['sort' => 'bestsellers']),
+            'Deals' => route('shop', ['sort' => 'discounted']),
+        ],
+        'Discover' => ['Recipes' => '#', 'Food stories' => '#', 'Product stories' => '#'],
+        'Help' => ['Delivery & pickup' => '#', 'FAQs' => '#', 'Contact us' => '#'],
+        'Community' => ['Our market' => '#', 'About Ìsàlèè Èkó' => '#', 'Wholesale portal' => '#', 'Join our community' => '#'],
     ];
 @endphp
 
@@ -18,8 +23,8 @@
             <div>
                 <h3 class="pb-[26px] text-[12px] leading-4 font-bold text-white">{{ $heading }}</h3>
                 <ul class="flex flex-col gap-2.5">
-                    @foreach ($links as $label)
-                        <li><a href="#" class="block text-[11px] leading-[14px] text-grayscale-50 transition-colors hover:text-white">{{ $label }}</a></li>
+                    @foreach ($links as $label => $url)
+                        <li><a href="{{ $url }}" class="block text-[11px] leading-[14px] text-grayscale-50 transition-colors hover:text-white">{{ $label }}</a></li>
                     @endforeach
                 </ul>
             </div>

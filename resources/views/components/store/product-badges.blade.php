@@ -6,10 +6,10 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'pointer-events-none absolute left-0 top-2 flex flex-col items-start gap-1 uppercase']) }}>
-    @if ($product->is_trending)
+    @if ($label = $product->tagLabel())
         <span @class([$tag, 'flex items-center gap-1 bg-trend-50 pl-[5px] pr-2.5 italic text-white [clip-path:polygon(0_0,100%_0,calc(100%-8px)_100%,0_100%)]'])>
             <x-store.icon name="stars" />
-            Trending
+            {{ $label }}
         </span>
     @endif
 

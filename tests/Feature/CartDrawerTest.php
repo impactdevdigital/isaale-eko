@@ -84,8 +84,10 @@ test('adding a whole recipe adds each ingredient once', function () {
 });
 
 test('the demo seeder can run twice without duplicating rows', function () {
+    $before = Product::count();
+
     $this->seed(DemoCatalogSeeder::class);
 
-    expect(Product::count())->toBe(27)
+    expect(Product::count())->toBe($before)
         ->and(Product::where('slug', 'indomie')->first()->variations()->count())->toBe(1);
 });

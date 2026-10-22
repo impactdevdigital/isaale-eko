@@ -28,11 +28,11 @@
                     <img src="{{ asset('images/logo-small.svg') }}" alt="Ìsàlèè Èkó" class="h-[39px] w-[61px]">
                 </a>
 
-                <form action="#" role="search" class="order-last flex h-[46px] w-full items-center overflow-hidden rounded-xl border border-grayscale-20 bg-grayscale-0 md:order-none md:ml-2.5 md:max-w-[930px] md:flex-1">
+                <form action="{{ route('shop') }}" method="GET" role="search" class="order-last flex h-[46px] w-full items-center overflow-hidden rounded-xl border border-grayscale-20 bg-grayscale-0 md:order-none md:ml-2.5 md:max-w-[930px] md:flex-1">
                     <label for="site-search" class="flex flex-1 items-center gap-2.5 pl-5 md:pl-10">
                         <x-store.icon name="search" class="size-[18px] shrink-0 text-ink" />
                         <span class="sr-only">Search</span>
-                        <input id="site-search" type="search" name="q"
+                        <input id="site-search" type="search" name="q" value="{{ request()->routeIs('shop') ? request('q') : '' }}"
                                placeholder="Search products, ingredients or recipes..."
                                class="w-full bg-transparent text-lead-mobile text-ink placeholder:text-body-muted focus:outline-none max-md:placeholder:text-[13px]">
                     </label>
@@ -96,7 +96,7 @@
                                 <x-store.icon name="arrow-down" class="size-2.5 transition-transform" x-bind:class="menu === '{{ $link['menu'] }}' && 'rotate-180'" />
                             </button>
                         @else
-                            <a href="#" class="flex shrink-0 items-center border-b-[3px] border-transparent px-[15px] text-nav capitalize transition-colors hover:border-brand-yellow">
+                            <a href="{{ $link['url'] }}" class="flex shrink-0 items-center border-b-[3px] border-transparent px-[15px] text-nav capitalize transition-colors hover:border-brand-yellow">
                                 {{ $link['label'] }}
                             </a>
                         @endisset

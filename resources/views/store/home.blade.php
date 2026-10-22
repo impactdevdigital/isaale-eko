@@ -4,7 +4,7 @@
 
         {{-- Fresh this week --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
-            <x-store.section-heading title="Fresh This Week" subtitle="Popular picks. Great prices. Real flavour." link="View all" />
+            <x-store.section-heading title="Fresh This Week" subtitle="Popular picks. Great prices. Real flavour." link="View all" :href="route('shop')" />
             <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-6 xl:grid-cols-7">
                 @foreach ($freshThisWeek as $product)
                     <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" />
@@ -26,7 +26,7 @@
 
         {{-- More from the shelves --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
-            <x-store.section-heading title="More From The Shelves" subtitle="Everyday essentials and new things worth trying." link="Explore all products" />
+            <x-store.section-heading title="More From The Shelves" subtitle="Everyday essentials and new things worth trying." link="Explore all products" :href="route('shop')" />
             <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-6 xl:grid-cols-7">
                 @foreach ($moreFromTheShelves as $product)
                     <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" />
@@ -36,10 +36,10 @@
 
         {{-- Shop by category --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
-            <x-store.section-heading title="Shop By Category" subtitle="Everything you need, from pantry staples to everyday essentials." link="View all" />
+            <x-store.section-heading title="Shop By Category" subtitle="Everything you need, from pantry staples to everyday essentials." link="View all" :href="route('shop')" />
             <div class="grid grid-cols-3 gap-2.5 md:grid-cols-4 lg:grid-cols-8 lg:gap-[9px]">
                 @foreach ($categories as $category)
-                    <a href="#" @class(['group flex flex-col overflow-hidden rounded-sm border border-grayscale-40 bg-surface pb-3 transition-colors hover:border-ink', 'max-md:hidden' => $loop->index >= 6])>
+                    <a href="{{ route('shop', ['category' => $category->slug]) }}" @class(['group flex flex-col overflow-hidden rounded-sm border border-grayscale-40 bg-surface pb-3 transition-colors hover:border-ink', 'max-md:hidden' => $loop->index >= 6])>
                         <img src="{{ asset($category->image) }}" alt="" loading="lazy" class="aspect-[152/125] w-full object-cover">
                         <span class="flex items-center justify-between gap-2 px-2.5 pt-2.5">
                             <span class="text-[11px] leading-[14px] font-bold">{{ $category->name }}</span>
@@ -51,11 +51,11 @@
         </section>
 
         {{-- Shop by country --}}
-        <section class="flex flex-col gap-4 pt-10 pb-12">
-            <x-store.section-heading title="Shop By Country" subtitle="Explore authentic flavours from across Africa and the Caribbean." link="View all" />
+        <section id="shop-by-country" class="flex scroll-mt-4 flex-col gap-4 pt-10 pb-12">
+            <x-store.section-heading title="Shop By Country" subtitle="Explore authentic flavours from across Africa and the Caribbean." />
             <div class="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:-mr-[30px] md:ml-0 md:pl-0 xl:-mr-[72px]">
                 @foreach ($countries as $country)
-                    <a href="#" @class([
+                    <a href="{{ route('shop.country', $country) }}" @class([
                         'relative isolate flex size-[170px] shrink-0 snap-start flex-col gap-2 overflow-hidden rounded-sm p-4 md:size-[260px] md:gap-4 md:p-8',
                         'bg-[#288129] text-white' => $country->theme === 'green',
                         'bg-[#F7C200] text-[#242424]' => $country->theme === 'yellow',

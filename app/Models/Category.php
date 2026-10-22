@@ -13,6 +13,7 @@ class Category extends Model
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'featured_order' => 'integer',
         'sort_order' => 'integer',
     ];
 
@@ -33,7 +34,7 @@ class Category extends Model
 
     public function scopeFeatured(Builder $query): Builder
     {
-        return $query->where('is_featured', true)->orderBy('sort_order');
+        return $query->where('is_featured', true)->orderBy('featured_order');
     }
 
     public function scopeRoots(Builder $query): Builder

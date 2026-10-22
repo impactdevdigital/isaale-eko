@@ -5,32 +5,271 @@
 @source '../views/**/*.blade.php';
 @source '../../app/Livewire/**/*.php';
 
+/*
+ * Design tokens pulled from the Figma file "Isalee Eko Build" (cgF4nr09kMwsi6bunzkKcR),
+ * page "00 Foundations": Color System board (234:288) and Typography board (282:1007).
+ */
 @theme {
     --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    
-    /* Brand Design Colors */
-    --color-brand-primary: #DF2600;
-    --color-brand-primary-hover: #E64A24;
-    --color-brand-primary-dark: #9B1C00;
-    --color-brand-primary-soft: #FFF0EC;
 
-    --color-brand-gold: #FFD21F;
-    --color-brand-gold-dark: #E8BD00;
-    --color-brand-gold-mustard: #D58700;
-    --color-brand-gold-soft: #FFF9EA;
+    /* Base colors */
+    --color-ink: #111111;
+    --color-brand-yellow: #FFD21F;
 
-    --color-brand-ink: #111111;
-    --color-brand-gray: #686868;
-    --color-brand-border: #EEEEEE;
-    --color-brand-surface: #F6F6F6;
-    --color-brand-bg: #FAFAFA;
+    /* Brand Yellow */
+    --color-brand-yellow-0: #FFFBEF;
+    --color-brand-yellow-10: #FFF8E6;
+    --color-brand-yellow-20: #FFF1C4;
+    --color-brand-yellow-30: #FFE994;
+    --color-brand-yellow-40: #FFDE59;
+    --color-brand-yellow-50: #FFD21F;
+    --color-brand-yellow-60: #E8BD00;
+    --color-brand-yellow-70: #B99300;
+    --color-brand-yellow-80: #806500;
+    --color-brand-yellow-90: #413B2F;
 
-    --color-brand-green: #007D49;
-    --color-brand-green-soft: #DAF4E7;
+    /* Trending Purple */
+    --color-trend-0: #F9F6FF;
+    --color-trend-10: #F1EAFF;
+    --color-trend-20: #E6DBFF;
+    --color-trend-30: #CCB6FF;
+    --color-trend-40: #B391FF;
+    --color-trend-50: #9462FF;
+    --color-trend-60: #7849D7;
+    --color-trend-70: #6231BB;
+    --color-trend-80: #4B2193;
+    --color-trend-90: #31155F;
 
-    --color-brand-blue: #007FE8;
-    --color-brand-blue-soft: #E0F1FF;
+    /* Sale & HOT Red Orange */
+    --color-sale-0: #FFF8F6;
+    --color-sale-10: #FFF0EC;
+    --color-sale-20: #FFDACE;
+    --color-sale-30: #FFB79F;
+    --color-sale-40: #FF8D69;
+    --color-sale-50: #FA6338;
+    --color-sale-60: #DF4A1F;
+    --color-sale-70: #B83916;
+    --color-sale-80: #8B2B13;
+    --color-sale-90: #5B1E0E;
 
-    --color-brand-purple: #7849D7;
-    --color-brand-purple-soft: #F1EAFF;
+    /* Secondary Blue */
+    --color-secondary-0: #F5F8FF;
+    --color-secondary-10: #E0F1FF;
+    --color-secondary-20: #C1E3FF;
+    --color-secondary-30: #A2D5FF;
+    --color-secondary-40: #83C7FF;
+    --color-secondary-50: #64B9FF;
+    --color-secondary-60: #46ABFF;
+    --color-secondary-70: #279DFF;
+    --color-secondary-80: #088FFF;
+    --color-secondary-90: #007FE8;
+    --color-secondary-100: #006EC9;
+
+    /* Tertiary Teal */
+    --color-tertiary-0: #F5FDFF;
+    --color-tertiary-10: #E5F8FC;
+    --color-tertiary-20: #D6F3F9;
+    --color-tertiary-30: #B9E9F4;
+    --color-tertiary-40: #84D6E8;
+    --color-tertiary-50: #59C5DD;
+    --color-tertiary-60: #39B6D2;
+    --color-tertiary-70: #22A8C6;
+    --color-tertiary-80: #139CBB;
+    --color-tertiary-90: #0991B0;
+    --color-tertiary-100: #0387A4;
+
+    /* Grayscale */
+    --color-grayscale-0: #FAFAFA;
+    --color-grayscale-10: #F7F7F7;
+    --color-grayscale-20: #F6F6F6;
+    --color-grayscale-30: #EEEEEE;
+    --color-grayscale-40: #DEDEDE;
+    --color-grayscale-50: #BDBDBD;
+    --color-grayscale-60: #9E9E9E;
+    --color-grayscale-70: #777777;
+    --color-grayscale-80: #686868;
+    --color-grayscale-90: #404040;
+    --color-grayscale-100: #111111;
+
+    /* Stock & Delivery Green */
+    --color-stock-0: #DAF4E7;
+    --color-stock-10: #DAF4E7;
+    --color-stock-20: #A8DFC4;
+    --color-stock-30: #63BC92;
+    --color-stock-40: #209A68;
+    --color-stock-50: #007D49;
+
+    /* Bestseller Gold */
+    --color-best-0: #FFF9EA;
+    --color-best-10: #F9E3B6;
+    --color-best-20: #EFCC7C;
+    --color-best-30: #E1A93F;
+    --color-best-40: #D58700;
+    --color-best-50: #9B6000;
+
+    /* Price & Discount Red */
+    --color-price-0: #FFF0EC;
+    --color-price-10: #FFDACE;
+    --color-price-20: #FA6338;
+    --color-price-30: #E64A24;
+    --color-price-40: #DF2600;
+    --color-price-50: #9B1C00;
+
+    /* Semantic aliases */
+    --color-border: #DEDEDE;
+    --color-muted: #777777;
+    --color-body-muted: #686868;
+    --color-footer: #404040;
+
+    /* Website surfaces */
+    --color-surface: #FFFFFF;
+    --color-surface-soft-cream: #FFFBEF;
+    --color-surface-hero-cream: #FFF8E6;
+    --color-surface-gold-tint: #F9E3B6;
+    --color-surface-cool: #F7F7F7;
+    --color-surface-quiet: #F6F6F6;
+
+    /* Typography: DM Sans scale. Pair mobile and desktop sizes, e.g. `text-hero-mobile lg:text-hero`. */
+    --text-hero: 64px;
+    --text-hero--line-height: 61px;
+    --text-hero--letter-spacing: -3.2px;
+    --text-hero--font-weight: 700;
+    --text-hero-mobile: 42px;
+    --text-hero-mobile--line-height: 40px;
+    --text-hero-mobile--letter-spacing: -2.4px;
+    --text-hero-mobile--font-weight: 700;
+
+    --text-h2: 34px;
+    --text-h2--line-height: 36px;
+    --text-h2--letter-spacing: -1.25px;
+    --text-h2--font-weight: 700;
+    --text-h2-mobile: 28px;
+    --text-h2-mobile--line-height: 30px;
+    --text-h2-mobile--letter-spacing: -1.25px;
+    --text-h2-mobile--font-weight: 700;
+
+    --text-h3: 28px;
+    --text-h3--line-height: 28px;
+    --text-h3--letter-spacing: -1px;
+    --text-h3--font-weight: 700;
+
+    --text-h4: 18px;
+    --text-h4--line-height: 24px;
+    --text-h4--font-weight: 800;
+
+    --text-h5: 14px;
+    --text-h5--line-height: 18px;
+    --text-h5--font-weight: 800;
+
+    --text-lead: 16px;
+    --text-lead--line-height: 26px;
+    --text-lead--font-weight: 500;
+    --text-lead-mobile: 14px;
+    --text-lead-mobile--line-height: 22px;
+    --text-lead-mobile--font-weight: 500;
+
+    --text-body: 14px;
+    --text-body--line-height: 20px;
+    --text-body--font-weight: 400;
+    --text-body-sm: 12px;
+    --text-body-sm--line-height: 18px;
+    --text-body-sm--font-weight: 500;
+    --text-body-xs: 10px;
+    --text-body-xs--line-height: 13px;
+    --text-body-xs--font-weight: 500;
+
+    --text-button: 16px;
+    --text-button--line-height: 20px;
+    --text-button--font-weight: 800;
+    --text-button-sm: 12px;
+    --text-button-sm--line-height: 16px;
+    --text-button-sm--font-weight: 800;
+    --text-nav: 12px;
+    --text-nav--line-height: 16px;
+    --text-nav--font-weight: 800;
+    --text-link: 10px;
+    --text-link--line-height: 13px;
+    --text-link--font-weight: 800;
+
+    /* Prices are text-price-40 coloured; previous price is text-body-xs muted with line-through. */
+    --text-price: 17px;
+    --text-price--line-height: 22px;
+    --text-price--font-weight: 800;
+    --text-price-mobile: 15px;
+    --text-price-mobile--line-height: 19.5px;
+    --text-price-mobile--font-weight: 800;
+    --text-price-sm: 12px;
+    --text-price-sm--line-height: 15.6px;
+    --text-price-sm--font-weight: 800;
+
+    /* Badges and eyebrows are uppercase in the design: add `uppercase` in markup. */
+    --text-badge: 10px;
+    --text-badge--line-height: 23px;
+    --text-badge--letter-spacing: 0.15px;
+    --text-badge--font-weight: 900;
+    --text-badge-sm: 8px;
+    --text-badge-sm--line-height: 19px;
+    --text-badge-sm--letter-spacing: 0.1px;
+    --text-badge-sm--font-weight: 900;
+    --text-eyebrow: 11px;
+    --text-eyebrow--line-height: 14px;
+    --text-eyebrow--letter-spacing: 1.35px;
+    --text-eyebrow--font-weight: 800;
+    --text-caption: 11px;
+    --text-caption--line-height: 15px;
+    --text-caption--font-weight: 400;
+
+    /* Radius: cards use rounded-sm (4px), pills rounded-full */
+    --radius-hero: 32px;
+    --radius-hero-mobile: 16px;
+
+    /* Effect style "Shadow" */
+    --shadow-card: 0 4px 48px rgb(0 0 0 / 0.02);
+
+    /* Layout: 1296px content at 1440, gutters 16 / 30 / 72 */
+    --container-page: 1296px;
+    --spacing-gutter: 16px;
+    --spacing-gutter-md: 30px;
+    --spacing-gutter-xl: 72px;
+
+    /* Legacy names kept as aliases of the Figma palette */
+    --color-brand-primary: var(--color-price-40);
+    --color-brand-primary-hover: var(--color-price-30);
+    --color-brand-primary-dark: var(--color-price-50);
+    --color-brand-primary-soft: var(--color-price-0);
+    --color-brand-gold: var(--color-brand-yellow-50);
+    --color-brand-gold-dark: var(--color-brand-yellow-60);
+    --color-brand-gold-mustard: var(--color-best-40);
+    --color-brand-gold-soft: var(--color-best-0);
+    --color-brand-ink: var(--color-ink);
+    --color-brand-gray: var(--color-grayscale-80);
+    --color-brand-border: var(--color-grayscale-30);
+    --color-brand-surface: var(--color-grayscale-20);
+    --color-brand-bg: var(--color-grayscale-0);
+    --color-brand-green: var(--color-stock-50);
+    --color-brand-green-soft: var(--color-stock-0);
+    --color-brand-blue: var(--color-secondary-90);
+    --color-brand-blue-soft: var(--color-secondary-10);
+    --color-brand-purple: var(--color-trend-60);
+    --color-brand-purple-soft: var(--color-trend-10);
+}
+
+/* Page-width wrapper matching the Figma grid: 16px gutter on phones, 30px on tablet, 72px on desktop. */
+@utility page-container {
+    width: 100%;
+    max-width: calc(var(--container-page) + 2 * var(--spacing-gutter-xl));
+    margin-inline: auto;
+    padding-inline: var(--spacing-gutter);
+
+    @media (width >= 48rem) {
+        padding-inline: var(--spacing-gutter-md);
+    }
+
+    @media (width >= 80rem) {
+        padding-inline: var(--spacing-gutter-xl);
+    }
+}
+
+[x-cloak] {
+    display: none !important;
 }

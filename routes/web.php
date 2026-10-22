@@ -1,13 +1,12 @@
 <?php
 
+use App\Http\Controllers\Store\HomeController;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', HomeController::class)->name('home');
 
 // Admin Operations Portal
 Route::prefix('admin')->name('admin.')->group(function () {

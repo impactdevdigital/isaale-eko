@@ -29,7 +29,7 @@ test('adding a product prices it from the database and opens the drawer', functi
         ->assertDispatched('cart-open')
         ->assertDispatched('cart-updated', count: 1)
         ->assertSee('Indomie')
-        ->assertSee('$4.49');
+        ->assertSee(money(449));
 
     expect(app(Cart::class)->subtotalCents())->toBe(449);
 });

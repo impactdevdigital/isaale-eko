@@ -76,7 +76,7 @@ class CartDrawer extends Component
         return view('livewire.store.cart-drawer', [
             'lines' => $lines,
             'subtotal' => $cart->subtotalCents($lines),
-            'canCheckout' => $lines->contains('selected', true),
+            'canCheckout' => $cart->checkoutLines($lines)->isNotEmpty(),
         ]);
     }
 }

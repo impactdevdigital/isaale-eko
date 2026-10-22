@@ -133,4 +133,24 @@
         <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         @break
 
+    @case('card')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="2.75" y="5" width="18.5" height="14" rx="2.5"/><path d="M2.75 9.5h18.5M6.5 15h3"/></svg>
+        @break
+
+    @case('wallet')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5V18a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-3.5M4 7.5A2.5 2.5 0 0 1 6.5 5H17v2.5M4 7.5h15a1 1 0 0 1 1 1V11"/><path d="M20 11h-4a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        @break
+
+    @case('store')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5V20h16V9.5M3 9.5 5 4h14l2 5.5a2.5 2.5 0 0 1-4.5 1.5 2.5 2.5 0 0 1-4.5 0 2.5 2.5 0 0 1-4.5 0A2.5 2.5 0 0 1 3 9.5Z"/><path d="M10 20v-5h4v5"/></svg>
+        @break
+
+    @case('mail')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>
+        @break
+
+    @case('phone')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.5h2.6l1.3 4.2-2 1.4a12 12 0 0 0 6.4 6.4l1.4-2 4.2 1.3v2.6A2.1 2.1 0 0 1 18.4 20 15.4 15.4 0 0 1 4 5.6a2.1 2.1 0 0 1 2.6-2.1Z"/></svg>
+        @break
+
 @endswitch

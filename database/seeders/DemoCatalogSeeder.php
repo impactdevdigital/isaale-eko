@@ -230,6 +230,8 @@ class DemoCatalogSeeder extends Seeder
 
             $collection->products()->sync($this->positions($products));
         }
+
+        $this->call(DemoCouponSeeder::class);
     }
 
     /**

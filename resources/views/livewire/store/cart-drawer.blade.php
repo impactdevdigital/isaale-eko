@@ -53,16 +53,24 @@
                                 @endif
                             </div>
 
-                            <div class="flex shrink-0 items-center gap-2">
-                                <span class="text-body-xs font-bold">Qty:</span>
-                                <div class="flex h-7 items-center gap-2 rounded-full border-[1.5px] border-grayscale-40 px-2.5">
-                                    <button type="button" wire:click="decrement({{ $id }})" aria-label="Decrease quantity"><x-store.icon name="minus" /></button>
-                                    <span class="min-w-3 text-center text-body-sm font-bold" aria-live="polite">{{ $line->quantity }}</span>
-                                    <button type="button" wire:click="increment({{ $id }})" aria-label="Increase quantity" @disabled($line->quantity >= \App\Support\Cart::MAX_QUANTITY)><x-store.icon name="plus" class="size-3" /></button>
+                            @if ($line->available)
+                                <div class="flex shrink-0 items-center gap-2">
+                                    <span class="text-body-xs font-bold">Qty:</span>
+                                    <div class="flex h-7 items-center gap-2 rounded-full border-[1.5px] border-grayscale-40 px-2.5">
+                                        <button type="button" wire:click="decrement({{ $id }})" aria-label="Decrease quantity"><x-store.icon name="minus" /></button>
+                                        <span class="min-w-3 text-center text-body-sm font-bold" aria-live="polite">{{ $line->quantity }}</span>
+                                        <button type="button" wire:click="increment({{ $id }})" aria-label="Increase quantity" @disabled($line->quantity >= min(\App\Support\Cart::MAX_QUANTITY, $line->variation->stock_quantity ?? PHP_INT_MAX))><x-store.icon name="plus" class="size-3" /></button>
+                                    </div>
                                 </div>
-                            </div>
+                            @else
+                                <span class="shrink-0 text-body-xs text-grayscale-60">Item unavailable</span>
+                            @endif
                         </div>
                     </div>
+
+                    @if ($line->notice)
+                        <p class="text-body-xs text-sale-60">{{ $line->notice }}</p>
+                    @endif
 
                     <div class="flex items-center gap-4 text-[11px] leading-[14px] font-bold">
                         <button type="button" wire:click="remove({{ $id }})" class="flex items-center gap-1 underline">
@@ -86,13 +94,17 @@
             </div>
 
             @if ($canCheckout)
-                <a href="#" class="flex h-[50px] items-center justify-center gap-2 rounded-full bg-ink text-[14px] leading-[18px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
+                <a href="{{ route('checkout') }}" class="flex h-[50px] items-center justify-center gap-2 rounded-full bg-ink text-[14px] leading-[18px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
                     Checkout securely <x-store.icon name="arrow-right" />
                 </a>
             @else
                 <span aria-disabled="true" class="flex h-[50px] cursor-not-allowed items-center justify-center gap-2 rounded-full bg-grayscale-30 text-[14px] leading-[18px] font-extrabold text-white">
                     Checkout securely <x-store.icon name="arrow-right" />
                 </span>
+            @endif
+
+            @if ($lines->isNotEmpty())
+                <a href="{{ route('cart') }}" class="-mt-2 text-center text-button-sm underline">View basket</a>
             @endif
         </div>
     </aside>

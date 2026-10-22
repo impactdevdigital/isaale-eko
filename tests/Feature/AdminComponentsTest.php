@@ -1,9 +1,11 @@
 <?php
 
 use App\Livewire\Admin\PaymentMethods;
+use App\Livewire\Admin\ProductsList;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
 use App\Models\PaymentMethod;
+use App\Models\Product;
 use App\Models\Setting;
 use App\Models\StoreClosure;
 use Database\Seeders\PaymentMethodSeeder;
@@ -51,4 +53,27 @@ test('admin payment methods component toggles and guards last method', function 
         ->assertHasNoErrors();
 
     expect($card->fresh()->is_enabled)->toBeFalse();
+});
+
+test('admin products list component renders, searches, and updates product attributes', function () {
+    $product = Product::create([
+        'square_item_id' => 'TEST_ITEM_123',
+        'name' => 'Premium Nigerian Egusi',
+        'slug' => 'premium-nigerian-egusi',
+        'status' => 'active',
+        'item_class' => 'perishable',
+    ]);
+
+    Livewire::test(ProductsList::class)
+        ->assertStatus(200)
+        ->assertSee('Products')
+        ->assertSee('Premium Nigerian Egusi')
+        ->call('toggleFeatured', $product->id)
+        ->call('updateItemClass', $product->id, 'non_food')
+        ->call('toggleStatus', $product->id);
+
+    $product->refresh();
+    expect($product->is_featured)->toBeTrue()
+        ->and($product->item_class)->toBe('non_food')
+        ->and($product->status)->toBe('hidden');
 });

@@ -29,11 +29,16 @@ class SquareGateway
         return $this->http()->get('/v2/locations')->throw()->json('locations', []);
     }
 
-    public function catalogPage(?string $cursor = null): array          // ['objects' => [...], 'cursor' => '...']
+    public function catalogPage(?string $cursor = null, string $types = 'ITEM,CATEGORY,IMAGE'): array   // ['objects' => [...], 'cursor' => '...']
     {
         return $this->http()->get('/v2/catalog/list', array_filter([
-            'types' => 'ITEM,CATEGORY,IMAGE', 'cursor' => $cursor,
+            'types' => $types, 'cursor' => $cursor,
         ]))->throw()->json();
+    }
+
+    public function catalogBatchRetrieve(array $ids): array
+    {
+        return $this->http()->post('/v2/catalog/batch-retrieve', ['object_ids' => $ids])->throw()->json('objects', []);
     }
 
     public function catalogChangesSince(string $isoTime, ?string $cursor = null): array

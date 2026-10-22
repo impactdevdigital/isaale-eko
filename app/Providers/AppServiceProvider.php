@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Database\Eloquent\Relations\Relation::enforceMorphMap([
+            'product' => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+            'sub_category' => \App\Models\SubCategory::class,
+            'country' => \App\Models\Country::class,
+        ]);
     }
 }

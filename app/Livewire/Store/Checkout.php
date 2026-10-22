@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Services\Checkout\CheckoutProblem;
 use App\Services\Checkout\DeliveryCheck;
 use App\Services\Checkout\OneTimeCode;
+use App\Services\Checkout\OrderReceipt;
 use App\Services\Checkout\PickupWindows;
 use App\Services\Checkout\PlaceOrder;
+use App\Services\Checkout\TakePayment;
 use App\Services\ConsentService;
 use App\Support\Cart;
 use App\Support\CartTotals;
@@ -98,6 +100,12 @@ class Checkout extends Component
     public ?string $couponResult = null;
 
     public ?string $problem = null;
+
+    /** Set when an online payment is declined: shows the Payment Declined screen. */
+    public ?string $declined = null;
+
+    #[Locked]
+    public ?int $declinedAmount = null;
 
     public function mount(): void
     {
@@ -398,13 +406,20 @@ class Checkout extends Component
         $this->reset('couponCode', 'couponResult');
     }
 
-    public function pay(): void
+    /**
+     * Place the order. Card and wallet payments pass the token from Square's
+     * Web Payments SDK; Pay at Pickup needs none.
+     */
+    public function pay(?string $token = null, ?string $attempt = null): void
     {
         $user = Auth::user();
+        $online = $this->paymentMethod !== 'pay_at_pickup';
 
-        if (! $user || ! $this->paymentMethod) {
+        if (! $user || ! $this->paymentMethod || ($online && ! $token)) {
             return;
         }
+
+        $this->declined = null;
 
         try {
             $order = app(PlaceOrder::class)->handle(
@@ -414,6 +429,7 @@ class Checkout extends Component
                 paymentMethod: $this->paymentMethod,
                 pickupStart: $this->pickupStart ? CarbonImmutable::parse($this->pickupStart) : null,
                 address: $this->fulfilment === 'delivery' ? $this->address : null,
+                clearCart: ! $online,
             );
         } catch (CheckoutProblem $problem) {
             // Keep the verified identity, address and slot; just explain what to fix.
@@ -426,8 +442,36 @@ class Checkout extends Component
             return;
         }
 
+        if ($online) {
+            $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
+
+            if ($failure) {
+                // The order isn't placed; the basket, details and slot stay as they were.
+                $this->declined = $failure;
+                $this->declinedAmount = $order->total_cents;
+
+                return;
+            }
+
+            app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
+        }
+
+        app(OrderReceipt::class)->send($order);
+        session()->flash('order_placed', $order->number);
+
         $this->dispatch('cart-updated', count: app(Cart::class)->count());
         $this->redirectRoute('orders.show', $order);
+    }
+
+    public function retryPayment(): void
+    {
+        $this->declined = null;
+    }
+
+    public function changePaymentMethod(): void
+    {
+        $this->declined = null;
+        $this->paymentMethod = null;
     }
 
     // ----- Helpers ------------------------------------------------------------
@@ -462,11 +506,13 @@ class Checkout extends Component
 
         $fulfilmentReady = $this->fulfilment === 'pickup' ? $this->pickupStart !== null : $deliveryReady;
 
+        $totals = CartTotals::for($checkoutLines, $cart->coupon(), $fee);
+
         return view('livewire.store.checkout', [
             'user' => $user,
             'checkoutLines' => $checkoutLines,
             'quantityChanged' => $lines->contains(fn ($line) => $line->notice),
-            'totals' => CartTotals::for($checkoutLines, $cart->coupon(), $fee),
+            'totals' => $totals,
             'paymentMethods' => $this->paymentMethods(),
             'days' => $this->modal === 'slot' ? $windows->days() : collect(),
             'windows' => $this->modal === 'slot' && $this->slotDay ? $windows->windowsFor(CarbonImmutable::parse($this->slotDay, config('shop.timezone'))) : collect(),
@@ -474,6 +520,15 @@ class Checkout extends Component
             'readyToPay' => $user && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
             'fulfilmentReady' => $fulfilmentReady,
             'pickupLabel' => $this->pickupStart ? self::windowLabel(CarbonImmutable::parse($this->pickupStart)) : null,
+            'square' => [
+                'env' => config('services.square.env'),
+                'appId' => config('services.square.app_id'),
+                'locationId' => config('services.square.location_id'),
+                'method' => $this->paymentMethod,
+                'amount' => $totals->total(),
+                'currency' => config('shop.currency'),
+                'country' => 'CA',
+            ],
         ]);
     }
 

@@ -78,6 +78,7 @@ class PickupWindows
     private function isFull(CarbonInterface $start): bool
     {
         return Order::where('fulfilment', 'pickup')
+            ->where('status', '!=', Order::STATUS_PAYMENT_FAILED)
             ->where('pickup_starts_at', $start->copy()->utc())
             ->count() >= config('shop.pickup.window_capacity');
     }

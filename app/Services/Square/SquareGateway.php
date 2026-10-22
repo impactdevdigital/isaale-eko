@@ -93,6 +93,24 @@ class SquareGateway
         ])->throw()->json('payment');
     }
 
+    /**
+     * Charge a Web Payments SDK token without a Square order. reference_id
+     * ties the payment to our order number (and to webhooks).
+     */
+    public function chargeToken(string $sourceToken, int $cents, string $currency, string $idempotencyKey, string $referenceId, ?string $note = null, ?string $buyerEmail = null): array
+    {
+        return $this->http()->post('/v2/payments', array_filter([
+            'idempotency_key' => $idempotencyKey,
+            'source_id' => $sourceToken,
+            'location_id' => config('services.square.location_id'),
+            'amount_money' => ['amount' => $cents, 'currency' => $currency],
+            'reference_id' => $referenceId,
+            'note' => $note,
+            'buyer_email_address' => $buyerEmail,
+            'autocomplete' => true,
+        ]))->throw()->json('payment');
+    }
+
     public function refundPayment(string $paymentId, int $cents, string $currency, string $reason, string $idempotencyKey): array
     {
         return $this->http()->post('/v2/refunds', [

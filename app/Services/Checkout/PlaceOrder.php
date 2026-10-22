@@ -36,6 +36,7 @@ class PlaceOrder
         string $paymentMethod,
         ?CarbonInterface $pickupStart = null,
         ?array $address = null,
+        bool $clearCart = true,
     ): Order {
         $lines = $this->cart->lines();
         $checkoutLines = $this->cart->checkoutLines($lines);
@@ -113,7 +114,10 @@ class PlaceOrder
             return $order;
         });
 
-        $this->cart->clear(...$checkoutLines->keys()->all());
+        // Online payments keep the basket until the charge succeeds.
+        if ($clearCart) {
+            $this->cart->clear(...$checkoutLines->keys()->all());
+        }
 
         return $order;
     }

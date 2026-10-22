@@ -14,6 +14,7 @@ use Database\Seeders\DemoCatalogSeeder;
 use Database\Seeders\PaymentMethodSeeder;
 use Database\Seeders\StoreHoursSeeder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
@@ -23,6 +24,10 @@ beforeEach(function () {
     // A Monday morning before opening, so every window that day is open.
     $this->travelTo(CarbonImmutable::parse('2026-10-26 08:00', 'America/Moncton'));
     Mail::fake();
+    config(['shop.currency' => 'CAD']);
+
+    // Square's payments API: approve every charge unless a test says otherwise.
+    Http::fake(['*/v2/payments' => Http::response(['payment' => ['id' => 'sq-pay-1', 'status' => 'COMPLETED']])]);
 });
 
 function addToCart(string $slug, int $quantity = 1): int
@@ -112,7 +117,7 @@ test('guest pickup: verify by email, choose a slot and place a pay-at-pickup ord
         ->call('confirmSlot')
         ->assertSet('pickupStart', $start)
         ->set('paymentMethod', 'pay_at_pickup')
-        ->assertSee('Pay '.money(498))
+        ->assertSee('Place order')
         ->call('pay');
 
     $order = Order::firstOrFail();
@@ -130,13 +135,16 @@ test('guest pickup: verify by email, choose a slot and place a pay-at-pickup ord
 test('guest delivery: address out of area blocks payment; a Saint John address adds the fee', function () {
     addToCart('fresh-okra');
 
-    $sms = Mockery::mock(SmsSender::class);
-    $sms->shouldReceive('send')->once()->withArgs(function (string $phone, string $message) use (&$code) {
-        preg_match('/\d{6}/', $message, $match);
-        $code = $match[0];
+    $sms = new class implements SmsSender
+    {
+        /** @var array<int, array{0: string, 1: string}> */
+        public array $sent = [];
 
-        return $phone === '+15065550123';
-    });
+        public function send(string $phone, string $message): void
+        {
+            $this->sent[] = [$phone, $message];
+        }
+    };
     $this->app->instance(SmsSender::class, $sms);
 
     $component = Livewire::test(Checkout::class)
@@ -152,7 +160,10 @@ test('guest delivery: address out of area blocks payment; a Saint John address a
         ->call('sendCode')
         ->assertSet('codeDestination', '+15065550123');
 
-    $component->set('code', $code)->call('verifyCode')
+    expect($sms->sent)->toHaveCount(1)->and($sms->sent[0][0])->toBe('+15065550123');
+    preg_match('/code is (\d{6})/', $sms->sent[0][1], $match);
+
+    $component->set('code', $match[1])->call('verifyCode')
         ->assertSet('addressStatus', 'out_of_area')
         ->assertSee('We can’t deliver to this address')
         ->set('paymentMethod', 'card')
@@ -162,10 +173,11 @@ test('guest delivery: address out of area blocks payment; a Saint John address a
 
     $component->set('city', 'Saint John')->set('postalCode', 'e2l4l1')->call('saveAddress')
         ->assertSet('addressStatus', 'ok')
-        ->call('pay');
+        ->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
 
     $order = Order::firstOrFail();
-    expect($order->status)->toBe(Order::STATUS_AWAITING_PAYMENT)
+    expect($order->status)->toBe(Order::STATUS_PAID)
+        ->and($order->payment_id)->toBe('sq-pay-1')
         ->and($order->delivery_address['postal_code'])->toBe('E2L 4L1')
         ->and($order->delivery_fee_cents)->toBe(799)
         ->and($order->total_cents)->toBe(249 + 799);
@@ -186,7 +198,7 @@ test('signed-in shoppers use a saved address without verifying again', function 
         ->assertSet('selectedAddressId', $address->id)
         ->assertSet('addressStatus', 'ok')
         ->set('paymentMethod', 'card')
-        ->call('pay');
+        ->call('pay', 'cnon:card-nonce-ok');
 
     expect(Order::firstOrFail()->delivery_fee_cents)->toBe(0);
 });

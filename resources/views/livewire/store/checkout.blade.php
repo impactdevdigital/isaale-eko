@@ -35,7 +35,40 @@
         </ol>
     </nav>
 
-    <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
+    @if ($declined)
+        <section class="mx-auto flex max-w-[560px] flex-col items-center py-10 text-center" aria-labelledby="declined-title">
+            <span class="flex size-16 items-center justify-center rounded-full bg-sale-10 text-price-40"><x-store.icon name="card" class="size-7" /></span>
+            <h1 id="declined-title" class="mt-5 text-h2-mobile md:text-h2">Payment Declined</h1>
+            <p class="mt-3 text-lead-mobile font-normal text-body-muted md:text-lead">We couldn’t complete your {{ money($declinedAmount ?? $totals->total()) }} payment. Your order hasn’t been placed.</p>
+            <div class="mt-6 w-full rounded-sm bg-grayscale-0 px-6 py-6 text-left">
+                <p class="text-[15px] font-bold">Check your card before trying again</p>
+                <p class="mt-3 text-body text-body-muted">{{ $declined }}</p>
+                <p class="mt-3 text-body-sm">Your {{ $totals->itemCount }} {{ str('item')->plural($totals->itemCount) }} {{ $totals->itemCount === 1 ? 'is' : 'are' }} still in your cart.</p>
+            </div>
+            <div class="mt-6 grid w-full gap-3 sm:grid-cols-2">
+                <button type="button" wire:click="retryPayment" class="h-[42px] rounded-full bg-ink text-[15px] font-bold text-white">Retry payment</button>
+                <button type="button" wire:click="changePaymentMethod" class="h-[42px] rounded-full border border-ink text-[15px] font-bold">Change payment method</button>
+            </div>
+            <p class="mt-4 text-body-sm text-body-muted">Other options: Apple Pay / Google Pay, or Pay at Pickup.</p>
+            <p class="mt-4 text-body-sm text-body-muted">Need a hand? <a href="mailto:{{ \App\Models\Setting::get('support_email') }}" class="font-bold text-ink">Contact us</a></p>
+        </section>
+    @else
+    <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]"
+         wire:key="pay-{{ $paymentMethod ?? 'none' }}-{{ $totals->total() }}"
+         x-data="squarePayments(@js($square))">
+        {{-- Payment processing --}}
+        <div x-data="{ show: false }" x-show="show" x-cloak @payment-processing.window="show = $event.detail"
+             class="fixed inset-0 z-[60] flex items-center justify-center bg-surface/95 px-4" role="status" aria-live="assertive">
+            <div class="flex max-w-[560px] flex-col items-center text-center">
+                <span class="flex size-[72px] items-center justify-center rounded-full bg-brand-yellow-10">
+                    <span class="size-10 animate-spin rounded-full border-[3px] border-grayscale-30 border-t-ink"></span>
+                </span>
+                <p class="mt-5 text-h2-mobile md:text-h2">Processing Your Payment</p>
+                <p class="mt-3 text-lead-mobile font-normal text-body-muted md:text-lead">We’re checking your {{ money($totals->total()) }} payment securely. This may take a moment.</p>
+                <p class="mt-4 text-body-sm">Please keep this page open. Don’t refresh or pay again while we check.</p>
+            </div>
+        </div>
+
         <div class="flex flex-col gap-8">
             <div>
                 <h1 class="text-h2-mobile md:text-h2">Checkout</h1>
@@ -155,17 +188,36 @@
                                 <span class="block text-body-sm font-normal text-body-muted">{{ $methodHints[$method->code] ?? $method->description() }}</span>
                             </span>
                         </label>
+
+                        @if ($paymentMethod === $method->code && $method->code === 'card')
+                            <div class="bg-grayscale-0 px-4 pb-4">
+                                <div x-ref="card" wire:ignore class="min-h-[90px]"></div>
+                                <p x-show="! ready && ! error" class="text-body-sm text-body-muted">Loading secure card form…</p>
+                                <p class="mt-1 flex items-center gap-1.5 text-[11px] text-stock-50"><x-store.icon name="shield" class="size-3.5" /> Card details go straight to Square and never touch our servers.</p>
+                            </div>
+                        @endif
+
+                        @if ($paymentMethod === $method->code && $method->code === 'wallet')
+                            <div class="flex flex-col gap-2 bg-grayscale-0 px-4 pb-4">
+                                <div x-ref="googlePay" wire:ignore x-show="walletAvailable.googlePay" class="h-11"></div>
+                                <button type="button" x-show="walletAvailable.applePay" x-cloak @click="pay('applePay')"
+                                        class="h-11 rounded-full bg-black text-[15px] font-bold text-white">Pay with Apple Pay</button>
+                                <p x-show="! ready && ! error" class="text-body-sm text-body-muted">Checking Apple Pay and Google Pay…</p>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
+                <p x-show="error" x-cloak x-text="error" role="alert" class="mt-3 rounded-sm bg-sale-0 px-4 py-3 text-body-sm text-price-40"></p>
             </fieldset>
         </div>
 
         <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
                                :fee-label="$feeLabel" :fee-value="$feeValue" :total-label="$totalLabel" class="lg:self-start">
             @if ($readyToPay && $totalLabel === null)
-                <button type="button" wire:click="pay" wire:loading.attr="disabled" class="flex h-[50px] items-center justify-center rounded-full bg-ink text-[16px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
-                    <span wire:loading.remove wire:target="pay">Pay {{ money($totals->total()) }}</span>
-                    <span wire:loading wire:target="pay">Placing your order…</span>
+                <button type="button" @click="pay()" :disabled="busy || (method !== 'pay_at_pickup' && ! ready)"
+                        class="flex h-[50px] items-center justify-center rounded-full bg-ink text-[16px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
+                    <span x-show="! busy">{{ $paymentMethod === 'pay_at_pickup' ? 'Place order' : 'Pay '.money($totals->total()) }}</span>
+                    <span x-show="busy" x-cloak>{{ $paymentMethod === 'pay_at_pickup' ? 'Placing your order…' : 'Processing…' }}</span>
                 </button>
                 <p class="text-center text-body-sm text-body-muted">Your details, {{ $fulfilment === 'pickup' ? 'pickup slot' : 'delivery address' }} and payment method are complete.</p>
             @else
@@ -176,6 +228,7 @@
             @endif
         </x-store.order-summary>
     </div>
+    @endif
 
     {{-- Dialogs --}}
     @if ($modal === 'contact')

@@ -73,8 +73,8 @@ class OrderHistory extends Component
         $orders = $this->orders()
             ->inTab($this->tab)
             ->when($term !== '', fn ($q) => $q->where(fn ($q) => $q
-                ->where('number', 'like', '%'.$term.'%')
-                ->orWhereHas('items', fn ($q) => $q->where('name', 'like', '%'.$term.'%'))))
+                ->whereLike('number', '%'.$term.'%')
+                ->orWhereHas('items', fn ($q) => $q->whereLike('name', '%'.$term.'%'))))
             ->with('items')
             ->paginate(10);
 

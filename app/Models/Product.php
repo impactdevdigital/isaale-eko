@@ -73,10 +73,11 @@ class Product extends Model
      */
     public function scopeSearch(Builder $query, string $term): Builder
     {
-        // Wildcards are dropped rather than escaped so the query works the same on SQLite and MySQL.
+        // Wildcards are dropped rather than escaped so the query works the same on every database.
+        // whereLike is case-insensitive everywhere (ILIKE on Postgres, where plain LIKE isn't).
         $like = '%'.str_replace(['%', '_'], '', $term).'%';
 
-        return $query->where('name', 'like', $like);
+        return $query->whereLike('name', $like);
     }
 
     /**

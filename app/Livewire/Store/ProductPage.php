@@ -5,6 +5,7 @@ namespace App\Livewire\Store;
 use App\Models\Product;
 use App\Models\StockNotification;
 use App\Support\Cart;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -44,6 +45,20 @@ class ProductPage extends Component
         }
 
         $this->dispatch('cart-add', variation: $this->product->defaultVariation->id, quantity: $this->quantity);
+    }
+
+    /**
+     * Save or unsave the product; guests are asked to sign in first.
+     */
+    public function toggleWishlist(): void
+    {
+        if (! $user = Auth::user()) {
+            $this->dispatch('sign-in-open');
+
+            return;
+        }
+
+        $user->wishlist()->toggle($this->product->id);
     }
 
     /**

@@ -25,6 +25,11 @@ class PointTransaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

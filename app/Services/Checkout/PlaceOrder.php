@@ -68,6 +68,12 @@ class PlaceOrder
         }
 
         $coupon = $this->cart->coupon();
+
+        if ($coupon && ! $coupon->usableBy($user)) {
+            $this->cart->removeCoupon();
+
+            throw new CheckoutProblem('That reward code belongs to another account, so we removed it. Check your order summary, then pay.');
+        }
         $subtotal = $this->cart->subtotalCents($lines);
         $totals = CartTotals::for($checkoutLines, $coupon, $fulfilment === 'delivery' ? CartTotals::deliveryFeeFor($subtotal) : 0);
         $contact = $user->signInContact();

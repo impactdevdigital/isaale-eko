@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Coupon extends Model
 {
     protected $guarded = [];
 
     protected $casts = [
+        'user_id' => 'integer',
         'value' => 'integer',
         'min_subtotal_cents' => 'integer',
         'max_uses' => 'integer',
@@ -27,6 +29,19 @@ class Coupon extends Model
     {
         return ($this->expires_at && $this->expires_at->isPast())
             || ($this->max_uses !== null && $this->times_used >= $this->max_uses);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Reward codes belong to one customer; other codes are for anyone.
+     */
+    public function usableBy(?User $user): bool
+    {
+        return $this->user_id === null || $this->user_id === $user?->id;
     }
 
     public function isLive(): bool

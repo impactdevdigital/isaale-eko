@@ -9,8 +9,12 @@ use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
 use App\Livewire\Store\Account\AccountManagement;
 use App\Livewire\Store\Account\AddressBook;
+use App\Livewire\Store\Account\BuyAgain;
 use App\Livewire\Store\Account\OrderDetail;
 use App\Livewire\Store\Account\OrderHistory;
+use App\Livewire\Store\Account\Preferences;
+use App\Livewire\Store\Account\Rewards;
+use App\Livewire\Store\Account\Wishlist;
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
 use App\Livewire\Store\ProductListing;
@@ -35,6 +39,10 @@ Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/addresses', AddressBook::class)->name('account.addresses');
     Route::get('/orders', OrderHistory::class)->name('account.orders');
     Route::get('/orders/{order}', OrderDetail::class)->name('account.orders.show');
+    Route::get('/rewards', Rewards::class)->name('account.rewards');
+    Route::get('/wishlist', Wishlist::class)->name('account.wishlist');
+    Route::get('/buy-again', BuyAgain::class)->name('account.buy-again');
+    Route::get('/preferences', Preferences::class)->name('account.preferences');
 });
 
 // Admin Operations Portal

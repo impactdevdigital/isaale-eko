@@ -183,7 +183,7 @@ class Cart
         $coupon = Coupon::findByCode($code);
 
         $result = match (true) {
-            ! $coupon || ! $coupon->isLive() => 'invalid',
+            ! $coupon || ! $coupon->isLive() || ! $coupon->usableBy(auth()->user()) => 'invalid',
             $coupon->isExpired() => 'expired',
             $coupon->min_subtotal_cents && $subtotalCents < $coupon->min_subtotal_cents => 'minimum',
             default => 'applied',

@@ -71,7 +71,7 @@
                                        'border-transparent text-grayscale-80 hover:text-ink' => $active !== $key,
                                    ])>
                                     <x-store.icon :name="$icon" class="size-4 shrink-0" />
-                                    <span class="flex-1">{{ $label }}</span>
+                                    <span class="flex-1 whitespace-nowrap">{{ $label }}</span>
                                     @if (($items[$loop->index][4] ?? 0) > 0)
                                         <span class="flex size-[18px] items-center justify-center rounded-full bg-price-40 text-[10px] font-bold text-white">{{ $items[$loop->index][4] }}</span>
                                     @endif

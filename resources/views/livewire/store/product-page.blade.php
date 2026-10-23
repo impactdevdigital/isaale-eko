@@ -144,8 +144,11 @@
                     </span>
                 @endif
 
-                <button type="button" class="flex size-11 shrink-0 items-center justify-center rounded-full border border-grayscale-40 transition-colors hover:border-ink" aria-label="Save {{ $product->name }} to wishlist">
-                    <x-store.icon name="lovely" class="size-4" />
+                @php($saved = auth()->user()?->wishlist()->whereKey($product->id)->exists())
+                <button type="button" wire:click="toggleWishlist" aria-pressed="{{ $saved ? 'true' : 'false' }}"
+                        @class(['flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors', 'border-price-40 bg-sale-0 text-price-40' => $saved, 'border-grayscale-40 hover:border-ink' => ! $saved])
+                        aria-label="{{ $saved ? 'Remove '.$product->name.' from wishlist' : 'Save '.$product->name.' to wishlist' }}">
+                    <x-store.icon name="heart" class="size-4" />
                 </button>
             </div>
 

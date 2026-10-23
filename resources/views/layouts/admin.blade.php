@@ -119,15 +119,23 @@
                             Products & Inventory
                         </a>
 
-                        <div class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-[#686868] opacity-60">
+                        <a href="{{ route('admin.recipes') }}" 
+                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.recipes') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
                             <span class="flex items-center gap-3">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                                 Kitchen Recipes
                             </span>
-                            <span class="text-[10px] uppercase font-bold bg-[#F6F6F6] text-[#686868] px-2 py-0.5 rounded">Phase G</span>
-                        </div>
+                            @php
+                                $sidebarRecipesCount = \App\Models\Recipe::count();
+                            @endphp
+                            @if ($sidebarRecipesCount > 0)
+                                <span class="text-[11px] font-bold bg-[#F6F6F6] text-[#111111] px-2 py-0.5 rounded-full">
+                                    {{ $sidebarRecipesCount }}
+                                </span>
+                            @endif
+                        </a>
 
                         <div class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-[#686868] opacity-60">
                             <span class="flex items-center gap-3">

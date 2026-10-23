@@ -5,8 +5,10 @@ The repo contains everything Render needs:
 - `Dockerfile` builds the app (PHP 8.4 + Nginx, port 8080, front-end assets built inside).
 - `render.yaml` is a Render Blueprint that creates:
   - **isaale-eko-db**: Postgres (Basic 256 MB, about $6/month)
-  - **isalee-eko**: the website (Starter, $7/month), migrations run before each deploy
-  - **isaale-eko-worker**: background jobs + scheduler, incl. the 5-minute Square sync (Starter, $7/month)
+  - **isalee-eko**: the website (Free for now; Starter, $7/month, for the real shop)
+  - **isaale-eko-worker**: background jobs + scheduler, incl. the 5-minute Square sync
+    (Starter, $7/month). Commented out in `render.yaml` while on the free plan,
+    because Render has no free workers.
 
 Every push to the deployed branch redeploys automatically.
 

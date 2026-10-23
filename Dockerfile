@@ -38,10 +38,13 @@ RUN npm run build
 FROM base
 
 ENV PHP_OPCACHE_ENABLE=1 \
-    # On start: cache config, routes, views and events and link storage.
-    # Migrations run once per deploy in Render's pre-deploy step instead.
+    # On start: run migrations, cache config, routes, views and events, link storage.
+    # (Render's free plan has no pre-deploy step or shell, so the container does it.)
     AUTORUN_ENABLED=true \
-    AUTORUN_LARAVEL_MIGRATION=false
+    AUTORUN_LARAVEL_MIGRATION=true
+
+# Then add opening hours, payment methods and the first Square import if missing.
+COPY --chmod=755 docker/60-shop-install.sh /etc/entrypoint.d/60-shop-install.sh
 
 COPY --from=vendor --chown=www-data:www-data /var/www/html/vendor ./vendor
 COPY --chown=www-data:www-data . .

@@ -24,20 +24,36 @@ class CategoriesManager extends Component
 
     /** Preset category food photos exported from the Figma library */
     public const PRESET_IMAGES = [
-        ['name' => 'Flours & Baking', 'path' => 'images/store/subcategories/flours-and-baking.webp'],
-        ['name' => 'Grains & Cereals', 'path' => 'images/store/subcategories/grains-and-cereals.webp'],
-        ['name' => 'Rice & Beans', 'path' => 'images/store/categories/rice-and-beans.webp'],
-        ['name' => 'Meat & Fish', 'path' => 'images/store/categories/meat-and-fish.webp'],
-        ['name' => 'Fresh Produce', 'path' => 'images/store/categories/fresh-produce.webp'],
-        ['name' => 'Vegetables', 'path' => 'images/store/subcategories/vegetables.webp'],
-        ['name' => 'Spices & Seasonings', 'path' => 'images/store/subcategories/spices-and-seasonings.webp'],
-        ['name' => 'Cooking Oils', 'path' => 'images/store/subcategories/cooking-oils.webp'],
-        ['name' => 'Seasonings', 'path' => 'images/store/categories/seasonings.webp'],
-        ['name' => 'Sauces & Pastes', 'path' => 'images/store/categories/sauces.webp'],
-        ['name' => 'Snacks & Pastries', 'path' => 'images/store/categories/snacks.webp'],
-        ['name' => 'Drinks & Beverages', 'path' => 'images/store/categories/drinks.webp'],
-        ['name' => 'Pantry Staples', 'path' => 'images/store/categories/pantry-staples.webp'],
-        ['name' => 'Beauty & Home', 'path' => 'images/store/categories/beauty-and-home.webp'],
+        ['name' => 'Flours & Baking', 'path' => 'images/store/subcategories/flours-and-baking.webp', 'emoji' => '🌾'],
+        ['name' => 'Grains & Cereals', 'path' => 'images/store/subcategories/grains-and-cereals.webp', 'emoji' => '🌾'],
+        ['name' => 'Rice & Beans', 'path' => 'images/store/categories/rice-and-beans.webp', 'emoji' => '🫘'],
+        ['name' => 'Meat & Fish', 'path' => 'images/store/categories/meat-and-fish.webp', 'emoji' => '🍗'],
+        ['name' => 'Fresh Produce', 'path' => 'images/store/categories/fresh-produce.webp', 'emoji' => '🥬'],
+        ['name' => 'Vegetables', 'path' => 'images/store/subcategories/vegetables.webp', 'emoji' => '🥬'],
+        ['name' => 'Spices & Seasonings', 'path' => 'images/store/subcategories/spices-and-seasonings.webp', 'emoji' => '🌶️'],
+        ['name' => 'Cooking Oils', 'path' => 'images/store/subcategories/cooking-oils.webp', 'emoji' => '🫒'],
+        ['name' => 'Seasonings', 'path' => 'images/store/categories/seasonings.webp', 'emoji' => '🧂'],
+        ['name' => 'Sauces & Pastes', 'path' => 'images/store/categories/sauces.webp', 'emoji' => '🥫'],
+        ['name' => 'Snacks & Pastries', 'path' => 'images/store/categories/snacks.webp', 'emoji' => '🍿'],
+        ['name' => 'Drinks & Beverages', 'path' => 'images/store/categories/drinks.webp', 'emoji' => '🥤'],
+        ['name' => 'Pantry Staples', 'path' => 'images/store/categories/pantry-staples.webp', 'emoji' => '📦'],
+        ['name' => 'Beauty & Home', 'path' => 'images/store/categories/beauty-and-home.webp', 'emoji' => '🧼'],
+    ];
+
+    /** Quick selectable grocery emoji palette for store staff */
+    public const QUICK_EMOJIS = [
+        '🌾' => 'Grains',
+        '🫘' => 'Beans',
+        '🌶️' => 'Pepper',
+        '🍗' => 'Meat',
+        '🐟' => 'Fish',
+        '🥬' => 'Greens',
+        '🥔' => 'Tubers',
+        '🫒' => 'Oils',
+        '🥤' => 'Drinks',
+        '🍿' => 'Snacks',
+        '🥫' => 'Cans',
+        '🧼' => 'Care',
     ];
 
     public string $search = '';
@@ -177,6 +193,11 @@ class CategoriesManager extends Component
         $this->selectedPreset = $path;
         $this->image = $path;
         $this->imageUpload = null;
+
+        $preset = collect(self::PRESET_IMAGES)->firstWhere('path', $path);
+        if ($preset && empty($this->emoji)) {
+            $this->emoji = $preset['emoji'];
+        }
     }
 
     public function removeImage(): void
@@ -405,6 +426,7 @@ class CategoriesManager extends Component
                 'categories' => $categories,
                 'lastSync' => $lastSync,
                 'presets' => self::PRESET_IMAGES,
+                'quickEmojis' => self::QUICK_EMOJIS,
             ])->layout('layouts.admin', ['title' => 'Categories & Sub-Categories']);
         }
 
@@ -435,6 +457,7 @@ class CategoriesManager extends Component
                 'subCategories' => $subQuery,
                 'lastSync' => $lastSync,
                 'presets' => self::PRESET_IMAGES,
+                'quickEmojis' => self::QUICK_EMOJIS,
             ])->layout('layouts.admin', ['title' => 'Categories & Sub-Categories']);
         }
 
@@ -463,6 +486,7 @@ class CategoriesManager extends Component
             'parentCategories' => $parentsQuery,
             'lastSync' => $lastSync,
             'presets' => self::PRESET_IMAGES,
+            'quickEmojis' => self::QUICK_EMOJIS,
         ])->layout('layouts.admin', ['title' => 'Categories & Sub-Categories']);
     }
 }

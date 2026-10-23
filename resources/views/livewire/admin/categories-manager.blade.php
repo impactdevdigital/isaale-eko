@@ -737,12 +737,27 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-[#111111] mb-1">Emoji / Icon Badge</label>
-                                    <input type="text"
-                                           wire:model="emoji"
-                                           placeholder="e.g. 🌾, 🌶️, 🍗, 🥤, 🧼"
-                                           class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                                    <p class="mt-1 text-[11px] text-[#686868]">Quick icon shown beside category title.</p>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block text-xs font-bold text-[#111111]">Icon Badge <span class="text-[#686868] font-normal">(Optional)</span></label>
+                                        @if ($emoji)
+                                            <button type="button" wire:click="$set('emoji', '')" class="text-[10px] font-bold text-[#DF2600] hover:underline">
+                                                Clear Icon
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <!-- Quick Selectable Food Icons Palette -->
+                                    <div class="flex items-center gap-1.5 flex-wrap p-2 rounded-xl bg-white border border-[#EEEEEE]">
+                                        @foreach ($quickEmojis as $icon => $label)
+                                            <button type="button"
+                                                    wire:click="$set('emoji', '{{ $icon }}')"
+                                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-transform hover:scale-110 {{ $emoji === $icon ? 'bg-[#FFF0EC] ring-2 ring-[#DF2600] shadow-xs' : 'bg-[#FAFAFA] hover:bg-[#EEEEEE]' }}"
+                                                    title="{{ $label }}">
+                                                {{ $icon }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                    <p class="mt-1 text-[11px] text-[#686868]">Tap an icon above, or leave blank.</p>
                                     @error('emoji') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                             </div>

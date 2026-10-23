@@ -29,17 +29,18 @@ Every push to the deployed branch redeploys automatically.
    - `MAIL_FROM_ADDRESS`: e.g. `orders@yourdomain.ca`
 3. Click **Apply**. The first build takes ~5–10 minutes.
 
-## 3. First-time setup (once)
+## 3. First-time setup (automatic)
 
-Open **isaale-eko → Shell** and run:
+Every time the website container starts it:
 
-```
-php artisan db:seed --class=ProductionSeeder --force   # opening hours + payment methods
-php artisan square:sync --full                          # products, prices, photos, stock from Square
-```
+1. runs the database migrations,
+2. runs `php artisan shop:install`, which adds opening hours and payment methods
+   only if they're missing, and runs the first Square import if no products are linked yet.
 
+This works on Render's free plan too (no Shell or pre-deploy step needed).
 Do not run `DemoCatalogSeeder` on the live site; products come from Square.
-`ProductionSeeder` resets opening hours, so only run it once.
+
+On paid plans you can also run commands yourself in **isaale-eko → Shell**.
 
 ## 4. Square webhook (after the site is up)
 
@@ -68,6 +69,11 @@ Before announcing: the `/admin` pages have **no login yet** and must be protecte
 
 ## Troubleshooting
 
+- **A 500 error with nothing in the logs:** set `APP_DEBUG=true` on the web service
+  (Environment), reload the page to read the error, then set it back to `false`.
+- **Free plan:** no Shell, no pre-deploy step, and no background worker, so the
+  5-minute Square sync and background emails don't run. The site sleeps after 15
+  minutes without visitors. Use Starter plans for the real shop.
 - **Logs:** each service → **Logs**. Until email is set up (`MAIL_MAILER=log`), sign-in codes appear there.
 - **Health check:** `https://<your domain>/up` should say the app is up.
 - **Sync by hand:** Shell → `php artisan square:sync`.

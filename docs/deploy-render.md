@@ -5,7 +5,7 @@ The repo contains everything Render needs:
 - `Dockerfile` builds the app (PHP 8.4 + Nginx, port 8080, front-end assets built inside).
 - `render.yaml` is a Render Blueprint that creates:
   - **isaale-eko-db**: Postgres (Basic 256 MB, about $6/month)
-  - **isaale-eko**: the website (Starter, $7/month), migrations run before each deploy
+  - **isalee-eko**: the website (Starter, $7/month), migrations run before each deploy
   - **isaale-eko-worker**: background jobs + scheduler, incl. the 5-minute Square sync (Starter, $7/month)
 
 Every push to the deployed branch redeploys automatically.
@@ -24,7 +24,7 @@ Every push to the deployed branch redeploys automatically.
 1. Render Dashboard → **New → Blueprint** → connect GitHub → pick this repository.
 2. Render reads `render.yaml` and asks for the `sync: false` values:
    - `APP_KEY`: the key from step 1.2 (starts with `base64:`)
-   - `APP_URL`: leave as the `https://isaale-eko.onrender.com` address for now
+   - `APP_URL`: leave as the `https://isalee-eko.onrender.com` address for now
    - Square values; leave the two webhook values empty for now
    - `MAIL_FROM_ADDRESS`: e.g. `orders@yourdomain.ca`
 3. Click **Apply**. The first build takes ~5–10 minutes.
@@ -40,7 +40,7 @@ Every time the website container starts it:
 This works on Render's free plan too (no Shell or pre-deploy step needed).
 Do not run `DemoCatalogSeeder` on the live site; products come from Square.
 
-On paid plans you can also run commands yourself in **isaale-eko → Shell**.
+On paid plans you can also run commands yourself in **isalee-eko → Shell**.
 
 ## 4. Square webhook (after the site is up)
 
@@ -52,7 +52,7 @@ On paid plans you can also run commands yourself in **isaale-eko → Shell**.
 
 ## 5. Your domain
 
-isaale-eko → **Settings → Custom Domains** → add the domain and follow the DNS
+isalee-eko → **Settings → Custom Domains** → add the domain and follow the DNS
 instructions. HTTPS is automatic. Then update `APP_URL` (and the webhook URL) to the new address.
 
 ## 6. Going live with real payments

@@ -12,6 +12,11 @@ class SquareGateway
 {
     private function http(): PendingRequest
     {
+        return $this->request()->asJson();
+    }
+
+    private function request(): PendingRequest
+    {
         $base = config('services.square.env') === 'production'
             ? 'https://connect.squareup.com'
             : 'https://connect.squareupsandbox.com';
@@ -19,7 +24,7 @@ class SquareGateway
         return Http::baseUrl($base)
             ->withToken(config('services.square.token'))
             ->withHeaders(['Square-Version' => config('services.square.version')])
-            ->acceptJson()->asJson()->timeout(20)
+            ->acceptJson()->timeout(20)
             ->retry(2, 500, fn ($e) => $e instanceof ConnectionException, throw: false);
     }
 
@@ -51,13 +56,72 @@ class SquareGateway
         return $this->http()->get("/v2/catalog/object/{$id}")->throw()->json('object', []);
     }
 
-    public function inventoryCounts(array $variationIds = [], ?string $cursor = null): array   // ['counts' => [...]]
+    public function inventoryCounts(array $variationIds = [], ?string $cursor = null, ?string $updatedAfter = null): array   // ['counts' => [...]]
     {
         return $this->http()->post('/v2/inventory/counts/batch-retrieve', array_filter([
             'catalog_object_ids' => $variationIds,            // empty list = everything
             'location_ids' => [config('services.square.location_id')],
+            'updated_after' => $updatedAfter,
             'cursor' => $cursor,
         ]))->throw()->json();
+    }
+
+    /**
+     * Several catalogue objects by id (e.g. the images and categories an
+     * item points at). Deleted ones are simply missing from the result.
+     */
+    public function catalogObjects(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return $this->http()->post('/v2/catalog/batch-retrieve', ['object_ids' => array_values($ids)])
+            ->throw()->json('objects', []);
+    }
+
+    // ---- sandbox test data (see square:seed-sandbox) ----
+    public function upsertCatalog(array $objects, string $idempotencyKey): array
+    {
+        return $this->http()->post('/v2/catalog/batch-upsert', [
+            'idempotency_key' => $idempotencyKey,
+            'batches' => [['objects' => $objects]],
+        ])->throw()->json();
+    }
+
+    public function uploadCatalogImage(string $itemId, string $path, string $name, string $idempotencyKey): array
+    {
+        $request = json_encode([
+            'idempotency_key' => $idempotencyKey,
+            'object_id' => $itemId,
+            'is_primary' => true,
+            'image' => ['type' => 'IMAGE', 'id' => '#image', 'image_data' => ['name' => $name]],
+        ]);
+
+        return $this->request()->asMultipart()
+            ->attach('request', $request, null, ['Content-Type' => 'application/json'])
+            ->attach('image_file', file_get_contents($path), basename($path), ['Content-Type' => mime_content_type($path)])
+            ->post('/v2/catalog/images')
+            ->throw()->json('image', []);
+    }
+
+    public function setInventory(array $counts, string $idempotencyKey): array   // [variationId => quantity]
+    {
+        $now = now()->toIso8601ZuluString();
+
+        return $this->http()->post('/v2/inventory/changes/batch-create', [
+            'idempotency_key' => $idempotencyKey,
+            'changes' => collect($counts)->map(fn ($quantity, $id) => [
+                'type' => 'PHYSICAL_COUNT',
+                'physical_count' => [
+                    'catalog_object_id' => $id,
+                    'location_id' => config('services.square.location_id'),
+                    'state' => 'IN_STOCK',
+                    'quantity' => (string) $quantity,
+                    'occurred_at' => $now,
+                ],
+            ])->values()->all(),
+        ])->throw()->json();
     }
 
     public function getOrder(string $orderId): array

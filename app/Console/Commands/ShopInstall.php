@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Country;
 use App\Models\Product;
 use App\Models\StoreHour;
+use App\Models\User;
 use App\Services\Square\CatalogSync;
+use Database\Seeders\AdminUserSeeder;
 use Database\Seeders\DemoCatalogSeeder;
 use Database\Seeders\PaymentMethodSeeder;
 use Database\Seeders\StorefrontSeeder;
@@ -31,6 +33,11 @@ class ShopInstall extends Command
 
         // firstOrCreate per method: adds new ones, leaves existing settings alone.
         $this->call('db:seed', ['--class' => PaymentMethodSeeder::class, '--force' => true]);
+
+        // Ensure default store manager / administrator exists for operations
+        if (User::where('is_admin', true)->where('is_active', true)->doesntExist()) {
+            $this->call('db:seed', ['--class' => AdminUserSeeder::class, '--force' => true]);
+        }
 
         // Menu categories, home tiles and countries: ours, not Square's.
         if (Country::query()->doesntExist()) {

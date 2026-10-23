@@ -5,6 +5,7 @@ use App\Models\Country;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\StoreHour;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
 test('shop:install fills in what is missing and leaves staff changes alone', function () {
@@ -13,7 +14,8 @@ test('shop:install fills in what is missing and leaves staff changes alone', fun
     $this->artisan('shop:install')->assertSuccessful();
 
     expect(StoreHour::count())->toBeGreaterThan(0)
-        ->and(PaymentMethod::count())->toBeGreaterThan(0);
+        ->and(PaymentMethod::count())->toBeGreaterThan(0)
+        ->and(User::where('is_admin', true)->count())->toBeGreaterThan(0);
 
     // Staff change an opening time; running it again must not undo that.
     $monday = StoreHour::first();

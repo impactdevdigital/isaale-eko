@@ -720,17 +720,8 @@
                                 @error('name') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
-                            <!-- Slug & Parent Department -->
+                            <!-- Parent Category & Emoji Badge -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-[#111111] mb-1">URL Slug *</label>
-                                    <input type="text"
-                                           wire:model="slug"
-                                           placeholder="e.g. flour-fufu"
-                                           class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                                    @error('slug') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
-                                </div>
-
                                 <div>
                                     <label class="block text-xs font-bold text-[#111111] mb-1">Parent Category (Department)</label>
                                     <select wire:model="parent_id"
@@ -744,19 +735,6 @@
                                     </select>
                                     @error('parent_id') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
                                 </div>
-                            </div>
-
-                            <!-- Square POS ID & Emoji Icon -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-[#111111] mb-1">Square POS Category ID</label>
-                                    <input type="text"
-                                           wire:model="square_id"
-                                           placeholder="e.g. 2L4O4NMJTYW6427357T2L..."
-                                           class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] font-mono text-xs text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                                    <p class="mt-1 text-[11px] text-[#686868]">Corresponds to Square's catalog CATEGORY object ID.</p>
-                                    @error('square_id') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
-                                </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-[#111111] mb-1">Emoji / Icon Badge</label>
@@ -764,34 +742,124 @@
                                            wire:model="emoji"
                                            placeholder="e.g. 🌾, 🌶️, 🍗, 🥤, 🧼"
                                            class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                                    <p class="mt-1 text-[11px] text-[#686868]">Displayed beside category title in navigation menus.</p>
+                                    <p class="mt-1 text-[11px] text-[#686868]">Quick icon shown beside category title.</p>
                                     @error('emoji') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
 
-                            <!-- Image Path & Sort Order -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-[#111111] mb-1">Image Asset Path / URL</label>
-                                    <input type="text"
-                                           wire:model="image"
-                                           placeholder="e.g. images/categories/grains.jpg"
-                                           class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                                    @error('image') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                            <!-- Staff-Friendly Category Photo Selector -->
+                            <div class="p-4 rounded-2xl bg-[#FAFAFA] border border-[#EEEEEE] space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="block text-xs font-bold text-[#111111]">Category Photo</span>
+                                        <span class="block text-[11px] text-[#686868]">Choose a photo from the store library or upload an image.</span>
+                                    </div>
+
+                                    @if ($imageUpload || $selectedPreset || $image)
+                                        <button type="button"
+                                                wire:click="removeImage"
+                                                class="text-[11px] font-bold text-[#DF2600] hover:underline flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Remove Photo
+                                        </button>
+                                    @endif
                                 </div>
 
-                                <div>
-                                    <label class="block text-xs font-bold text-[#111111] mb-1">Sort Order</label>
-                                    <input type="number"
-                                           min="0"
-                                           wire:model="sort_order"
-                                           class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                                    @error('sort_order') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                                <!-- Current Photo Preview Card -->
+                                @if ($imageUpload)
+                                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-[#007D49]/30">
+                                        @if (method_exists($imageUpload, 'isPreviewable') && $imageUpload->isPreviewable())
+                                            <img src="{{ $imageUpload->temporaryUrl() }}" alt="Preview" class="w-12 h-12 rounded-lg object-cover border border-[#EEEEEE]">
+                                        @else
+                                            <div class="w-12 h-12 rounded-lg bg-[#FAFAFA] border border-[#EEEEEE] flex items-center justify-center text-xs font-bold text-[#686868]">
+                                                IMG
+                                            </div>
+                                        @endif
+                                        <div class="flex-1 min-w-0">
+                                            <span class="text-xs font-bold text-[#007D49] block">Ready to upload</span>
+                                            <span class="text-[11px] text-[#686868] truncate block">{{ $imageUpload->getClientOriginalName() }}</span>
+                                        </div>
+                                    </div>
+                                @elseif ($selectedPreset || $image)
+                                    @php
+                                        $currentDisplayImg = $selectedPreset ?: $image;
+                                    @endphp
+                                    <div class="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-[#EEEEEE]">
+                                        <img src="{{ asset($currentDisplayImg) }}" alt="Category" class="w-12 h-12 rounded-lg object-cover border border-[#EEEEEE]">
+                                        <div class="flex-1 min-w-0">
+                                            <span class="text-xs font-bold text-[#111111] block">Selected Photo</span>
+                                            <span class="text-[11px] text-[#686868] truncate block">{{ basename($currentDisplayImg) }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Tab Switcher: Store Library vs Upload -->
+                                <div class="flex items-center gap-1 p-1 bg-white rounded-xl border border-[#EEEEEE] w-fit">
+                                    <button type="button"
+                                            wire:click="$set('imageSourceTab', 'presets')"
+                                            class="px-3 py-1 rounded-lg text-xs font-bold transition-colors {{ $imageSourceTab === 'presets' ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#686868] hover:text-[#111111]' }}">
+                                        Store Library ({{ count($presets) }})
+                                    </button>
+                                    <button type="button"
+                                            wire:click="$set('imageSourceTab', 'upload')"
+                                            class="px-3 py-1 rounded-lg text-xs font-bold transition-colors {{ $imageSourceTab === 'upload' ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#686868] hover:text-[#111111]' }}">
+                                        Upload from Device
+                                    </button>
                                 </div>
+
+                                <!-- Tab 1: Visual Preset Gallery Picker -->
+                                @if ($imageSourceTab === 'presets')
+                                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5 max-h-48 overflow-y-auto p-1 bg-white rounded-xl border border-[#EEEEEE]">
+                                        @foreach ($presets as $preset)
+                                            @php
+                                                $isSelected = ($selectedPreset === $preset['path']) || ($image === $preset['path'] && ! $selectedPreset);
+                                            @endphp
+                                            <button type="button"
+                                                    wire:click="selectPreset('{{ $preset['path'] }}')"
+                                                    class="p-1.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 {{ $isSelected ? 'border-[#DF2600] bg-[#FFF0EC]/50 ring-2 ring-[#DF2600]/30' : 'border-[#EEEEEE] hover:border-[#111111] hover:bg-[#FAFAFA]' }}"
+                                                    title="{{ $preset['name'] }}">
+                                                <img src="{{ asset($preset['path']) }}" alt="{{ $preset['name'] }}" class="w-10 h-10 rounded-lg object-cover">
+                                                <span class="text-[10px] font-bold text-[#111111] truncate w-full block">{{ $preset['name'] }}</span>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Tab 2: Drag & Drop File Upload -->
+                                @if ($imageSourceTab === 'upload')
+                                    <div class="p-5 border-2 border-dashed border-[#EEEEEE] rounded-xl text-center bg-white hover:border-[#DF2600] transition-colors relative">
+                                        <input type="file"
+                                               wire:model="imageUpload"
+                                               accept="image/png,image/jpeg,image/webp"
+                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                        <div class="space-y-1">
+                                            <div class="w-8 h-8 rounded-full bg-[#FFF0EC] text-[#DF2600] flex items-center justify-center mx-auto">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div class="text-xs font-bold text-[#111111]">
+                                                Click to browse or drag a photo here
+                                            </div>
+                                            <p class="text-[10px] text-[#686868]">Supports PNG, JPG, or WebP up to 5MB</p>
+                                        </div>
+
+                                        <div wire:loading wire:target="imageUpload" class="mt-2 text-xs font-bold text-[#DF2600] flex items-center justify-center gap-1.5">
+                                            <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Uploading photo...
+                                        </div>
+                                    </div>
+                                    @error('imageUpload') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                                @endif
                             </div>
 
                             <!-- Featured on Storefront Toggle -->
-                            <div class="pt-2">
+                            <div>
                                 <label class="inline-flex items-center gap-3 p-3.5 rounded-xl bg-[#FAFAFA] border border-[#EEEEEE] cursor-pointer hover:bg-white transition-colors w-full">
                                     <input type="checkbox"
                                            wire:model="is_featured"
@@ -801,6 +869,53 @@
                                         <span class="block text-[11px] text-[#686868]">Highlight this category in top navigation badges and homepage spotlight cards.</span>
                                     </div>
                                 </label>
+                            </div>
+
+                            <!-- Optional Advanced Settings Accordion (Technical fields hidden for staff) -->
+                            <div class="pt-1">
+                                <button type="button"
+                                        wire:click="toggleAdvanced"
+                                        class="flex items-center gap-2 text-xs font-bold text-[#686868] hover:text-[#111111] transition-colors">
+                                    <svg class="w-3.5 h-3.5 transform transition-transform {{ $showAdvanced ? 'rotate-90' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <span>Advanced Settings (URL Slug, Square POS ID, Sort Order)</span>
+                                </button>
+
+                                @if ($showAdvanced)
+                                    <div class="mt-3 p-4 rounded-2xl bg-[#FAFAFA] border border-[#EEEEEE] space-y-4">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs font-bold text-[#111111] mb-1">URL Slug</label>
+                                                <input type="text"
+                                                       wire:model="slug"
+                                                       placeholder="Auto-generated from name"
+                                                       class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-xs font-mono text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
+                                                <p class="mt-1 text-[10px] text-[#686868]">Automatically created from category name.</p>
+                                                @error('slug') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-xs font-bold text-[#111111] mb-1">Square POS Category ID</label>
+                                                <input type="text"
+                                                       wire:model="square_id"
+                                                       placeholder="Auto-synced from Square"
+                                                       class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-white font-mono text-xs text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
+                                                <p class="mt-1 text-[10px] text-[#686868]">Square POS fills this automatically during catalog sync.</p>
+                                                @error('square_id') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="w-full sm:w-1/2">
+                                            <label class="block text-xs font-bold text-[#111111] mb-1">Sort Order</label>
+                                            <input type="number"
+                                                   min="0"
+                                                   wire:model="sort_order"
+                                                   class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-xs text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
+                                            @error('sort_order') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 

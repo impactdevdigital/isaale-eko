@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 /**
@@ -18,7 +19,26 @@ use Livewire\WithPagination;
  */
 class CategoriesManager extends Component
 {
+    use WithFileUploads;
     use WithPagination;
+
+    /** Preset category food photos exported from the Figma library */
+    public const PRESET_IMAGES = [
+        ['name' => 'Flours & Baking', 'path' => 'images/store/subcategories/flours-and-baking.webp'],
+        ['name' => 'Grains & Cereals', 'path' => 'images/store/subcategories/grains-and-cereals.webp'],
+        ['name' => 'Rice & Beans', 'path' => 'images/store/categories/rice-and-beans.webp'],
+        ['name' => 'Meat & Fish', 'path' => 'images/store/categories/meat-and-fish.webp'],
+        ['name' => 'Fresh Produce', 'path' => 'images/store/categories/fresh-produce.webp'],
+        ['name' => 'Vegetables', 'path' => 'images/store/subcategories/vegetables.webp'],
+        ['name' => 'Spices & Seasonings', 'path' => 'images/store/subcategories/spices-and-seasonings.webp'],
+        ['name' => 'Cooking Oils', 'path' => 'images/store/subcategories/cooking-oils.webp'],
+        ['name' => 'Seasonings', 'path' => 'images/store/categories/seasonings.webp'],
+        ['name' => 'Sauces & Pastes', 'path' => 'images/store/categories/sauces.webp'],
+        ['name' => 'Snacks & Pastries', 'path' => 'images/store/categories/snacks.webp'],
+        ['name' => 'Drinks & Beverages', 'path' => 'images/store/categories/drinks.webp'],
+        ['name' => 'Pantry Staples', 'path' => 'images/store/categories/pantry-staples.webp'],
+        ['name' => 'Beauty & Home', 'path' => 'images/store/categories/beauty-and-home.webp'],
+    ];
 
     public string $search = '';
 
@@ -51,6 +71,18 @@ class CategoriesManager extends Component
     public string $emoji = '';
 
     public string $image = '';
+
+    /** Temporary file upload instance */
+    public $imageUpload = null;
+
+    /** Path of image chosen from store library presets */
+    public string $selectedPreset = '';
+
+    /** Active image selector tab: 'presets' | 'upload' */
+    public string $imageSourceTab = 'presets';
+
+    /** Toggle for advanced technical fields (slug, Square ID, sort order) */
+    public bool $showAdvanced = false;
 
     public bool $is_featured = false;
 
@@ -140,6 +172,25 @@ class CategoriesManager extends Component
         session()->flash('success', "Updated featured spotlight for '{$category->name}'.");
     }
 
+    public function selectPreset(string $path): void
+    {
+        $this->selectedPreset = $path;
+        $this->image = $path;
+        $this->imageUpload = null;
+    }
+
+    public function removeImage(): void
+    {
+        $this->selectedPreset = '';
+        $this->image = '';
+        $this->imageUpload = null;
+    }
+
+    public function toggleAdvanced(): void
+    {
+        $this->showAdvanced = ! $this->showAdvanced;
+    }
+
     public function openCreateModal(?int $parentId = null): void
     {
         $this->resetValidation();
@@ -150,6 +201,10 @@ class CategoriesManager extends Component
         $this->square_id = '';
         $this->emoji = '';
         $this->image = '';
+        $this->imageUpload = null;
+        $this->selectedPreset = '';
+        $this->imageSourceTab = 'presets';
+        $this->showAdvanced = false;
         $this->is_featured = false;
         $this->sort_order = 0;
 
@@ -168,6 +223,10 @@ class CategoriesManager extends Component
         $this->square_id = $category->square_id ?? '';
         $this->emoji = $category->emoji ?? '';
         $this->image = $category->image ?? '';
+        $this->imageUpload = null;
+        $this->selectedPreset = $category->image ?? '';
+        $this->imageSourceTab = 'presets';
+        $this->showAdvanced = false;
         $this->is_featured = (bool) $category->is_featured;
         $this->sort_order = (int) ($category->sort_order ?? 0);
 
@@ -191,11 +250,21 @@ class CategoriesManager extends Component
             'square_id' => 'nullable|string|max:255|unique:categories,square_id,'.($this->editingCategoryId ?? 'NULL'),
             'emoji' => 'nullable|string|max:16',
             'image' => 'nullable|string|max:255',
+            'imageUpload' => 'nullable|mimes:jpeg,jpg,png,webp,svg|max:5120',
             'is_featured' => 'boolean',
             'sort_order' => 'integer|min:0',
         ];
 
         $this->validate($rules);
+
+        $imagePath = $this->selectedPreset ?: ($this->image ?: null);
+
+        if ($this->imageUpload) {
+            $ext = $this->imageUpload->getClientOriginalExtension() ?: 'webp';
+            $filename = 'category-'.Str::slug($this->name ?: 'item').'-'.time().'.'.$ext;
+            $this->imageUpload->storeAs('categories/uploads', $filename, 'public');
+            $imagePath = 'storage/categories/uploads/'.$filename;
+        }
 
         $data = [
             'name' => trim($this->name),
@@ -203,7 +272,7 @@ class CategoriesManager extends Component
             'parent_id' => $this->parent_id ?: null,
             'square_id' => trim($this->square_id) ?: null,
             'emoji' => trim($this->emoji) ?: null,
-            'image' => trim($this->image) ?: null,
+            'image' => $imagePath,
             'is_featured' => $this->is_featured,
             'sort_order' => $this->sort_order,
         ];
@@ -335,6 +404,7 @@ class CategoriesManager extends Component
                 'rootDepartments' => $rootDepartments,
                 'categories' => $categories,
                 'lastSync' => $lastSync,
+                'presets' => self::PRESET_IMAGES,
             ])->layout('layouts.admin', ['title' => 'Categories & Sub-Categories']);
         }
 
@@ -364,6 +434,7 @@ class CategoriesManager extends Component
                 'rootDepartments' => $rootDepartments,
                 'subCategories' => $subQuery,
                 'lastSync' => $lastSync,
+                'presets' => self::PRESET_IMAGES,
             ])->layout('layouts.admin', ['title' => 'Categories & Sub-Categories']);
         }
 
@@ -391,6 +462,7 @@ class CategoriesManager extends Component
             'rootDepartments' => $rootDepartments,
             'parentCategories' => $parentsQuery,
             'lastSync' => $lastSync,
+            'presets' => self::PRESET_IMAGES,
         ])->layout('layouts.admin', ['title' => 'Categories & Sub-Categories']);
     }
 }

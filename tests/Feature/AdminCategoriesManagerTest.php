@@ -155,6 +155,39 @@ test('staff can edit an existing category attributes', function () {
         ->and($cat->fresh()->sort_order)->toBe(10);
 });
 
+test('staff can select a category photo from the library preset grid', function () {
+    Livewire::test(CategoriesManager::class)
+        ->call('openCreateModal')
+        ->set('name', 'West African Palm Oils')
+        ->call('selectPreset', 'images/store/subcategories/cooking-oils.webp')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertSet('showModal', false);
+
+    $cat = Category::where('name', 'West African Palm Oils')->first();
+    expect($cat)->not->toBeNull()
+        ->and($cat->image)->toBe('images/store/subcategories/cooking-oils.webp');
+});
+
+test('staff can upload a custom category photo file', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+    // Minimal valid 1x1 JPEG header
+    $jpegBytes = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
+    $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('custom-category.jpg', $jpegBytes);
+
+    Livewire::test(CategoriesManager::class)
+        ->call('openCreateModal')
+        ->set('name', 'Fresh Yam Flour')
+        ->set('imageUpload', $file)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertSet('showModal', false);
+
+    $cat = Category::where('name', 'Fresh Yam Flour')->first();
+    expect($cat)->not->toBeNull()
+        ->and($cat->image)->toContain('storage/categories/uploads/');
+});
+
 test('prevents deleting category if active products or children are assigned', function () {
     $parent = Category::create([
         'name' => 'Protected Parent Department',

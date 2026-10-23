@@ -66,22 +66,28 @@
                 <div x-show="filtersOpen" x-cloak class="mt-4 lg:mt-0 lg:!block">
                     <p class="hidden pb-8 text-[14px] leading-[18px] font-bold lg:block">Filter products</p>
 
-                    <x-store.filter-group title="Category">
-                        @foreach ($categoryTree as $group)
-                            <x-store.filter-option name="category" :value="$group->slug" :label="$group->name" />
-                            <div class="flex flex-col gap-1.5 pl-5">
-                                @foreach ($group->children as $child)
-                                    <x-store.filter-option name="category" :value="$child->slug" :label="$child->name" />
-                                @endforeach
-                            </div>
-                        @endforeach
-                    </x-store.filter-group>
+                    @if ($categoryTree->isNotEmpty())
+                        <x-store.filter-group title="Category">
+                            @foreach ($categoryTree as $group)
+                                <x-store.filter-option name="category" :value="$group->slug" :label="$group->name" />
+                                @if ($group->children->isNotEmpty())
+                                    <div class="flex flex-col gap-1.5 pl-5">
+                                        @foreach ($group->children as $child)
+                                            <x-store.filter-option name="category" :value="$child->slug" :label="$child->name" />
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @endforeach
+                        </x-store.filter-group>
+                    @endif
 
-                    <x-store.filter-group title="Country">
-                        @foreach ($countries as $option)
-                            <x-store.filter-option name="country" :value="$option->slug" :label="$option->name" :flag="$option->flagUrl()" />
-                        @endforeach
-                    </x-store.filter-group>
+                    @if ($countries->isNotEmpty())
+                        <x-store.filter-group title="Country">
+                            @foreach ($countries as $option)
+                                <x-store.filter-option name="country" :value="$option->slug" :label="$option->name" :flag="$option->flagUrl()" />
+                            @endforeach
+                        </x-store.filter-group>
+                    @endif
 
                     <x-store.filter-group title="Price range">
                         @foreach (ProductListing::PRICES as $value => [$label])

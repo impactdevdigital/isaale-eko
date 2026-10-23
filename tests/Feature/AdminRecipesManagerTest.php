@@ -156,3 +156,46 @@ test('staff can delete a recipe', function () {
 
     expect(Recipe::where('slug', 'recipe-to-delete')->exists())->toBeFalse();
 });
+
+test('staff can select photo from presets or upload an image file for a recipe', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+
+    // 1. Preset selection
+    Livewire::test(RecipesManager::class)
+        ->call('createRecipe')
+        ->set('name', 'Preset Test Jollof')
+        ->call('selectPreset', 'images/store/recipes/jollof-rice.webp')
+        ->assertSet('selectedPreset', 'images/store/recipes/jollof-rice.webp')
+        ->assertSet('image', 'images/store/recipes/jollof-rice.webp')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $presetRecipe = Recipe::where('name', 'Preset Test Jollof')->first();
+    expect($presetRecipe)->not->toBeNull();
+    expect($presetRecipe->image)->toBe('images/store/recipes/jollof-rice.webp');
+
+    // 2. File upload
+    $jpegBytes = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
+    $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('banga-dish.jpg', $jpegBytes);
+
+    Livewire::test(RecipesManager::class)
+        ->call('createRecipe')
+        ->set('name', 'Upload Test Banga')
+        ->set('imageUpload', $file)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $uploadedRecipe = Recipe::where('name', 'Upload Test Banga')->first();
+    expect($uploadedRecipe)->not->toBeNull();
+    expect($uploadedRecipe->image)->toContain('storage/recipes/uploads/recipe-upload-test-banga');
+});
+
+test('staff can toggle advanced settings in recipe modal', function () {
+    Livewire::test(RecipesManager::class)
+        ->call('createRecipe')
+        ->assertSet('showAdvanced', false)
+        ->call('toggleAdvanced')
+        ->assertSet('showAdvanced', true)
+        ->call('toggleAdvanced')
+        ->assertSet('showAdvanced', false);
+});

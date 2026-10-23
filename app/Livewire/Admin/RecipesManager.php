@@ -8,6 +8,7 @@ use App\Models\Recipe;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 /**
@@ -18,7 +19,17 @@ use Livewire\WithPagination;
  */
 class RecipesManager extends Component
 {
+    use WithFileUploads;
     use WithPagination;
+
+    /** Authentic recipe meal presets exported from the store library */
+    public const PRESET_RECIPES = [
+        ['name' => 'Nigerian Jollof Rice', 'path' => 'images/store/recipes/jollof-rice.webp', 'origin' => 'Nigeria'],
+        ['name' => 'Egusi Soup', 'path' => 'images/store/recipes/egusi-soup.webp', 'origin' => 'Nigeria'],
+        ['name' => 'Banga Palm Soup', 'path' => 'images/store/recipes/banga-soup.webp', 'origin' => 'Delta / Nigeria'],
+        ['name' => 'Zobo Hibiscus Drink', 'path' => 'images/store/recipes/zobo-hibiscus-drink.webp', 'origin' => 'West Africa'],
+        ['name' => 'Curry Goat', 'path' => 'images/store/recipes/thumbs/curry-goat.webp', 'origin' => 'Jamaica / Caribbean'],
+    ];
 
     public string $search = '';
 
@@ -45,6 +56,18 @@ class RecipesManager extends Component
     public ?int $duration_minutes = null;
 
     public string $image = '';
+
+    /** Temporary file upload instance */
+    public $imageUpload = null;
+
+    /** Path of photo chosen from store library presets */
+    public string $selectedPreset = '';
+
+    /** Active image selector tab: 'presets' | 'upload' */
+    public string $imageSourceTab = 'presets';
+
+    /** Toggle for advanced technical settings (URL slug, sort order) */
+    public bool $showAdvanced = false;
 
     public string $thumbnail = '';
 
@@ -73,10 +96,30 @@ class RecipesManager extends Component
             'country_id' => 'nullable|exists:countries,id',
             'duration_minutes' => 'nullable|integer|min:1|max:480',
             'image' => 'nullable|string|max:255',
+            'imageUpload' => 'nullable|mimes:jpeg,jpg,png,webp,svg|max:5120',
             'thumbnail' => 'nullable|string|max:255',
             'is_featured' => 'boolean',
             'sort_order' => 'integer|min:0',
         ];
+    }
+
+    public function selectPreset(string $path): void
+    {
+        $this->selectedPreset = $path;
+        $this->image = $path;
+        $this->imageUpload = null;
+    }
+
+    public function removeImage(): void
+    {
+        $this->selectedPreset = '';
+        $this->image = '';
+        $this->imageUpload = null;
+    }
+
+    public function toggleAdvanced(): void
+    {
+        $this->showAdvanced = ! $this->showAdvanced;
     }
 
     public function updatingSearch(): void
@@ -121,6 +164,10 @@ class RecipesManager extends Component
         $this->duration_minutes = 45;
         $this->image = '';
         $this->thumbnail = '';
+        $this->imageUpload = null;
+        $this->selectedPreset = '';
+        $this->imageSourceTab = 'presets';
+        $this->showAdvanced = false;
         $this->is_featured = false;
         $this->sort_order = (int) (Recipe::max('sort_order') ?? 0) + 1;
         $this->ingredientSearch = '';
@@ -140,6 +187,10 @@ class RecipesManager extends Component
         $this->duration_minutes = $recipe->duration_minutes;
         $this->image = $recipe->image ?? '';
         $this->thumbnail = $recipe->thumbnail ?? '';
+        $this->imageUpload = null;
+        $this->selectedPreset = $recipe->image ?? '';
+        $this->imageSourceTab = 'presets';
+        $this->showAdvanced = false;
         $this->is_featured = (bool) $recipe->is_featured;
         $this->sort_order = (int) $recipe->sort_order;
         $this->ingredientSearch = '';
@@ -162,14 +213,35 @@ class RecipesManager extends Component
 
     public function save(): void
     {
-        $validated = $this->validate();
+        $this->validate();
+
+        $imagePath = $this->selectedPreset ?: ($this->image ?: null);
+
+        if ($this->imageUpload) {
+            $ext = $this->imageUpload->getClientOriginalExtension() ?: 'webp';
+            $filename = 'recipe-'.Str::slug($this->name ?: 'dish').'-'.time().'.'.$ext;
+            $this->imageUpload->storeAs('recipes/uploads', $filename, 'public');
+            $imagePath = 'storage/recipes/uploads/'.$filename;
+        }
+
+        $data = [
+            'name' => trim($this->name),
+            'slug' => Str::slug($this->slug ?: $this->name),
+            'tagline' => trim($this->tagline) ?: null,
+            'country_id' => $this->country_id ?: null,
+            'duration_minutes' => $this->duration_minutes ? (int) $this->duration_minutes : null,
+            'image' => $imagePath,
+            'thumbnail' => $this->thumbnail ?: null,
+            'is_featured' => $this->is_featured,
+            'sort_order' => $this->sort_order,
+        ];
 
         if ($this->editingRecipeId) {
             $recipe = Recipe::findOrFail($this->editingRecipeId);
-            $recipe->update($validated);
+            $recipe->update($data);
             $message = "Recipe \"{$recipe->name}\" updated successfully.";
         } else {
-            $recipe = Recipe::create($validated);
+            $recipe = Recipe::create($data);
             $message = "Recipe \"{$recipe->name}\" created successfully.";
         }
 
@@ -247,6 +319,7 @@ class RecipesManager extends Component
             'counts' => $counts,
             'attachedProducts' => $attachedProducts,
             'searchResults' => $searchResults,
+            'presets' => self::PRESET_RECIPES,
         ])->layout('layouts.admin', ['title' => 'Kitchen Recipes & Bundles']);
     }
 }

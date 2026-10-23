@@ -1,4 +1,5 @@
 <?php
+
 // app/Services/Square/SquareGateway.php
 
 namespace App\Services\Square;
@@ -34,10 +35,10 @@ class SquareGateway
         return $this->http()->get('/v2/locations')->throw()->json('locations', []);
     }
 
-    public function catalogPage(?string $cursor = null): array          // ['objects' => [...], 'cursor' => '...']
+    public function catalogPage(?string $cursor = null, string $types = 'ITEM,CATEGORY,IMAGE'): array   // ['objects' => [...], 'cursor' => '...']
     {
         return $this->http()->get('/v2/catalog/list', array_filter([
-            'types' => 'ITEM,CATEGORY,IMAGE', 'cursor' => $cursor,
+            'types' => $types, 'cursor' => $cursor,
         ]))->throw()->json();
     }
 
@@ -141,6 +142,7 @@ class SquareGateway
     public function createOrder(array $order, string $idempotencyKey): array
     {
         $order['location_id'] = config('services.square.location_id');
+
         return $this->http()->post('/v2/orders', [
             'idempotency_key' => $idempotencyKey, 'order' => $order,
         ])->throw()->json('order');
@@ -190,10 +192,11 @@ class SquareGateway
     {
         $expected = base64_encode(hash_hmac(
             'sha256',
-            config('services.square.webhook_url') . $request->getContent(),
+            config('services.square.webhook_url').$request->getContent(),
             config('services.square.webhook_key'),
             true
         ));
+
         return hash_equals($expected, (string) $request->header('x-square-hmacsha256-signature'));
     }
 }

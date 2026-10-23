@@ -29,6 +29,9 @@ class CatalogSync
     /** @var array{items: int, deactivated: int, categories: int, stock: int} */
     private array $stats = ['items' => 0, 'deactivated' => 0, 'categories' => 0, 'stock' => 0];
 
+    /** @var array<int, int> Products created during this run. */
+    private array $created = [];
+
     public function __construct(private SquareGateway $square) {}
 
     /**
@@ -40,6 +43,7 @@ class CatalogSync
     public function full(): array
     {
         $started = now();
+        $initial = ! Cache::has(self::STATE_KEY);
         $objects = collect();
         $cursor = null;
 
@@ -50,6 +54,11 @@ class CatalogSync
         } while ($cursor);
 
         $this->apply($objects);
+
+        // The very first import brings in the whole range at once; that's not "new arrivals".
+        if ($initial) {
+            Product::whereIn('id', $this->created)->update(['first_seen_at' => null]);
+        }
 
         $seen = $objects->where('type', 'ITEM')->pluck('id');
         $this->stats['deactivated'] += Product::whereNotNull('square_id')
@@ -137,7 +146,10 @@ class CatalogSync
         $images = $objects->where('type', 'IMAGE')->mapWithKeys(fn ($o) => [$o['id'] => $o['image_data']['url'] ?? null]);
 
         DB::transaction(function () use ($objects, $items, $images) {
-            $objects->where('type', 'CATEGORY')->each(fn ($category) => $this->applyCategory($category));
+            // Top-level categories first, so sub-categories can point at their parent.
+            $objects->where('type', 'CATEGORY')
+                ->sortBy(fn ($c) => isset($c['category_data']['parent_category']['id']) ? 1 : 0)
+                ->each(fn ($category) => $this->applyCategory($category));
             $items->each(fn ($item) => $this->applyItem($item, $images));
         });
     }
@@ -162,6 +174,8 @@ class CatalogSync
         $category = $existing ?? Category::where('slug', Str::slug($name))->whereNull('square_id')->first() ?? new Category;
         $category->square_id = $object['id'];
         $category->name = $name;
+        // Square sub-categories become children of their parent category.
+        $category->parent_id = Category::where('square_id', $object['category_data']['parent_category']['id'] ?? null)->value('id');
         $category->slug ??= $this->uniqueSlug(Category::class, $name);
         $category->save();
 
@@ -222,6 +236,10 @@ class CatalogSync
         $product->slug ??= $this->uniqueSlug(Product::class, $name);
         $product->save();
 
+        if ($product->wasRecentlyCreated) {
+            $this->created[] = $product->id;
+        }
+
         $keep = [];
 
         foreach ($variations as $i => $variation) {
@@ -236,6 +254,7 @@ class CatalogSync
                 'square_id' => $variation['id'],
                 'product_id' => $product->id,
                 'name' => ($vd['name'] ?? null) === 'Regular' ? $row->name : ($vd['name'] ?? null),
+                'sku' => $vd['sku'] ?? null,
                 'price_cents' => $this->priceOf($variation),
                 'sort_order' => $vd['ordinal'] ?? $i,
                 // Tracked stock is filled in from Square's counts; keep the last known number meanwhile.

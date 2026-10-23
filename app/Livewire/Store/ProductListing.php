@@ -151,7 +151,7 @@ class ProductListing extends Component
 
         return match ($this->sort) {
             'trending' => $query->trending()->orderByDesc('is_trending')->orderBy('name'),
-            'new' => $query->where('created_at', '>=', now()->subDays((int) Setting::get('new_arrival_days', 21)))->latest()->orderBy('id'),
+            'new' => $query->where('first_seen_at', '>=', now()->subDays((int) Setting::get('new_arrival_days', 21)))->latest('first_seen_at')->orderBy('id'),
             'bestsellers' => $query->whereNotNull('bestseller_rank')->orderBy('bestseller_rank'),
             'discounted' => $query->discounted()->orderByDesc('discount_estimate')->orderBy('name'),
             'hot' => $query->where('is_hot', true)->orderBy('name'),

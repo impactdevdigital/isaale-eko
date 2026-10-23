@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,16 +12,33 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
+    use HasTranslations;
+
+    /** Item types staff can set in the admin (affects handling and delivery). */
+    public const ITEM_CLASSES = ['perishable' => 'Perishable', 'non_perishable' => 'Non-perishable', 'non_food' => 'Non-food'];
+
     protected $guarded = [];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_hidden' => 'boolean',
+        'is_featured' => 'boolean',
+        'is_enriched' => 'boolean',
+        'first_seen_at' => 'datetime',
         'is_trending' => 'boolean',
         'is_hot' => 'boolean',
         'bestseller_rank' => 'integer',
         'discount_estimate' => 'integer',
         'gallery' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        // New products count as new arrivals from now (the first Square import clears this).
+        static::creating(function (Product $product) {
+            $product->first_seen_at ??= now();
+        });
+    }
 
     public function category(): BelongsTo
     {
@@ -50,9 +68,22 @@ class Product extends Model
         return $this->belongsToMany(Recipe::class)->withPivot('sort_order');
     }
 
+    /**
+     * On sale: active in Square and not hidden by staff.
+     */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)->where('is_hidden', false);
+    }
+
+    public function scopeFeatured(Builder $query): Builder
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function isAvailable(): bool
+    {
+        return $this->is_active && ! $this->is_hidden;
     }
 
     /**
@@ -116,7 +147,7 @@ class Product extends Model
 
     public function inStock(): bool
     {
-        return $this->is_active && (bool) $this->defaultVariation?->inStock();
+        return $this->isAvailable() && (bool) $this->defaultVariation?->inStock();
     }
 
     /**
@@ -127,7 +158,7 @@ class Product extends Model
         $quantity = $this->defaultVariation?->stock_quantity;
 
         return match (true) {
-            ! $this->is_active || ! $this->defaultVariation => 'unavailable',
+            ! $this->isAvailable() || ! $this->defaultVariation => 'unavailable',
             $quantity !== null && $quantity <= 0 => 'out_of_stock',
             $quantity !== null && $quantity <= (int) Setting::get('low_stock_threshold', 5) => 'low_stock',
             default => 'in_stock',

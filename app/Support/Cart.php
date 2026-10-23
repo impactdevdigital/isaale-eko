@@ -53,7 +53,7 @@ class Cart
                 continue;
             }
 
-            $available = $variation->product->is_active && $variation->inStock();
+            $available = $variation->product->isAvailable() && $variation->inStock();
             $notice = null;
 
             if ($available && $variation->stock_quantity !== null && $line['quantity'] > $variation->stock_quantity) {

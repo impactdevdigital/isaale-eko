@@ -241,3 +241,42 @@ test('stock webhooks update counts and catalogue webhooks queue a sync', functio
 test('webhooks without a valid signature are rejected', function () {
     $this->postJson('/api/webhooks/square', ['type' => 'catalog.version.updated'])->assertForbidden();
 });
+
+test('staff hiding a product survives later syncs', function () {
+    fakeSquare(catalogue());
+    app(CatalogSync::class)->full();
+
+    Product::where('square_id', 'ITEM1')->update(['is_hidden' => true]);
+    app(CatalogSync::class)->full();
+
+    $rice = Product::where('square_id', 'ITEM1')->sole();
+    expect($rice->is_active)->toBeTrue()->and($rice->is_hidden)->toBeTrue()
+        ->and(Product::active()->pluck('square_id')->all())->toBe(['ITEM2']);
+});
+
+test('SKUs and Square sub-categories come across', function () {
+    fakeSquare([
+        ['type' => 'CATEGORY', 'id' => 'TOP', 'category_data' => ['name' => 'Pantry']],
+        ['type' => 'CATEGORY', 'id' => 'SUB', 'category_data' => ['name' => 'Spices', 'parent_category' => ['id' => 'TOP']]],
+        squareItem('ITEM1', 'Suya Spice', [squareVariation('V1', null, 499, extra: ['item_variation_data' => ['sku' => 'SUYA-1']])], ['item_data' => ['categories' => [['id' => 'SUB']], 'image_ids' => []]]),
+    ]);
+
+    app(CatalogSync::class)->full();
+
+    $suya = Product::where('square_id', 'ITEM1')->sole();
+    expect($suya->category->name)->toBe('Spices')
+        ->and($suya->category->parent->name)->toBe('Pantry')
+        ->and($suya->defaultVariation->sku)->toBe('SUYA-1');
+});
+
+test('the first import is not new arrivals, but later new items are', function () {
+    fakeSquare(catalogue());
+    app(CatalogSync::class)->full();
+
+    expect(Product::whereNotNull('first_seen_at')->count())->toBe(0);
+
+    fakeSquare([...catalogue(), squareItem('ITEM9', 'Fresh Yam', [squareVariation('V9', null, 599)])]);
+    app(CatalogSync::class)->full();
+
+    expect(Product::whereNotNull('first_seen_at')->pluck('square_id')->all())->toBe(['ITEM9']);
+});

@@ -22,7 +22,7 @@
         <aside class="w-full lg:w-72 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0">
             <!-- Brand Header -->
             <div class="p-6 border-b border-[#EEEEEE] flex items-center justify-between">
-                <a href="{{ route('admin.settings') }}" class="flex items-center gap-3">
+                <a href="{{ route('admin.orders') }}" class="flex items-center gap-3">
                     <img src="{{ asset('images/logo-small.svg') }}" alt="Ìsàlèè Èkó" class="h-10 w-auto">
                     <div>
                         <span class="block text-base font-extrabold tracking-tight text-[#111111]">Ìsàlèè Èkó</span>
@@ -35,42 +35,10 @@
 
             <!-- Navigation Links -->
             <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
-                <!-- Group: Store Settings -->
+                <!-- Group: Operations & Fulfillment -->
                 <div>
                     <h3 class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#686868]">
-                        Store Controls
-                    </h3>
-                    <div class="mt-2 space-y-1">
-                        <a href="{{ route('admin.settings') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.settings') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
-                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                            </svg>
-                            Store Settings
-                        </a>
-
-                        <a href="{{ route('admin.hours') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.hours') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
-                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Hours & Closures
-                        </a>
-
-                        <a href="{{ route('admin.payments') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.payments') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
-                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                            Payment Methods
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Group: Operations -->
-                <div>
-                    <h3 class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#686868]">
-                        Fulfillment & Claims
+                        Fulfillment & Operations
                     </h3>
                     <div class="mt-2 space-y-1">
                         <a href="{{ route('admin.orders') }}" 
@@ -164,6 +132,38 @@
                             </span>
                             <span class="text-[10px] uppercase font-bold bg-[#F6F6F6] text-[#686868] px-2 py-0.5 rounded">Documentation</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Group: Store Controls (Settings, Hours, Payments) -->
+                <div>
+                    <h3 class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#686868]">
+                        Store Controls
+                    </h3>
+                    <div class="mt-2 space-y-1">
+                        <a href="{{ route('admin.settings') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.settings') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                            </svg>
+                            Store Settings
+                        </a>
+
+                        <a href="{{ route('admin.hours') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.hours') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Hours & Closures
+                        </a>
+
+                        <a href="{{ route('admin.payments') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.payments') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Payment Methods
+                        </a>
                     </div>
                 </div>
             </nav>

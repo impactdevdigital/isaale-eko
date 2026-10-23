@@ -51,7 +51,7 @@ Route::prefix('account')->middleware('auth')->group(function () {
 
 // Admin Operations Portal
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/', '/admin/settings');
+    Route::redirect('/', '/admin/orders');
     Route::get('/settings', StoreSettings::class)->name('settings');
     Route::get('/hours', StoreHoursEditor::class)->name('hours');
     Route::get('/payments', PaymentMethods::class)->name('payments');

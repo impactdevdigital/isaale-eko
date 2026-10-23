@@ -4,16 +4,26 @@ namespace App\Livewire\Admin;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Setting;
+use App\Services\Square\CatalogSync;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * Products & inventory for staff. Names, prices and stock come from Square
+ * (square:sync); here staff set what Square doesn't know: hidden online,
+ * featured, and the item class used for returns.
+ */
 class ProductsList extends Component
 {
     use WithPagination;
 
     public string $search = '';
+
     public string $categoryFilter = '';
+
     public string $stockFilter = '';
+
     public string $classFilter = '';
 
     protected $queryString = [
@@ -46,19 +56,21 @@ class ProductsList extends Component
     public function toggleFeatured(int $productId): void
     {
         $product = Product::findOrFail($productId);
-        $product->update(['is_featured' => !$product->is_featured]);
+        $product->update(['is_featured' => ! $product->is_featured]);
     }
 
-    public function toggleStatus(int $productId): void
+    /**
+     * Hide or show online. The sync never changes this, so it sticks.
+     */
+    public function toggleHidden(int $productId): void
     {
         $product = Product::findOrFail($productId);
-        $newStatus = $product->status === 'active' ? 'hidden' : 'active';
-        $product->update(['status' => $newStatus]);
+        $product->update(['is_hidden' => ! $product->is_hidden]);
     }
 
     public function updateItemClass(int $productId, string $class): void
     {
-        if (!in_array($class, ['perishable', 'non_perishable', 'non_food'], true)) {
+        if (! array_key_exists($class, Product::ITEM_CLASSES)) {
             return;
         }
 
@@ -67,39 +79,42 @@ class ProductsList extends Component
 
     public function render()
     {
-        $query = Product::with(['category', 'subCategory', 'variations.snapshot'])
-            ->when($this->search, function ($q) {
-                $term = trim($this->search);
-                $q->where(function ($sq) use ($term) {
-                    $sq->where('name', 'like', "%{$term}%")
-                      ->orWhereHas('variations', fn ($v) => $v->where('sku', 'like', "%{$term}%"));
-                });
+        $low = (int) Setting::get('low_stock_threshold', 5);
+
+        $query = Product::with(['category.parent', 'variations'])
+            ->when(trim($this->search) !== '', function ($q) {
+                $term = '%'.trim($this->search).'%';
+                $q->where(fn ($sq) => $sq
+                    ->whereLike('name', $term)
+                    ->orWhereHas('variations', fn ($v) => $v->whereLike('sku', $term)));
             })
-            ->when($this->categoryFilter, fn ($q) => $q->where('category_id', $this->categoryFilter))
+            // A category includes its sub-categories.
+            ->when($this->categoryFilter, fn ($q) => $q->whereIn('category_id',
+                Category::where('id', $this->categoryFilter)->orWhere('parent_id', $this->categoryFilter)->pluck('id')))
             ->when($this->classFilter, fn ($q) => $q->where('item_class', $this->classFilter))
-            ->when($this->stockFilter, function ($q) {
+            ->when($this->stockFilter, function ($q) use ($low) {
                 match ($this->stockFilter) {
-                    'in_stock' => $q->whereHas('variations', fn ($v) => $v->where('tracks_inventory', true)->whereHas('snapshot', fn ($s) => $s->where('state', 'in'))),
-                    'low_stock' => $q->whereHas('variations', fn ($v) => $v->where('tracks_inventory', true)->whereHas('snapshot', fn ($s) => $s->where('state', 'low'))),
-                    'out_of_stock' => $q->whereDoesntHave('variations', fn ($v) => $v->where('tracks_inventory', true)->whereHas('snapshot', fn ($s) => $s->whereIn('state', ['in', 'low']))),
-                    'untracked' => $q->whereHas('variations', fn ($v) => $v->where('tracks_inventory', false)),
+                    'in_stock' => $q->whereHas('variations', fn ($v) => $v->where('stock_quantity', '>', $low)),
+                    'low_stock' => $q->whereHas('variations', fn ($v) => $v->whereBetween('stock_quantity', [1, $low])),
+                    'out_of_stock' => $q->whereDoesntHave('variations', fn ($v) => $v->where(fn ($w) => $w->whereNull('stock_quantity')->orWhere('stock_quantity', '>', 0))),
+                    'untracked' => $q->whereHas('variations', fn ($v) => $v->whereNull('stock_quantity')),
                     default => null,
                 };
             });
 
-        $products = $query->orderBy('name')->paginate(20);
-
         $counts = [
             'total' => Product::count(),
-            'active' => Product::where('status', 'active')->count(),
+            'active' => Product::active()->count(),
             'featured' => Product::where('is_featured', true)->count(),
-            'untracked' => Product::whereHas('variations', fn ($v) => $v->where('tracks_inventory', false))->count(),
+            'untracked' => Product::whereHas('variations', fn ($v) => $v->whereNull('stock_quantity'))->count(),
         ];
 
         return view('livewire.admin.products-list', [
-            'products' => $products,
-            'categories' => Category::where('status', 'active')->orderBy('name')->get(),
+            'products' => $query->orderBy('name')->paginate(20),
+            'categories' => Category::roots()->with('children')->get(),
             'counts' => $counts,
+            'low' => $low,
+            'lastSync' => cache(CatalogSync::STATE_KEY),
         ])->layout('layouts.admin', ['header' => 'Products & Inventory']);
     }
 }

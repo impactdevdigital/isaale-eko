@@ -1,1 +1,1 @@
-//
+import './square-payments';

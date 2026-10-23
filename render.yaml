@@ -1,0 +1,113 @@
+# Render Blueprint: Dashboard → New → Blueprint → pick this repo.
+# Creates the Postgres database, the website and a background worker.
+# Values marked `sync: false` are asked for once when the Blueprint is created.
+# Step-by-step guide: docs/deploy-render.md
+
+databases:
+  - name: isaale-eko-db
+    plan: basic-256mb
+    region: virginia
+    databaseName: isaale_eko
+    user: isaale_eko
+    postgresMajorVersion: "16"
+
+envVarGroups:
+  - name: isaale-eko-shared
+    envVars:
+      - key: APP_NAME
+        value: Ìsàlèè Èkó
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false          # run `php artisan key:generate --show` and paste the result
+      - key: APP_URL
+        sync: false          # e.g. https://isaaleeko.ca (or the onrender.com address at first)
+      - key: APP_LOCALE
+        value: en
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # Shop
+      - key: SHOP_CURRENCY
+        value: CAD
+      - key: SHOP_TIMEZONE
+        value: America/Moncton
+
+      # Square (start with sandbox keys; switch to production when ready)
+      - key: SQUARE_ENV
+        value: sandbox
+      - key: SQUARE_ACCESS_TOKEN
+        sync: false
+      - key: SQUARE_LOCATION_ID
+        sync: false
+      - key: SQUARE_APP_ID
+        sync: false
+      - key: SQUARE_VERSION
+        sync: false          # same value as in your local .env
+      - key: SQUARE_WEBHOOK_SIGNATURE_KEY
+        sync: false          # from Square → Webhooks once the subscription exists
+      - key: SQUARE_WEBHOOK_URL
+        sync: false          # https://<your domain>/api/webhooks/square
+
+      # Email (sign-in codes, receipts). Until a provider is set up, "log" only writes them to the logs.
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Ìsàlèè Èkó
+
+services:
+  # The website.
+  - type: web
+    name: isaale-eko
+    runtime: docker
+    plan: starter
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    # Runs once per deploy, before the new version takes traffic.
+    preDeployCommand: php artisan migrate --force
+    autoDeploy: true
+    envVars:
+      - fromGroup: isaale-eko-shared
+      - key: PORT
+        value: "8080"
+      - key: DB_URL
+        fromDatabase:
+          name: isaale-eko-db
+          property: connectionString
+
+  # Background jobs (emails, Square webhook syncs) and the scheduler
+  # (Square sync every 5 minutes). If either process stops, the container
+  # exits and Render restarts it.
+  - type: worker
+    name: isaale-eko-worker
+    runtime: docker
+    plan: starter
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    dockerCommand: bash -c "php artisan schedule:work & php artisan queue:work --tries=3 --max-time=3600 & wait -n; exit 1"
+    autoDeploy: true
+    envVars:
+      - fromGroup: isaale-eko-shared
+      - key: AUTORUN_ENABLED
+        value: "false"
+      - key: DB_URL
+        fromDatabase:
+          name: isaale-eko-db
+          property: connectionString

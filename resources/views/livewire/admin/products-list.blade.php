@@ -9,10 +9,17 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DAF4E7] text-xs font-bold text-[#007D49]">
-                <span class="w-2 h-2 rounded-full bg-[#007D49]"></span>
-                Square Sync: Live
-            </span>
+            @if ($lastSync)
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DAF4E7] text-xs font-bold text-[#007D49]">
+                    <span class="w-2 h-2 rounded-full bg-[#007D49]"></span>
+                    Square sync: {{ \Illuminate\Support\Carbon::parse($lastSync)->diffForHumans() }}
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF9EA] text-xs font-bold text-[#D58700]">
+                    <span class="w-2 h-2 rounded-full bg-[#D58700]"></span>
+                    Not synced with Square yet
+                </span>
+            @endif
         </div>
     </div>
 
@@ -39,7 +46,7 @@
         <div class="p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
             <span class="text-xs font-bold uppercase tracking-wider text-[#D58700]">Untracked Stock</span>
             <div class="mt-2 text-2xl font-extrabold text-[#D58700]">{{ number_format($counts['untracked']) }}</div>
-            <span class="text-[11px] text-[#686868]">Treated as Out of Stock</span>
+            <span class="text-[11px] text-[#686868]">Always shown as available</span>
         </div>
     </div>
 
@@ -64,6 +71,9 @@
                     <option value="">All Categories ({{ count($categories) }})</option>
                     @foreach ($categories as $cat)
                         <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @foreach ($cat->children as $child)
+                            <option value="{{ $child->id }}">&nbsp;&nbsp;– {{ $child->name }}</option>
+                        @endforeach
                     @endforeach
                 </select>
             </div>
@@ -114,8 +124,8 @@
                             <!-- Product Column -->
                             <td class="px-5 py-4">
                                 <div class="flex items-center gap-3">
-                                    @if ($p->image_url)
-                                        <img src="{{ $p->image_url }}" alt="{{ $p->name }}" class="w-11 h-11 rounded-lg object-cover bg-[#F6F6F6] shrink-0 border border-[#EEEEEE]">
+                                    @if ($p->image)
+                                        <img src="{{ asset($p->image) }}" alt="{{ $p->name }}" class="w-11 h-11 rounded-lg object-cover bg-[#F6F6F6] shrink-0 border border-[#EEEEEE]">
                                     @else
                                         <div class="w-11 h-11 rounded-lg bg-[#F6F6F6] border border-[#EEEEEE] flex items-center justify-center text-xs font-bold text-[#9E9E9E] shrink-0">
                                             No img
@@ -123,7 +133,7 @@
                                     @endif
                                     <div class="min-w-0">
                                         <span class="block font-bold text-[#111111] truncate max-w-xs">{{ $p->name }}</span>
-                                        <span class="block text-xs text-[#686868] font-mono truncate">ID: {{ $p->square_item_id }}</span>
+                                        <span class="block text-xs text-[#686868] font-mono truncate">{{ $p->square_id ? 'Square: '.$p->square_id : 'Not linked to Square (demo)' }}</span>
                                     </div>
                                 </div>
                             </td>
@@ -132,10 +142,10 @@
                             <td class="px-4 py-4">
                                 @if ($p->category)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#F6F6F6] text-[#111111]">
-                                        {{ $p->category->name }}
+                                        {{ $p->category->parent?->name ?? $p->category->name }}
                                     </span>
-                                    @if ($p->subCategory)
-                                        <span class="block text-[11px] text-[#686868] mt-0.5">{{ $p->subCategory->name }}</span>
+                                    @if ($p->category->parent)
+                                        <span class="block text-[11px] text-[#686868] mt-0.5">{{ $p->category->name }}</span>
                                     @endif
                                 @else
                                     <span class="text-xs text-[#9E9E9E] italic">Uncategorized</span>
@@ -166,31 +176,20 @@
                             <!-- Availability Badge -->
                             <td class="px-4 py-4">
                                 @php
-                                    $hasUntracked = $p->variations->contains(fn ($v) => !$v->tracks_inventory);
-                                    $isOrderable = $p->variations->contains(fn ($v) => $v->isOrderable());
-                                    $hasLow = $p->variations->contains(fn ($v) => $v->availabilityState() === 'low');
+                                    $stock = $p->variations->pluck('stock_quantity');
+                                    $untracked = $stock->contains(null);
+                                    $available = $untracked || $stock->contains(fn ($q) => $q > 0);
+                                    $isLow = ! $untracked && $stock->contains(fn ($q) => $q > 0 && $q <= $low);
                                 @endphp
 
-                                @if ($isOrderable)
-                                    @if ($hasLow)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#FFF9EA] text-[#D58700]">
-                                            Low Stock
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#DAF4E7] text-[#007D49]">
-                                            In Stock
-                                        </span>
-                                    @endif
+                                @if (! $available)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#F6F6F6] text-[#686868]">Out of Stock</span>
+                                @elseif ($untracked)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F6F6] text-[#686868]" title="Stock tracking is off in Square, so it always shows as available">Not tracked</span>
+                                @elseif ($isLow)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#FFF9EA] text-[#D58700]">Low Stock · {{ $stock->sum() }}</span>
                                 @else
-                                    @if ($hasUntracked)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#F6F6F6] text-[#686868]" title="Stock tracking off in Square = treated as Out of Stock">
-                                            Untracked (Out)
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#F6F6F6] text-[#686868]">
-                                            Out of Stock
-                                        </span>
-                                    @endif
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#DAF4E7] text-[#007D49]">In Stock · {{ $stock->sum() }}</span>
                                 @endif
                             </td>
 
@@ -218,11 +217,16 @@
 
                             <!-- Status Column -->
                             <td class="px-4 py-4 text-right">
-                                <button type="button"
-                                        wire:click="toggleStatus({{ $p->id }})"
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold transition-colors {{ $p->status === 'active' ? 'bg-[#DAF4E7] text-[#007D49]' : 'bg-[#F6F6F6] text-[#686868]' }}">
-                                    {{ ucfirst($p->status) }}
-                                </button>
+                                @if (! $p->is_active)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[#F6F6F6] text-[#9E9E9E]" title="Removed, archived or unpriced in Square">Off in Square</span>
+                                @else
+                                    <button type="button"
+                                            wire:click="toggleHidden({{ $p->id }})"
+                                            title="{{ $p->is_hidden ? 'Show on the website' : 'Hide from the website' }}"
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold transition-colors {{ $p->is_hidden ? 'bg-[#F6F6F6] text-[#686868]' : 'bg-[#DAF4E7] text-[#007D49]' }}">
+                                        {{ $p->is_hidden ? 'Hidden' : 'Live' }}
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @empty

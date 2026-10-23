@@ -39,6 +39,7 @@ return [
         'env'         => env('SQUARE_ENV', 'sandbox'),
         'token'       => env('SQUARE_ACCESS_TOKEN'),
         'location_id' => env('SQUARE_LOCATION_ID'),
+        'app_id'      => env('SQUARE_APP_ID'),
         'version'     => env('SQUARE_VERSION'),
         'webhook_key' => env('SQUARE_WEBHOOK_SIGNATURE_KEY'),
         'webhook_url' => env('SQUARE_WEBHOOK_URL'),

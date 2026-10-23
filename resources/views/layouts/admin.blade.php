@@ -73,15 +73,25 @@
                         Fulfillment & Claims
                     </h3>
                     <div class="mt-2 space-y-1">
-                        <div class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-[#686868] opacity-60">
+                        <a href="{{ route('admin.orders') }}" 
+                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.orders') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
                             <span class="flex items-center gap-3">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                 </svg>
                                 Orders Queue
                             </span>
-                            <span class="text-[10px] uppercase font-bold bg-[#F6F6F6] text-[#686868] px-2 py-0.5 rounded">Phase E</span>
-                        </div>
+                            @php
+                                $sidebarActiveOrders = \App\Models\Order::whereIn('status', [\App\Models\Order::STATUS_PLACED, \App\Models\Order::STATUS_PAID])
+                                    ->where(fn ($q) => $q->whereNull('fulfilment_status')->orWhere('fulfilment_status', '!=', \App\Models\Order::FULFILMENT_COMPLETED))
+                                    ->count();
+                            @endphp
+                            @if ($sidebarActiveOrders > 0)
+                                <span class="text-[11px] font-bold bg-[#DF2600] text-white px-2 py-0.5 rounded-full">
+                                    {{ $sidebarActiveOrders }}
+                                </span>
+                            @endif
+                        </a>
 
                         <div class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-[#686868] opacity-60">
                             <span class="flex items-center gap-3">

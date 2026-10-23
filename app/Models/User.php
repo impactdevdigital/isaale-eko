@@ -12,12 +12,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'phone', 'password', 'email_verified_at', 'phone_verified_at'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'is_admin', 'role', 'is_active', 'email_verified_at', 'phone_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public const ROLE_MANAGER = 'manager';
+
+    public const ROLE_ASSOCIATE = 'associate';
+
+    public const ROLE_CUSTOMER = 'customer';
 
     /**
      * Get the attributes that should be cast.
@@ -30,7 +36,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin && (bool) $this->is_active;
+    }
+
+    public function isManager(): bool
+    {
+        return (bool) $this->is_admin && (bool) $this->is_active && in_array($this->role, [self::ROLE_MANAGER, 'owner'], true);
+    }
+
+    public function isAssociate(): bool
+    {
+        return (bool) $this->is_admin && (bool) $this->is_active && $this->role === self::ROLE_ASSOCIATE;
+    }
+
+    public function scopeStaff($query)
+    {
+        return $query->where('is_admin', true);
     }
 
     public function addresses(): HasMany

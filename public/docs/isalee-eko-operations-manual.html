@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ìsàlèè Èkó — Store Operations & Administration Manual</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 18mm 16mm 18mm 16mm;
+            @bottom-right {
+                content: counter(page);
+                font-size: 9pt;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                color: #888888;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.55;
+            font-size: 10pt;
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Page Layout & Breaks */
+        .page-break {
+            page-break-after: always;
+            break-after: page;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5 {
+            color: #111111;
+            font-weight: 800;
+            margin-top: 0;
+            line-height: 1.25;
+        }
+
+        h1 { font-size: 24pt; margin-bottom: 8pt; }
+        h2 { font-size: 16pt; margin-top: 18pt; margin-bottom: 8pt; border-bottom: 1.5pt solid #EEEEEE; padding-bottom: 4pt; color: #111111; }
+        h3 { font-size: 12pt; margin-top: 14pt; margin-bottom: 6pt; color: #DF2600; }
+        h4 { font-size: 10.5pt; margin-top: 10pt; margin-bottom: 4pt; }
+        p { margin-top: 0; margin-bottom: 8pt; color: #333333; }
+        ul, ol { margin-top: 0; margin-bottom: 8pt; padding-left: 18pt; }
+        li { margin-bottom: 4pt; color: #333333; }
+
+        /* Cover Page */
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40pt 20pt 30pt 20pt;
+            border: 2pt solid #EEEEEE;
+            border-top: 6pt solid #DF2600;
+            border-radius: 4pt;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+        }
+
+        .cover-header {
+            text-align: left;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            background: #FFF0EC;
+            color: #DF2600;
+            font-weight: 800;
+            font-size: 9pt;
+            letter-spacing: 1.5pt;
+            text-transform: uppercase;
+            padding: 4pt 10pt;
+            border-radius: 4pt;
+            margin-bottom: 16pt;
+        }
+
+        .cover-title {
+            font-size: 32pt;
+            font-weight: 900;
+            letter-spacing: -0.5pt;
+            color: #111111;
+            line-height: 1.15;
+            margin-bottom: 12pt;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            font-weight: 500;
+            color: #555555;
+            max-width: 480pt;
+            line-height: 1.45;
+            margin-bottom: 24pt;
+        }
+
+        .cover-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16pt;
+            padding-top: 20pt;
+            border-top: 1pt solid #E5E5E5;
+        }
+
+        .meta-label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 1pt;
+            font-weight: 700;
+            color: #777777;
+            margin-bottom: 2pt;
+        }
+
+        .meta-value {
+            font-size: 10pt;
+            font-weight: 700;
+            color: #111111;
+        }
+
+        .cover-footer {
+            padding-top: 20pt;
+            border-top: 1pt solid #EEEEEE;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 8.5pt;
+            color: #777777;
+        }
+
+        /* Callout Banners */
+        .callout {
+            padding: 10pt 12pt;
+            border-radius: 6pt;
+            margin: 10pt 0;
+            font-size: 9.5pt;
+            border: 1pt solid transparent;
+        }
+
+        .callout-info {
+            background-color: #F0F7FF;
+            border-color: #CCE4FF;
+            color: #004488;
+        }
+
+        .callout-success {
+            background-color: #EDF9F2;
+            border-color: #BBEBD1;
+            color: #005A32;
+        }
+
+        .callout-warning {
+            background-color: #FFF9EA;
+            border-color: #FFE6A8;
+            color: #8C5B00;
+        }
+
+        .callout-danger {
+            background-color: #FFF0EC;
+            border-color: #FFCFC5;
+            color: #B31E00;
+        }
+
+        .callout strong {
+            display: block;
+            margin-bottom: 2pt;
+            font-size: 9.5pt;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10pt 0;
+            font-size: 9pt;
+        }
+
+        th, td {
+            padding: 6pt 8pt;
+            text-align: left;
+            border-bottom: 1pt solid #EEEEEE;
+        }
+
+        th {
+            background-color: #FAFAFA;
+            font-weight: 700;
+            color: #444444;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+            border-top: 1pt solid #EEEEEE;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #FCFCFC;
+        }
+
+        /* Badges & Pills */
+        .pill {
+            display: inline-block;
+            padding: 2pt 6pt;
+            border-radius: 10pt;
+            font-size: 8pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+        }
+
+        .pill-manager { background: #111111; color: #ffffff; }
+        .pill-associate { background: #EBF4FF; color: #0066CC; }
+        .pill-active { background: #DAF4E7; color: #007D49; }
+        .pill-pending { background: #FFF9EA; color: #D58700; }
+        .pill-danger { background: #FFF0EC; color: #DF2600; }
+
+        /* Step Process Box */
+        .step-card {
+            border: 1pt solid #EEEEEE;
+            border-radius: 6pt;
+            padding: 10pt 12pt;
+            margin-bottom: 8pt;
+            background: #FFFFFF;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 8pt;
+            margin-bottom: 4pt;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18pt;
+            height: 18pt;
+            background: #DF2600;
+            color: #ffffff;
+            font-size: 9pt;
+            font-weight: 800;
+            border-radius: 50%;
+        }
+
+        .step-title {
+            font-weight: 700;
+            font-size: 10pt;
+            color: #111111;
+        }
+
+        /* Keyboard / Code */
+        kbd, code {
+            font-family: Consolas, 'SF Mono', Menlo, Monaco, monospace;
+            font-size: 8.5pt;
+            background: #F4F4F4;
+            border: 1pt solid #E0E0E0;
+            padding: 1pt 4pt;
+            border-radius: 3pt;
+            color: #DF2600;
+        }
+
+        /* Table of Contents */
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 16pt 0;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 5pt 0;
+            border-bottom: 1pt dotted #DDDDDD;
+            font-size: 9.5pt;
+        }
+
+        .toc-title {
+            font-weight: 600;
+            color: #111111;
+        }
+
+        .toc-page {
+            font-weight: 700;
+            color: #DF2600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- COVER PAGE -->
+    <!-- ========================================== -->
+    <div class="cover-page page-break">
+        <div class="cover-header">
+            <div class="brand-badge">ÌSÀLÈÈ ÈKÓ · OPERATIONS PORTAL</div>
+            <div class="cover-title">Store Operations & Administration Manual</div>
+            <div class="cover-subtitle">
+                A complete, step-by-step handover handbook for store owners, general managers, and retail associates to manage daily customer orders, inventory stock, grocery categories, authentic kitchen recipes, store hours, and team access credentials.
+            </div>
+        </div>
+
+        <div class="cover-details-grid">
+            <div>
+                <div class="meta-label">Application</div>
+                <div class="meta-value">Ìsàlèè Èkó E-Commerce & Retail Engine</div>
+            </div>
+            <div>
+                <div class="meta-label">Location / Timezone</div>
+                <div class="meta-value">Moncton, NB, Canada · America/Moncton (AST)</div>
+            </div>
+            <div>
+                <div class="meta-label">Primary Portal URL</div>
+                <div class="meta-value">http://isaleeeko.ca/admin/login</div>
+            </div>
+            <div>
+                <div class="meta-label">Default Currency</div>
+                <div class="meta-value">Canadian Dollar ($ CAD)</div>
+            </div>
+            <div>
+                <div class="meta-label">Integration Gateway</div>
+                <div class="meta-value">Square POS & Web Payments</div>
+            </div>
+            <div>
+                <div class="meta-label">Document Version</div>
+                <div class="meta-value">Version 1.0 (Official Client Handover Edition)</div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div>
+                <strong>Confidential & Proprietary</strong><br>
+                Prepared exclusively for the management and operations staff of Ìsàlèè Èkó.
+            </div>
+            <div>
+                Published: October 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TABLE OF CONTENTS -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Table of Contents</h2>
+        <p>This manual covers every function of the Ìsàlèè Èkó operations portal, arranged in operational sequence from morning opening to evening reconciliation.</p>
+
+        <ul class="toc-list">
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 1:</strong> Access & Authentication (Logging In, Roles & Security)</span>
+                <span class="toc-page">Page 3</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 2:</strong> Operations Command Center (Dashboard & Live Metrics)</span>
+                <span class="toc-page">Page 4</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 3:</strong> Orders Queue & Fulfillment Workflow</span>
+                <span class="toc-page">Page 5</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 4:</strong> Products & Real-Time Inventory Control</span>
+                <span class="toc-page">Page 7</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 5:</strong> Categories, Sub-Categories & Storefront Hierarchy</span>
+                <span class="toc-page">Page 8</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 6:</strong> Kitchen Recipes & Grocery Basket Linking</span>
+                <span class="toc-page">Page 9</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 7:</strong> Operating Hours, Closures & Emergency Toggle</span>
+                <span class="toc-page">Page 10</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 8:</strong> Square POS & Payment Gateways</span>
+                <span class="toc-page">Page 11</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 9:</strong> Staff & Team Access Management (User Handover System)</span>
+                <span class="toc-page">Page 12</span>
+            </li>
+            <li class="toc-item">
+                <span class="toc-title"><strong>Section 10:</strong> Daily Opening & Closing Checklists & Emergency Recovery</span>
+                <span class="toc-page">Page 14</span>
+            </li>
+        </ul>
+
+        <div class="callout callout-info">
+            <strong>Target Audience Note</strong>
+            This manual is designed for non-technical team members. No programming or server knowledge is required to operate any function described herein.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: ACCESS & AUTHENTICATION -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 1: Access & Authentication</h2>
+        
+        <h3>1.1 Accessing the Operations Portal</h3>
+        <p>The store operations portal is completely isolated from the public storefront to maintain operational privacy and protect customer payment records.</p>
+        <ul>
+            <li><strong>Login URL:</strong> <code>https://isaleeeko.ca/admin/login</code> (or <code>http://127.0.0.1:8000/admin/login</code> in local network)</li>
+            <li><strong>Required Credentials:</strong> Your registered staff email address and password.</li>
+        </ul>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <span class="step-title">Enter Your Credentials</span>
+            </div>
+            <p>Type your assigned staff email address and password into the respective fields. If you are using a shared store tablet, do not check automatic browser password saves.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <span class="step-title">Click "Sign In to Operations"</span>
+            </div>
+            <p>Upon verification, the system will direct you directly into the <strong>Operations Command Center</strong>.</p>
+        </div>
+
+        <h3>1.2 Two-Tier Staff Role Separation</h3>
+        <p>Ìsàlèè Èkó employs a strict two-tier security model to prevent accidental modification of financial keys while allowing store staff full speed on daily fulfillment:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Capability / Screen</th>
+                    <th>Store Associate <span class="pill pill-associate">Associate</span></th>
+                    <th>Store Manager <span class="pill pill-manager">Manager</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Operations Dashboard</strong></td>
+                    <td>Full View (Orders, Sales, Low Stock)</td>
+                    <td>Full View (Orders, Sales, Low Stock)</td>
+                </tr>
+                <tr>
+                    <td><strong>Orders Queue & Packing</strong></td>
+                    <td>Fulfill, Pack, Complete Orders</td>
+                    <td>Fulfill, Pack, Refund, Complete</td>
+                </tr>
+                <tr>
+                    <td><strong>Products & Stock Quantities</strong></td>
+                    <td>Edit Stock Counts & Variations</td>
+                    <td>Full Catalog & Price Editing</td>
+                </tr>
+                <tr>
+                    <td><strong>Categories & Recipes</strong></td>
+                    <td>Create, Edit, Upload Photos</td>
+                    <td>Full Hierarchy & Sync Control</td>
+                </tr>
+                <tr>
+                    <td><strong>Store Hours & Holiday Closures</strong></td>
+                    <td>View Operating Times</td>
+                    <td>Edit Hours & Emergency Closure</td>
+                </tr>
+                <tr>
+                    <td><strong>Square Tokens & Payment Keys</strong></td>
+                    <td><span style="color: #DF2600; font-weight: bold;">Hidden (No Access)</span></td>
+                    <td><span style="color: #007D49; font-weight: bold;">Full Access</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Staff Roster & Passwords</strong></td>
+                    <td><span style="color: #DF2600; font-weight: bold;">Hidden (No Access)</span></td>
+                    <td><span style="color: #007D49; font-weight: bold;">Add, Reset, Deactivate</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>1.3 Changing Your Password (Self-Service)</h3>
+        <p>Any staff member can change their password at any time without asking a manager:</p>
+        <ol>
+            <li>Look at the top-right corner of the topbar next to your name initials.</li>
+            <li>Click the <strong>Key icon</strong> (<kbd>Change My Password</kbd>).</li>
+            <li>In the drawer that appears, type your <strong>Current Password</strong>, your <strong>New Password</strong> (minimum 6 characters), and confirm it.</li>
+            <li>Click <strong>Update Password</strong>. Your new credentials take effect immediately.</li>
+        </ol>
+
+        <div class="callout callout-warning">
+            <strong>Deactivated Staff Security Guard</strong>
+            If an employee leaves the company and a manager marks them as <strong>Deactivated</strong>, their active session is terminated instantly. Even if they type the correct password, the portal will reject access and display an account suspension notice.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: OPERATIONS COMMAND CENTER -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 2: Operations Command Center</h2>
+        <p>The <strong>Dashboard Overview</strong> (<code>/admin</code>) serves as the morning launchpad and live nerve center for the retail grocery store.</p>
+
+        <h3>2.1 Live KPI Metric Tiles</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Scorecard Tile</th>
+                    <th>What It Measures</th>
+                    <th>Action Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Today's Gross Sales</strong></td>
+                    <td>Total revenue from orders placed today in Moncton time (AST).</td>
+                    <td>Review daily sales velocity against store targets.</td>
+                </tr>
+                <tr>
+                    <td><strong>Orders Placed Today</strong></td>
+                    <td>Count of new orders received since midnight.</td>
+                    <td>Helps pace kitchen and packaging staffing.</td>
+                </tr>
+                <tr>
+                    <td><strong>Active Fulfillment</strong></td>
+                    <td>Orders marked <code>Placed</code> or <code>Paid</code> awaiting completion.</td>
+                    <td>Must be cleared to 0 before the end of the shift.</td>
+                </tr>
+                <tr>
+                    <td><strong>Low Stock Alerts</strong></td>
+                    <td>Number of product items with 5 or fewer units left in inventory.</td>
+                    <td>Alert warehouse suppliers or restock retail shelves.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2.2 Real-Time Store Operating Pill</h3>
+        <p>At the top of the dashboard, a colored badge displays the exact public status of the physical store:</p>
+        <ul>
+            <li><span class="pill pill-active">● Open until 7:00 PM</span> — Store is within regular scheduled hours and accepting shoppers.</li>
+            <li><span class="pill pill-pending">● Opens at 10:00 AM</span> — Store is currently closed overnight; will open automatically at the scheduled time.</li>
+            <li><span class="pill pill-danger">● Closed: Holiday / Emergency</span> — Scheduled closure or emergency toggle is active.</li>
+        </ul>
+
+        <h3>2.3 Urgent Orders Queue (First-In, First-Out)</h3>
+        <p>The dashboard displays the <strong>5 oldest pending orders</strong> that need packing right away. Clicking on any order number takes staff directly into the packing desk.</p>
+
+        <h3>2.4 Low Stock & Depleted Inventory Panel</h3>
+        <p>Displays products where stock is dangerously low (&le; 5 units). If a customer purchases the last item on the storefront, the variation automatically flips to "Sold Out" online to prevent overselling.</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: ORDERS QUEUE & FULFILLMENT WORKFLOW -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 3: Orders Queue & Fulfillment Workflow</h2>
+        <p>Accessible from the sidebar under <strong>Fulfillment & Operations &rarr; Orders Queue</strong> (<code>/admin/orders</code>).</p>
+
+        <h3>3.1 Order Lifecycle Stages</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status Badge</th>
+                    <th>Meaning</th>
+                    <th>Staff Responsibility</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pill pill-danger">Placed</span></td>
+                    <td>Order submitted by customer; payment authorization initiated.</td>
+                    <td>Review order items and begin pulling groceries from shelves.</td>
+                </tr>
+                <tr>
+                    <td><span class="pill pill-pending">Paid / Packing</span></td>
+                    <td>Payment confirmed via Square. Items are currently being packed.</td>
+                    <td>Bag items, verify batch quantities, and print packing slip.</td>
+                </tr>
+                <tr>
+                    <td><span class="pill pill-associate">Ready for Pickup</span></td>
+                    <td>Customer selected in-store pickup; parcel placed in pickup shelving.</td>
+                    <td>Customer receives automatic pickup notification. Hand over on arrival.</td>
+                </tr>
+                <tr>
+                    <td><span class="pill pill-associate">Out for Delivery</span></td>
+                    <td>Order handed to local Moncton delivery driver.</td>
+                    <td>Package en route to customer's residential address.</td>
+                </tr>
+                <tr>
+                    <td><span class="pill pill-active">Completed</span></td>
+                    <td>Goods received by customer; transaction finalized.</td>
+                    <td>No further action required. Order archived in history.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>3.2 Step-by-Step Order Packing Guide</h3>
+        
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <span class="step-title">Locate Order on Queue</span>
+            </div>
+            <p>Filter by <strong>Active Orders</strong> or search by customer name, phone number, or 5-digit Order Number (e.g. <code>#ORD-8291</code>).</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <span class="step-title">Open Order Detail Drawer</span>
+            </div>
+            <p>Click on the order row. Inspect all requested variations (e.g., <em>"Yam Tubers (Medium 3-Pack)"</em> or <em>"Honey Beans 5kg"</em>) and check any customer delivery instructions.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">3</span>
+                <span class="step-title">Pick & Pack Goods</span>
+            </div>
+            <p>Collect items from store shelves or freezer. Verify perishable items (meat, frozen fish, plantain) are properly temperature-insulated.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">4</span>
+                <span class="step-title">Update Fulfillment Status</span>
+            </div>
+            <p>Change status to <strong>Ready for Pickup</strong> or <strong>Completed</strong>. The system records the timestamp and staff audit trail.</p>
+        </div>
+
+        <div class="callout callout-info">
+            <strong>Split Fulfillment Types</strong>
+            Orders are clearly tagged as either <strong>Local Moncton Delivery</strong> (with street address and postal code) or <strong>In-Store Express Pickup</strong>. Keep pickup bags in the designated pickup counter behind the till.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 4: PRODUCTS & INVENTORY CONTROL -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 4: Products & Inventory Management</h2>
+        <p>Accessible from the sidebar under <strong>Catalog & Content &rarr; Products & Inventory</strong> (<code>/admin/products</code>).</p>
+
+        <h3>4.1 Catalog Overview</h3>
+        <p>The products screen lists all grocery items available in the store, organized with their respective brand, country of origin (Nigeria, Ghana, Jamaica, Canada), and price variations.</p>
+
+        <h3>4.2 Managing Product Variations & Stock Counts</h3>
+        <p>African grocery items often sell in multiple formats (e.g., Single Tuber vs 3-Pack; 2kg bag vs 10kg sack). Each format has its own independent stock level.</p>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <span class="step-title">Adjusting Stock Quantities</span>
+            </div>
+            <p>Click <strong>Edit</strong> on any product. Scroll down to the <strong>Variations & Pricing</strong> table. Directly update the numerical <strong>Stock Quantity</strong> field (e.g., received 25 new bags of Golden Penny Semovita). Click <strong>Save Changes</strong>.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <span class="step-title">Setting Featured Status</span>
+            </div>
+            <p>Toggle the <strong>Featured on Storefront</strong> checkbox to spotlight seasonal items (like fresh yellow garri or fresh scotch bonnets) directly on the homepage banner.</p>
+        </div>
+
+        <div class="callout callout-success">
+            <strong>Square Inventory Synchronization</strong>
+            If an in-store customer purchases an item through the physical Square POS register, the web catalog stock reduces in real time to prevent duplicate orders.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 5: CATEGORIES & SUB-CATEGORIES -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 5: Categories & Sub-Categories Hierarchy</h2>
+        <p>Accessible from the sidebar under <strong>Catalog & Content &rarr; Categories & Sub-Cats</strong> (<code>/admin/categories</code>).</p>
+
+        <h3>5.1 Catalog Hierarchy Model</h3>
+        <p>Categories follow a two-tier organizational hierarchy:</p>
+        <ul>
+            <li><strong>Parent Departments (Root):</strong> Broad supermarket departments (e.g., <em>"Flour, Grains & Rice"</em>, <em>"Spices & Seasonings"</em>, <em>"Snacks & Drinks"</em>, <em>"Frozen Meats & Seafood"</em>).</li>
+            <li><strong>Sub-Categories:</strong> Specialized groupings nested beneath parents (e.g., <em>"Fufu Flour"</em>, <em>"Poundo Yam"</em>, <em>"Suya Pepper"</em>).</li>
+        </ul>
+
+        <h3>5.2 Adding a New Category</h3>
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <span class="step-title">Click "+ New Category"</span>
+            </div>
+            <p>Type the customer-facing name (e.g., <em>"Dried Fish & Stockfish"</em>).</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <span class="step-title">Select Parent Department</span>
+            </div>
+            <p>If this is a sub-category, pick its parent department from the dropdown. If creating a brand-new top-level department, leave it set to <em>-- None (Top-Level Department) --</em>.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">3</span>
+                <span class="step-title">Choose Visual Icon Badge</span>
+            </div>
+            <p>Click on any of the pre-configured high-definition icon badges in the visual palette, or type an emoji directly into the icon box.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">4</span>
+                <span class="step-title">Select or Upload Category Photo</span>
+            </div>
+            <p>Staff can pick from the pre-loaded <strong>Store Photo Library</strong> with 1 click, or switch to <strong>Upload from Device</strong> to drag and drop a clean JPG/PNG image from a camera or phone.</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 6: KITCHEN RECIPES & BASKET LINKING -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 6: Kitchen Recipes & Culinary Content</h2>
+        <p>Accessible from the sidebar under <strong>Catalog & Content &rarr; Kitchen Recipes</strong> (<code>/admin/recipes</code>).</p>
+
+        <h3>6.1 Why Recipes Drive Grocery Basket Size</h3>
+        <p>Ìsàlèè Èkó recipes are not just cooking instructions — they are an interactive sales driver. When customers view a recipe (like <em>"Authentic Nigerian Egusi Soup"</em>), the storefront provides a single <strong>"Add All Ingredients to Cart"</strong> button that adds the exact ground egusi, palm oil, crayfish, and stockfish directly into their basket.</p>
+
+        <h3>6.2 Publishing a Recipe</h3>
+        <ol>
+            <li>Click <strong>+ New Recipe</strong> in the top-right corner.</li>
+            <li>Fill in:
+                <ul>
+                    <li><strong>Recipe Title:</strong> e.g., <em>"Smoky Jollof Rice (Party Style)"</em>.</li>
+                    <li><strong>Origin / Country:</strong> Nigeria, Ghana, etc.</li>
+                    <li><strong>Difficulty & Times:</strong> Prep time (minutes), Cook time (minutes), and Servings count.</li>
+                </ul>
+            </li>
+            <li><strong>Link Store Ingredients:</strong> For each required ingredient, link it to the actual product item in your store inventory so shoppers can purchase it with one tap.</li>
+            <li><strong>Cooking Steps:</strong> Type simple, numbered step-by-step instructions.</li>
+            <li>Click <strong>Publish Recipe</strong>. It appears on the public storefront immediately.</li>
+        </ol>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 7: STORE HOURS & CLOSURES -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 7: Store Hours, Closures & Emergency Toggle</h2>
+        <p>Accessible under <strong>Store Controls &rarr; Hours & Closures</strong> (<code>/admin/hours</code>).</p>
+
+        <h3>7.1 Standard Weekly Operating Hours</h3>
+        <p>Configure the physical store schedule for each day of the week (Monday through Sunday). Times operate in the Moncton local timezone (America/Moncton):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Day of Week</th>
+                    <th>Standard Schedule</th>
+                    <th>Online Order Cutoff</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Monday – Friday</td><td>10:00 AM – 7:00 PM</td><td>Pickup until 6:45 PM</td></tr>
+                <tr><td>Saturday</td><td>10:00 AM – 6:00 PM</td><td>Pickup until 5:45 PM</td></tr>
+                <tr><td>Sunday</td><td>12:00 PM – 5:00 PM</td><td>Pickup until 4:45 PM</td></tr>
+            </tbody>
+        </table>
+
+        <h3>7.2 Scheduling Holiday Closures</h3>
+        <p>For statutory holidays (e.g. Christmas, New Year's Day, Canada Day, Thanksgiving), enter the specific date and reason. The storefront will warn customers ahead of time.</p>
+
+        <h3>7.3 Emergency Snowstorm / Weather Closure Toggle</h3>
+        <div class="callout callout-danger">
+            <strong>Emergency Weather Switch</strong>
+            During severe New Brunswick snowstorms or power outages, Store Managers can activate the <strong>"Emergency Store Closure"</strong> switch. This immediately displays a prominent closure banner across the website and pauses new pickup orders to keep staff and shoppers safe.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 8: SQUARE POS & PAYMENT GATEWAYS -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 8: Square POS & Payment Gateways</h2>
+        <p>Accessible to Store Managers under <strong>Store Controls &rarr; Payment Methods</strong> (<code>/admin/payments</code>).</p>
+
+        <h3>8.1 Payment Channels Supported</h3>
+        <ul>
+            <li><strong>Square Web Payments:</strong> Secure tokenized checkout for Visa, MasterCard, American Express, and Interac Debit.</li>
+            <li><strong>Cash on Express In-Store Pickup:</strong> Allows shoppers to pay at the physical counter when collecting their order.</li>
+            <li><strong>Interac e-Transfer:</strong> Manual e-transfer payment instructions for local shoppers.</li>
+        </ul>
+
+        <h3>8.2 Safe Handling of Square Credentials</h3>
+        <p>The store's Square connection is governed by three secure keys:</p>
+        <ol>
+            <li><strong>Square Application ID:</strong> Identifies your registered Square merchant application.</li>
+            <li><strong>Square Access Token:</strong> The authorization key that allows the store to charge cards and sync inventory.</li>
+            <li><strong>Square Location ID:</strong> Identifies your physical retail store register in Moncton.</li>
+        </ol>
+
+        <div class="callout callout-warning">
+            <strong>Security Notice for Store Owners</strong>
+            Never share your Square Access Token via unencrypted email or text message. Only Store Managers have access to the Payment Methods screen. Store Associates are blocked from viewing these credentials.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 9: STAFF & ACCESS MANAGEMENT -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 9: Staff & Access Management (Handover System)</h2>
+        <p>Accessible to Store Managers under <strong>Store Controls &rarr; Staff & Access</strong> (<code>/admin/staff</code>).</p>
+        <p>This dedicated portal was engineered specifically for the client handover so the store owner can independently add new employees, issue passwords, and manage departing staff without calling an IT developer.</p>
+
+        <h3>9.1 Onboarding a New Employee</h3>
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <span class="step-title">Click "+ Add Staff Member"</span>
+            </div>
+            <p>In the top-right corner of the Staff Management portal, click the red button.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <span class="step-title">Enter Employee Details</span>
+            </div>
+            <ul>
+                <li><strong>Full Name:</strong> e.g., <em>"Bukola Adeleke"</em>.</li>
+                <li><strong>Email Address:</strong> This will be their unique username to log in (e.g., <code>bukola@isaleeeko.ca</code>).</li>
+                <li><strong>Phone Number:</strong> Optional contact number.</li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">3</span>
+                <span class="step-title">Select Staff Role</span>
+            </div>
+            <ul>
+                <li><span class="pill pill-associate">Store Associate</span> — For cashier, packaging, and kitchen staff. Can fulfill orders and update stock. Payment tokens and staff controls are hidden.</li>
+                <li><span class="pill pill-manager">Store Manager</span> — For owners and head managers. Full administrative authority.</li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">4</span>
+                <span class="step-title">Copy Temporary Password</span>
+            </div>
+            <p>The system auto-generates a secure temporary password (e.g. <code>temp8391!#</code>). Click the <strong>Copy</strong> button and send it to the employee via WhatsApp, SMS, or email.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <span class="step-number">5</span>
+                <span class="step-title">Employee Logs In & Updates Password</span>
+            </div>
+            <p>The employee goes to <code>/admin/login</code>, enters their email and temporary password, and uses the key icon in the topbar to change it to their personal password.</p>
+        </div>
+
+        <h3>9.2 Resetting an Employee's Forgotten Password</h3>
+        <ol>
+            <li>Find the employee in the <strong>Staff Roster Table</strong>.</li>
+            <li>Click <strong>Edit</strong>.</li>
+            <li>In the yellow <em>"Reset Password"</em> box, click <strong>Generate Random</strong> (or type a new custom password).</li>
+            <li>Click <strong>Save Changes</strong>. Provide the new password to the employee.</li>
+        </ol>
+
+        <h3>9.3 Handling Departed Staff (Deactivation vs Deletion)</h3>
+        <ul>
+            <li><strong>Instant Deactivation:</strong> Click <strong>Deactivate</strong>. The employee is immediately locked out from the portal. They cannot log in, but their past fulfillment audit logs remain intact.</li>
+            <li><strong>Revoke Access (Delete):</strong> Click the <strong>Trash icon</strong>. If the employee has processed orders, the system automatically revokes all admin rights while preserving order audit history. If no orders exist, the account is cleanly erased.</li>
+            <li><strong>Self-Protection Guard:</strong> A manager cannot deactivate or delete their own active account, preventing accidental lockouts.</li>
+        </ul>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 10: CHECKLISTS & EMERGENCY RECOVERY -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>Section 10: Daily Store Checklists & Emergency Recovery</h2>
+
+        <h3>10.1 Morning Opening Checklist (15 Minutes Before Opening)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>Action</th>
+                    <th>Location in Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Sign in to operations portal on the store tablet/counter computer.</td>
+                    <td><code>/admin/login</code></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Check <strong>Store Status Pill</strong> to confirm hours are scheduled for today.</td>
+                    <td>Dashboard Header</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Review <strong>Active Fulfillment Backlog</strong> for overnight web orders.</td>
+                    <td><code>/admin/orders</code></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Check <strong>Low Stock Alerts</strong> for items that sold out overnight.</td>
+                    <td><code>/admin/products</code></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Print packing slips for morning pickup slots.</td>
+                    <td>Orders Desk</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>10.2 Evening Closing Checklist (At Store Closing)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>Action</th>
+                    <th>Location in Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Verify all orders marked <em>"Ready for Pickup"</em> were collected by customers.</td>
+                    <td><code>/admin/orders</code></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Record any delivered local delivery batches as <em>"Completed"</em>.</td>
+                    <td><code>/admin/orders</code></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Review Today's Gross Sales tile for end-of-day register reconciliation.</td>
+                    <td>Dashboard Overview</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Sign out of the operations portal (click door/exit icon in topbar).</td>
+                    <td>Topbar Profile</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>10.3 Emergency Terminal Recovery (For IT & Developers)</h3>
+        <p>If store managers ever lose all passwords or accidentally lock themselves out, access can be instantly restored in 5 seconds directly from the server terminal without database surgery:</p>
+        
+        <div class="step-card">
+            <p>Open a terminal on the host server and run:</p>
+            <code>php artisan staff:create owner@isaleeeko.ca --name="Store Owner" --password="EmergencyPassword123!" --role=manager</code>
+            <p style="margin-top: 6pt; margin-bottom: 0;">This command creates or reactivates the account as a verified Store Manager with full access restored immediately.</p>
+        </div>
+
+        <div style="margin-top: 24pt; padding-top: 12pt; border-top: 1pt solid #EEEEEE; text-align: center; font-size: 8.5pt; color: #888888;">
+            Ìsàlèè Èkó Operations Portal Manual · Version 1.0 · Official Handover Document · Moncton, NB, Canada
+        </div>
+    </div>
+
+</body>
+</html>

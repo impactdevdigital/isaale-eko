@@ -4,13 +4,17 @@ use App\Http\Controllers\Store\AccountController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\OrderController;
 use App\Http\Controllers\Store\SessionController;
+use App\Livewire\Admin\AdminLogin;
 use App\Livewire\Admin\CategoriesManager;
+use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\OrdersQueue;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
 use App\Livewire\Admin\RecipesManager;
+use App\Livewire\Admin\StaffManager;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
+use Illuminate\Support\Facades\Auth;
 use App\Livewire\Store\Account\AccountManagement;
 use App\Livewire\Store\Account\AddressBook;
 use App\Livewire\Store\Account\BuyAgain;
@@ -51,12 +55,25 @@ Route::prefix('account')->middleware('auth')->group(function () {
 
 // Admin Operations Portal
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/', '/admin/orders');
-    Route::get('/settings', StoreSettings::class)->name('settings');
-    Route::get('/hours', StoreHoursEditor::class)->name('hours');
-    Route::get('/payments', PaymentMethods::class)->name('payments');
-    Route::get('/products', ProductsList::class)->name('products');
-    Route::get('/categories', CategoriesManager::class)->name('categories');
-    Route::get('/orders', OrdersQueue::class)->name('orders');
-    Route::get('/recipes', RecipesManager::class)->name('recipes');
+    Route::get('/login', AdminLogin::class)->name('login');
+    Route::post('/logout', function () {
+        Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
+
+        return redirect()->route('admin.login')->with('success', 'You have been safely signed out of operations.');
+    })->name('logout');
+
+    // Protected Operations Portal
+    Route::middleware('admin')->group(function () {
+        Route::get('/', Dashboard::class)->name('dashboard');
+        Route::get('/orders', OrdersQueue::class)->name('orders');
+        Route::get('/products', ProductsList::class)->name('products');
+        Route::get('/categories', CategoriesManager::class)->name('categories');
+        Route::get('/recipes', RecipesManager::class)->name('recipes');
+        Route::get('/settings', StoreSettings::class)->name('settings');
+        Route::get('/hours', StoreHoursEditor::class)->name('hours');
+        Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
+        Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
+    });
 });

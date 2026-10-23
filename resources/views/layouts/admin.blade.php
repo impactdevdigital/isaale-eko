@@ -22,7 +22,7 @@
         <aside class="w-full lg:w-72 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0">
             <!-- Brand Header -->
             <div class="p-6 border-b border-[#EEEEEE] flex items-center justify-between">
-                <a href="{{ route('admin.orders') }}" class="flex items-center gap-3">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
                     <img src="{{ asset('images/logo-small.svg') }}" alt="Ìsàlèè Èkó" class="h-10 w-auto">
                     <div>
                         <span class="block text-base font-extrabold tracking-tight text-[#111111]">Ìsàlèè Èkó</span>
@@ -35,6 +35,17 @@
 
             <!-- Navigation Links -->
             <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
+                <!-- Group: Executive Command -->
+                <div>
+                    <a href="{{ route('admin.dashboard') }}" 
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                        <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                        Operations Overview
+                    </a>
+                </div>
+
                 <!-- Group: Operations & Fulfillment -->
                 <div>
                     <h3 class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#686868]">
@@ -135,19 +146,32 @@
                     </div>
                 </div>
 
-                <!-- Group: Store Controls (Settings, Hours, Payments) -->
+                <!-- Group: Store Controls (Settings, Hours, Payments, Staff) -->
+                @php
+                    $isManager = auth()->user()?->isManager();
+                @endphp
                 <div>
                     <h3 class="px-3 text-[11px] font-extrabold uppercase tracking-wider text-[#686868]">
                         Store Controls
                     </h3>
                     <div class="mt-2 space-y-1">
-                        <a href="{{ route('admin.settings') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.settings') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
-                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                            </svg>
-                            Store Settings
-                        </a>
+                        @if ($isManager)
+                            <a href="{{ route('admin.staff') }}" 
+                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.staff') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                Staff & Access
+                            </a>
+
+                            <a href="{{ route('admin.settings') }}" 
+                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.settings') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                </svg>
+                                Store Settings
+                            </a>
+                        @endif
 
                         <a href="{{ route('admin.hours') }}" 
                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.hours') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
@@ -157,13 +181,15 @@
                             Hours & Closures
                         </a>
 
-                        <a href="{{ route('admin.payments') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.payments') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
-                            <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                            Payment Methods
-                        </a>
+                        @if ($isManager)
+                            <a href="{{ route('admin.payments') }}" 
+                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.payments') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                                Payment Methods
+                            </a>
+                        @endif
                     </div>
                 </div>
             </nav>
@@ -190,13 +216,53 @@
                     </h1>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#DAF4E7] text-[#007D49]">
                         ● Active Store
                     </span>
-                    <div class="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-bold">
-                        AD
-                    </div>
+
+                    @auth
+                        @php
+                            $adminName = auth()->user()->name ?? 'Staff';
+                            $initials = strtoupper(substr($adminName, 0, 2));
+                            $userRoleLabel = auth()->user()->isManager() ? 'Store Manager' : 'Store Associate';
+                        @endphp
+                        <div class="flex items-center gap-3 pl-3 border-l border-[#EEEEEE]">
+                            <div class="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-bold" title="{{ $adminName }}">
+                                {{ $initials }}
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <span class="block text-xs font-bold text-[#111111] leading-tight">{{ $adminName }}</span>
+                                <span class="block text-[10px] text-[#686868] leading-tight font-semibold">{{ $userRoleLabel }}</span>
+                            </div>
+
+                            <!-- Change Password Button (Triggers Self-Service Modal) -->
+                            <button type="button"
+                                    x-data
+                                    @click="$dispatch('open-change-password-modal')"
+                                    class="p-1.5 rounded-lg text-[#686868] hover:text-[#111111] hover:bg-[#F6F6F6] transition-colors"
+                                    title="Change My Password">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                            </button>
+
+                            <form method="POST" action="{{ route('admin.logout') }}" class="inline">
+                                @csrf
+                                <button type="submit"
+                                        class="p-1.5 rounded-lg text-[#686868] hover:text-[#DF2600] hover:bg-[#FFF0EC] transition-colors"
+                                        title="Sign Out of Operations">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-bold">
+                            AD
+                        </div>
+                    @endauth
                 </div>
             </header>
 
@@ -207,6 +273,9 @@
         </div>
     </div>
 
+    @auth
+        @livewire('admin.change-password-modal')
+    @endauth
     @livewireScripts
 </body>
 </html>

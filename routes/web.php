@@ -4,6 +4,7 @@ use App\Http\Controllers\Store\AccountController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\OrderController;
 use App\Http\Controllers\Store\SessionController;
+use App\Livewire\Admin\CategoriesManager;
 use App\Livewire\Admin\OrdersQueue;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
@@ -55,6 +56,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/hours', StoreHoursEditor::class)->name('hours');
     Route::get('/payments', PaymentMethods::class)->name('payments');
     Route::get('/products', ProductsList::class)->name('products');
+    Route::get('/categories', CategoriesManager::class)->name('categories');
     Route::get('/orders', OrdersQueue::class)->name('orders');
     Route::get('/recipes', RecipesManager::class)->name('recipes');
 });

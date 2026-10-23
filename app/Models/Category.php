@@ -44,4 +44,18 @@ class Category extends Model
     {
         return $query->whereNull('parent_id')->orderBy('sort_order');
     }
+
+    /**
+     * Total products assigned directly to this category or any of its child sub-categories.
+     */
+    public function allProductsCount(): int
+    {
+        $childIds = $this->relationLoaded('children')
+            ? $this->children->pluck('id')->all()
+            : $this->children()->pluck('id')->all();
+
+        $allIds = array_merge([$this->id], $childIds);
+
+        return Product::whereIn('category_id', $allIds)->count();
+    }
 }

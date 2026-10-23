@@ -1,7 +1,7 @@
 {{-- Six single-digit boxes bound to one Livewire property. Typing advances, Backspace goes back, pasting fills every box. --}}
 @props(['model' => 'code', 'label' => 'Six-digit code'])
 
-<div {{ $attributes->only('class') }}
+<div {{ $attributes->only(['class', 'wire:key']) }}
      x-data="{
          digits: Array(6).fill(''),
          sync() { $wire.set('{{ $model }}', this.digits.join(''), false) },

@@ -7,6 +7,8 @@ use App\Http\Controllers\Store\SessionController;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
+use App\Livewire\Store\Account\AccountManagement;
+use App\Livewire\Store\Account\AddressBook;
 use App\Livewire\Store\Account\OrderDetail;
 use App\Livewire\Store\Account\OrderHistory;
 use App\Livewire\Store\CartPage;
@@ -29,6 +31,8 @@ Route::post('/sign-out', [SessionController::class, 'destroy'])->middleware('aut
 
 Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/', [AccountController::class, 'overview'])->name('account');
+    Route::get('/manage', AccountManagement::class)->name('account.manage');
+    Route::get('/addresses', AddressBook::class)->name('account.addresses');
     Route::get('/orders', OrderHistory::class)->name('account.orders');
     Route::get('/orders/{order}', OrderDetail::class)->name('account.orders.show');
 });

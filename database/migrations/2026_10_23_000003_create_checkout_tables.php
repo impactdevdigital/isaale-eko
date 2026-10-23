@@ -67,7 +67,7 @@ return new class extends Migration
             $table->unsignedInteger('total_cents');
             $table->string('coupon_code')->nullable();
             $table->string('payment_method');
-            $table->timestamp('placed_at');
+            $table->timestamp('placed_at')->useCurrent();
             $table->timestamps();
 
             $table->index(['fulfilment', 'pickup_starts_at']);

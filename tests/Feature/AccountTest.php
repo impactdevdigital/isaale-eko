@@ -186,7 +186,10 @@ test('order details show the tracker and are private to the owner', function () 
 test('signing out ends the session', function () {
     $user = User::create(['name' => 'Valentine Akin', 'email' => 'val@example.com']);
 
-    $this->actingAs($user)->post('/sign-out')->assertRedirect('/');
+    $this->actingAs($user)
+        ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class)
+        ->post('/sign-out')
+        ->assertRedirect('/');
 
     $this->assertGuest();
 });

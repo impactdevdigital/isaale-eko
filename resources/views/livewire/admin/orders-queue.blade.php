@@ -286,19 +286,28 @@
                                         @if ($order->fulfilment_status === null)
                                             <button type="button"
                                                     wire:click="startPreparing({{ $order->id }})"
-                                                    class="px-3 py-1.5 rounded-xl bg-[#DF2600] text-white text-xs font-bold hover:bg-[#C22200] transition-colors shadow-xs">
+                                                    style="background-color: #DF2600;"
+                                                    class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
                                                 Start Preparing
                                             </button>
                                         @elseif ($order->fulfilment_status === \App\Models\Order::FULFILMENT_PREPARING)
                                             <button type="button"
                                                     wire:click="markAsReady({{ $order->id }})"
-                                                    class="px-3 py-1.5 rounded-xl bg-[#0055D4] text-white text-xs font-bold hover:bg-[#0047B3] transition-colors shadow-xs">
-                                                Mark as Ready
+                                                    style="background-color: #0055D4;"
+                                                    class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
+                                                Mark Ready
+                                            </button>
+                                            <button type="button"
+                                                    wire:click="markAsCompleted({{ $order->id }})"
+                                                    style="background-color: #007D49;"
+                                                    class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
+                                                {{ $order->fulfilment === 'pickup' ? 'Hand Over' : 'Delivered' }}
                                             </button>
                                         @elseif ($order->fulfilment_status === \App\Models\Order::FULFILMENT_READY)
                                             <button type="button"
                                                     wire:click="markAsCompleted({{ $order->id }})"
-                                                    class="px-3 py-1.5 rounded-xl bg-[#007D49] text-white text-xs font-bold hover:bg-[#00663C] transition-colors shadow-xs">
+                                                    style="background-color: #007D49;"
+                                                    class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
                                                 {{ $order->fulfilment === 'pickup' ? 'Hand Over (Collected)' : 'Mark Delivered' }}
                                             </button>
                                         @endif
@@ -519,25 +528,40 @@
 
                     <!-- Drawer Footer Actions -->
                     <div class="p-6 border-t border-[#EEEEEE] bg-[#FAFAFA] space-y-3">
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                             @if ($selectedOrder->status !== \App\Models\Order::STATUS_CANCELLED && $selectedOrder->fulfilment_status !== \App\Models\Order::FULFILMENT_COMPLETED)
                                 @if ($selectedOrder->fulfilment_status === null)
                                     <button type="button"
                                             wire:click="startPreparing({{ $selectedOrder->id }})"
-                                            class="flex-1 py-3 px-4 rounded-xl bg-[#DF2600] text-white font-extrabold text-sm hover:bg-[#C22200] transition-colors shadow-xs text-center">
-                                        Mark as Preparing
+                                            style="background-color: #DF2600;"
+                                            class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center">
+                                        Start Preparing Order
+                                    </button>
+                                    <button type="button"
+                                            wire:click="markAsReady({{ $selectedOrder->id }})"
+                                            style="background-color: #0055D4;"
+                                            class="py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center">
+                                        Mark Ready
                                     </button>
                                 @elseif ($selectedOrder->fulfilment_status === \App\Models\Order::FULFILMENT_PREPARING)
                                     <button type="button"
                                             wire:click="markAsReady({{ $selectedOrder->id }})"
-                                            class="flex-1 py-3 px-4 rounded-xl bg-[#0055D4] text-white font-extrabold text-sm hover:bg-[#0047B3] transition-colors shadow-xs text-center">
+                                            style="background-color: #0055D4;"
+                                            class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center">
                                         Mark Ready for {{ $selectedOrder->fulfilment === 'pickup' ? 'Collection' : 'Delivery' }}
+                                    </button>
+                                    <button type="button"
+                                            wire:click="markAsCompleted({{ $selectedOrder->id }})"
+                                            style="background-color: #007D49;"
+                                            class="py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center">
+                                        {{ $selectedOrder->fulfilment === 'pickup' ? 'Hand Over (Collected)' : 'Mark Delivered' }}
                                     </button>
                                 @elseif ($selectedOrder->fulfilment_status === \App\Models\Order::FULFILMENT_READY)
                                     <button type="button"
                                             wire:click="markAsCompleted({{ $selectedOrder->id }})"
-                                            class="flex-1 py-3 px-4 rounded-xl bg-[#007D49] text-white font-extrabold text-sm hover:bg-[#00663C] transition-colors shadow-xs text-center">
-                                        Complete & Hand Over Order
+                                            style="background-color: #007D49;"
+                                            class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center">
+                                        {{ $selectedOrder->fulfilment === 'pickup' ? 'Complete & Hand Over (Collected)' : 'Mark Delivered' }}
                                     </button>
                                 @endif
 
@@ -546,6 +570,10 @@
                                         class="py-3 px-4 rounded-xl border border-[#EEEEEE] bg-white text-[#DF2600] font-bold text-sm hover:bg-[#FFF0EC] transition-colors">
                                     Cancel
                                 </button>
+                            @else
+                                <div class="flex-1 py-3 px-4 rounded-xl bg-[#DAF4E7] text-[#007D49] font-extrabold text-sm text-center">
+                                    Order Completed ({{ $selectedOrder->fulfilment === 'pickup' ? 'Collected by Customer' : 'Delivered' }})
+                                </div>
                             @endif
                         </div>
                     </div>

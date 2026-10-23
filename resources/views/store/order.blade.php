@@ -5,7 +5,7 @@
     $justPlaced = session('order_placed') === $order->number;
     $receiptTo = $order->contact_email ?? $order->contact_phone;
     $steps = $order->trackerSteps();
-    $current = $order->isConfirmed() ? 0 : -1;
+    $current = $order->trackerStep();
 @endphp
 
 <x-layouts::store :title="'Order '.$order->number">

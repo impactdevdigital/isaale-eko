@@ -26,6 +26,9 @@
     <x-store.footer />
 
     <livewire:store.cart-drawer />
+    @guest
+        <livewire:store.sign-in />
+    @endguest
     <x-store.asha-launcher />
 
     @livewireScripts

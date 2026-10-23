@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\Store\AccountController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\OrderController;
+use App\Http\Controllers\Store\SessionController;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
+use App\Livewire\Store\Account\OrderDetail;
+use App\Livewire\Store\Account\OrderHistory;
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
 use App\Livewire\Store\ProductListing;
@@ -18,6 +22,16 @@ Route::get('/products/{product:slug}', ProductPage::class)->name('product');
 Route::get('/cart', CartPage::class)->name('cart');
 Route::get('/checkout', Checkout::class)->name('checkout');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+// Customer accounts: password-free sign-in happens in the drawer.
+Route::get('/sign-in', [SessionController::class, 'create'])->middleware('guest')->name('login');
+Route::post('/sign-out', [SessionController::class, 'destroy'])->middleware('auth')->name('sign-out');
+
+Route::prefix('account')->middleware('auth')->group(function () {
+    Route::get('/', [AccountController::class, 'overview'])->name('account');
+    Route::get('/orders', OrderHistory::class)->name('account.orders');
+    Route::get('/orders/{order}', OrderDetail::class)->name('account.orders.show');
+});
 
 // Admin Operations Portal
 Route::prefix('admin')->name('admin.')->group(function () {

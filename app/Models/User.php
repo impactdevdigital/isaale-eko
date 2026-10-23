@@ -42,6 +42,16 @@ class User extends Authenticatable
         return $this->hasMany(Order::class)->latest('placed_at');
     }
 
+    public function pointTransactions(): HasMany
+    {
+        return $this->hasMany(PointTransaction::class)->latest()->latest('id');
+    }
+
+    public function pointsBalance(): int
+    {
+        return (int) $this->pointTransactions()->sum('points');
+    }
+
     /**
      * The verified contact the shopper signs in with, e.g. for "Verified email".
      *

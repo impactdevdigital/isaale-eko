@@ -24,36 +24,36 @@ class CategoriesManager extends Component
 
     /** Preset category food photos exported from the Figma library */
     public const PRESET_IMAGES = [
-        ['name' => 'Flours & Baking', 'path' => 'images/store/subcategories/flours-and-baking.webp', 'emoji' => '🌾'],
-        ['name' => 'Grains & Cereals', 'path' => 'images/store/subcategories/grains-and-cereals.webp', 'emoji' => '🌾'],
-        ['name' => 'Rice & Beans', 'path' => 'images/store/categories/rice-and-beans.webp', 'emoji' => '🫘'],
+        ['name' => 'Flours & Baking', 'path' => 'images/store/subcategories/flours-and-baking.webp', 'emoji' => '🍞'],
+        ['name' => 'Grains & Cereals', 'path' => 'images/store/subcategories/grains-and-cereals.webp', 'emoji' => '🌽'],
+        ['name' => 'Rice & Beans', 'path' => 'images/store/categories/rice-and-beans.webp', 'emoji' => '🌾'],
         ['name' => 'Meat & Fish', 'path' => 'images/store/categories/meat-and-fish.webp', 'emoji' => '🍗'],
         ['name' => 'Fresh Produce', 'path' => 'images/store/categories/fresh-produce.webp', 'emoji' => '🥬'],
         ['name' => 'Vegetables', 'path' => 'images/store/subcategories/vegetables.webp', 'emoji' => '🥬'],
         ['name' => 'Spices & Seasonings', 'path' => 'images/store/subcategories/spices-and-seasonings.webp', 'emoji' => '🌶️'],
-        ['name' => 'Cooking Oils', 'path' => 'images/store/subcategories/cooking-oils.webp', 'emoji' => '🫒'],
-        ['name' => 'Seasonings', 'path' => 'images/store/categories/seasonings.webp', 'emoji' => '🧂'],
-        ['name' => 'Sauces & Pastes', 'path' => 'images/store/categories/sauces.webp', 'emoji' => '🥫'],
+        ['name' => 'Cooking Oils', 'path' => 'images/store/subcategories/cooking-oils.webp', 'emoji' => '🍯'],
+        ['name' => 'Seasonings', 'path' => 'images/store/categories/seasonings.webp', 'emoji' => '🌶️'],
+        ['name' => 'Sauces & Pastes', 'path' => 'images/store/categories/sauces.webp', 'emoji' => '🍯'],
         ['name' => 'Snacks & Pastries', 'path' => 'images/store/categories/snacks.webp', 'emoji' => '🍿'],
         ['name' => 'Drinks & Beverages', 'path' => 'images/store/categories/drinks.webp', 'emoji' => '🥤'],
-        ['name' => 'Pantry Staples', 'path' => 'images/store/categories/pantry-staples.webp', 'emoji' => '📦'],
+        ['name' => 'Pantry Staples', 'path' => 'images/store/categories/pantry-staples.webp', 'emoji' => '🌾'],
         ['name' => 'Beauty & Home', 'path' => 'images/store/categories/beauty-and-home.webp', 'emoji' => '🧼'],
     ];
 
-    /** Quick selectable grocery emoji palette for store staff */
+    /** Universal grocery icon palette compatible with all operating systems and browsers */
     public const QUICK_EMOJIS = [
-        '🌾' => 'Grains',
-        '🫘' => 'Beans',
-        '🌶️' => 'Pepper',
-        '🍗' => 'Meat',
-        '🐟' => 'Fish',
-        '🥬' => 'Greens',
-        '🥔' => 'Tubers',
-        '🫒' => 'Oils',
-        '🥤' => 'Drinks',
-        '🍿' => 'Snacks',
-        '🥫' => 'Cans',
-        '🧼' => 'Care',
+        '🌾' => 'Grains & Rice',
+        '🌽' => 'Cereals & Corn',
+        '🍞' => 'Flours & Baking',
+        '🥩' => 'Meat & Beef',
+        '🍗' => 'Poultry & Chicken',
+        '🐟' => 'Fish & Seafood',
+        '🥬' => 'Greens & Veggies',
+        '🌶️' => 'Peppers & Spices',
+        '🍯' => 'Oils & Sauces',
+        '🥤' => 'Drinks & Malts',
+        '🍿' => 'Snacks & Sweets',
+        '🧼' => 'Soap & Beauty',
     ];
 
     public string $search = '';

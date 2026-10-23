@@ -27,7 +27,11 @@
             @foreach ($shortcuts as $category)
                 <button type="button" wire:click="$set('category', '{{ $category->slug }}')"
                         class="flex h-11 items-center gap-2 rounded-full bg-surface px-4 text-button-sm transition-shadow hover:shadow-card">
-                    <span class="text-[22px] leading-none" aria-hidden="true">{{ $category->emoji }}</span>
+                    @if ($category->image && file_exists(public_path($category->image)))
+                        <img src="{{ asset($category->image) }}" alt="" class="w-6 h-6 rounded-full object-cover">
+                    @elseif ($category->emoji)
+                        <span class="text-[22px] leading-none" aria-hidden="true">{{ $category->emoji }}</span>
+                    @endif
                     {{ $category->name }}
                 </button>
             @endforeach

@@ -112,8 +112,11 @@ class ProductListing extends Component
             'selectedCategory' => $category,
             'countryPage' => $countryPage,
             'popular' => $countryPage ? $this->popularIn($countryPage) : collect(),
-            'categoryTree' => Category::roots()->has('children')->with('children')->get(),
-            'countries' => Country::orderBy('sort_order')->get(),
+            // Menu groups, plus top-level Square categories that aren't in the menu.
+            'categoryTree' => Category::roots()
+                ->where(fn ($query) => $query->has('children')->orWhereHas('products', fn ($p) => $p->active()))
+                ->with('children')->orderBy('name')->get(),
+            'countries' => Country::whereHas('products', fn ($p) => $p->active())->orderBy('sort_order')->get(),
             'noSearchResults' => $this->q !== '' && $products->total() === 0 && ! $this->hasFilters(),
         ])->title($this->pageTitle($category, $countryPage));
     }

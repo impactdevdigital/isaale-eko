@@ -171,15 +171,60 @@ class CatalogSync
             return;
         }
 
-        $category = $existing ?? Category::where('slug', Str::slug($name))->whereNull('square_id')->first() ?? new Category;
+        $category = $existing ?? $this->storefrontCategory($name) ?? new Category;
         $category->square_id = $object['id'];
         $category->name = $name;
-        // Square sub-categories become children of their parent category.
-        $category->parent_id = Category::where('square_id', $object['category_data']['parent_category']['id'] ?? null)->value('id');
+        // Square sub-categories become children of their parent category. A
+        // top-level Square category keeps its place in our menu tree.
+        $parentId = $object['category_data']['parent_category']['id'] ?? null;
+        if ($parentId) {
+            $category->parent_id = Category::where('square_id', $parentId)->value('id');
+        }
         $category->slug ??= $this->uniqueSlug(Category::class, $name);
         $category->save();
 
         $this->stats['categories']++;
+    }
+
+    /**
+     * Our own category with the same name that isn't linked to Square yet.
+     */
+    private function storefrontCategory(string $name): ?Category
+    {
+        return Category::whereNull('square_id')
+            ->whereRaw('lower(name) = ?', [mb_strtolower($name)])
+            ->orderBy('id')
+            ->first();
+    }
+
+    /**
+     * Square categories imported before our menu categories existed: move
+     * their products onto our category with the same name, link that one to
+     * Square instead, and remove the copy. Safe to run any time.
+     */
+    public function mergeIntoStorefrontCategories(): int
+    {
+        $merged = 0;
+
+        Category::whereNotNull('square_id')->doesntHave('children')->get()
+            ->each(function (Category $copy) use (&$merged) {
+                $ours = $this->storefrontCategory($copy->name);
+
+                if (! $ours) {
+                    return;
+                }
+
+                DB::transaction(function () use ($copy, $ours) {
+                    Product::where('category_id', $copy->id)->update(['category_id' => $ours->id]);
+                    $squareId = $copy->square_id;
+                    $copy->delete();
+                    $ours->update(['square_id' => $squareId]);
+                });
+
+                $merged++;
+            });
+
+        return $merged;
     }
 
     /**

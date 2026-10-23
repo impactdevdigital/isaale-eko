@@ -2,9 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Country;
 use App\Models\Product;
 use App\Models\StoreHour;
+use App\Services\Square\CatalogSync;
+use Database\Seeders\DemoCatalogSeeder;
 use Database\Seeders\PaymentMethodSeeder;
+use Database\Seeders\StorefrontSeeder;
 use Database\Seeders\StoreHoursSeeder;
 use Illuminate\Console\Command;
 
@@ -17,9 +21,9 @@ class ShopInstall extends Command
 {
     protected $signature = 'shop:install';
 
-    protected $description = 'Add opening hours, payment methods and the first Square import if they are missing';
+    protected $description = 'Add opening hours, payment methods, menu categories, countries and the first Square import if they are missing';
 
-    public function handle(): int
+    public function handle(CatalogSync $sync): int
     {
         if (StoreHour::query()->doesntExist()) {
             $this->call('db:seed', ['--class' => StoreHoursSeeder::class, '--force' => true]);
@@ -27,6 +31,11 @@ class ShopInstall extends Command
 
         // firstOrCreate per method: adds new ones, leaves existing settings alone.
         $this->call('db:seed', ['--class' => PaymentMethodSeeder::class, '--force' => true]);
+
+        // Menu categories, home tiles and countries: ours, not Square's.
+        if (Country::query()->doesntExist()) {
+            $this->call('db:seed', ['--class' => StorefrontSeeder::class, '--force' => true]);
+        }
 
         if (filled(config('services.square.token')) && Product::whereNotNull('square_id')->doesntExist()) {
             $this->info('No Square products yet: running the first import.');
@@ -37,6 +46,19 @@ class ShopInstall extends Command
                 // The shop still starts; the scheduled sync will try again.
                 $this->warn('Square import failed: '.$e->getMessage());
             }
+        }
+
+        if ($merged = $sync->mergeIntoStorefrontCategories()) {
+            $this->info("Matched {$merged} Square categories onto the menu categories.");
+        }
+
+        // The sandbox holds the demo products: give them their countries,
+        // badges, recipes and collections once, like the local demo.
+        if (config('services.square.env') === 'sandbox'
+            && Product::whereNotNull('square_id')->exists()
+            && Product::whereNotNull('country_id')->doesntExist()) {
+            $this->info('Sandbox: adding demo countries, badges, recipes and collections.');
+            app(DemoCatalogSeeder::class)->extras();
         }
 
         return self::SUCCESS;

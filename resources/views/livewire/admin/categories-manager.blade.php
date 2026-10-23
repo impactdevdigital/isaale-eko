@@ -205,8 +205,18 @@
                                 </svg>
                             </button>
 
-                            <div class="flex items-center gap-2.5">
-                                <span class="text-2xl">{{ $parent->emoji ?: '📁' }}</span>
+                            <div class="flex items-center gap-3">
+                                @if ($parent->image && file_exists(public_path($parent->image)))
+                                    <img src="{{ asset($parent->image) }}" alt="{{ $parent->name }}" class="w-10 h-10 rounded-xl object-cover border border-[#EEEEEE] shrink-0 bg-[#FAFAFA]">
+                                @elseif ($parent->emoji)
+                                    <span class="text-2xl">{{ $parent->emoji }}</span>
+                                @else
+                                    <span class="w-10 h-10 rounded-xl bg-[#FFF0EC] text-[#DF2600] flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                        </svg>
+                                    </span>
+                                @endif
                                 <div>
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <h3 class="text-base font-extrabold text-[#111111]">{{ $parent->name }}</h3>
@@ -314,8 +324,18 @@
                                                 <tr class="hover:bg-[#FAFAFA]/70 transition-colors">
                                                     <!-- Sub-category Name -->
                                                     <td class="py-3 px-6 pl-12">
-                                                        <div class="flex items-center gap-2.5">
-                                                            <span class="text-base">{{ $child->emoji ?: '🏷️' }}</span>
+                                                        <div class="flex items-center gap-3">
+                                                            @if ($child->image && file_exists(public_path($child->image)))
+                                                                <img src="{{ asset($child->image) }}" alt="{{ $child->name }}" class="w-8 h-8 rounded-lg object-cover border border-[#EEEEEE] shrink-0 bg-[#FAFAFA]">
+                                                            @elseif ($child->emoji)
+                                                                <span class="text-base">{{ $child->emoji }}</span>
+                                                            @else
+                                                                <span class="w-8 h-8 rounded-lg bg-[#FAFAFA] border border-[#EEEEEE] flex items-center justify-center text-[#DF2600] shrink-0">
+                                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                                    </svg>
+                                                                </span>
+                                                            @endif
                                                             <div>
                                                                 <span class="font-extrabold text-[#111111] block">{{ $child->name }}</span>
                                                                 <span class="text-[11px] text-[#686868] font-mono">{{ $child->slug }}</span>
@@ -430,7 +450,17 @@
                             <tr class="hover:bg-[#FAFAFA]/70 transition-colors">
                                 <td class="py-3.5 px-6">
                                     <div class="flex items-center gap-3">
-                                        <span class="text-lg">{{ $sub->emoji ?: '🏷️' }}</span>
+                                        @if ($sub->image && file_exists(public_path($sub->image)))
+                                            <img src="{{ asset($sub->image) }}" alt="{{ $sub->name }}" class="w-8 h-8 rounded-lg object-cover border border-[#EEEEEE] shrink-0 bg-[#FAFAFA]">
+                                        @elseif ($sub->emoji)
+                                            <span class="text-lg">{{ $sub->emoji }}</span>
+                                        @else
+                                            <span class="w-8 h-8 rounded-lg bg-[#FAFAFA] border border-[#EEEEEE] flex items-center justify-center text-[#DF2600] shrink-0">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                </svg>
+                                            </span>
+                                        @endif
                                         <div>
                                             <span class="font-extrabold text-[#111111] block">{{ $sub->name }}</span>
                                             <span class="text-[11px] text-[#686868] font-mono">{{ $sub->slug }}</span>
@@ -440,8 +470,16 @@
 
                                 <td class="py-3.5 px-4">
                                     @if ($sub->parent)
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FAFAFA] border border-[#EEEEEE] text-xs font-semibold text-[#111111]">
-                                            <span>{{ $sub->parent->emoji ?: '📁' }}</span>
+                                        <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#FAFAFA] border border-[#EEEEEE] text-xs font-semibold text-[#111111]">
+                                            @if ($sub->parent->image && file_exists(public_path($sub->parent->image)))
+                                                <img src="{{ asset($sub->parent->image) }}" alt="{{ $sub->parent->name }}" class="w-4 h-4 rounded object-cover">
+                                            @elseif ($sub->parent->emoji)
+                                                <span>{{ $sub->parent->emoji }}</span>
+                                            @else
+                                                <svg class="w-3.5 h-3.5 text-[#DF2600]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                </svg>
+                                            @endif
                                             {{ $sub->parent->name }}
                                         </span>
                                     @else
@@ -541,7 +579,17 @@
                             <tr class="hover:bg-[#FAFAFA]/70 transition-colors">
                                 <td class="py-3.5 px-6">
                                     <div class="flex items-center gap-3">
-                                        <span class="text-xl">{{ $parent->emoji ?: '📁' }}</span>
+                                        @if ($parent->image && file_exists(public_path($parent->image)))
+                                            <img src="{{ asset($parent->image) }}" alt="{{ $parent->name }}" class="w-9 h-9 rounded-xl object-cover border border-[#EEEEEE] shrink-0 bg-[#FAFAFA]">
+                                        @elseif ($parent->emoji)
+                                            <span class="text-xl">{{ $parent->emoji }}</span>
+                                        @else
+                                            <span class="w-9 h-9 rounded-xl bg-[#FFF0EC] text-[#DF2600] flex items-center justify-center shrink-0">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                </svg>
+                                            </span>
+                                        @endif
                                         <div>
                                             <span class="font-extrabold text-[#111111] block">{{ $parent->name }}</span>
                                             <span class="text-[11px] text-[#686868] font-mono">{{ $parent->slug }}</span>

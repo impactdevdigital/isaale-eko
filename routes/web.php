@@ -7,7 +7,9 @@ use App\Http\Controllers\Store\SessionController;
 use App\Livewire\Admin\AdminLogin;
 use App\Livewire\Admin\CategoriesManager;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\IssuesDesk;
 use App\Livewire\Admin\OrdersQueue;
+
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
 use App\Livewire\Admin\RecipesManager;
@@ -36,6 +38,19 @@ Route::get('/products/{product:slug}', ProductPage::class)->name('product');
 Route::get('/cart', CartPage::class)->name('cart');
 Route::get('/checkout', Checkout::class)->name('checkout');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+Route::get('/orders/{number}/substitutions/{id}', \App\Livewire\Store\SubstitutionResponse::class)
+    ->name('orders.substitutions.review')
+    ->middleware('signed');
+Route::get('/orders/{number}/reschedule', \App\Livewire\Store\RescheduleOrder::class)
+    ->name('orders.reschedule')
+    ->middleware('signed');
+
+// Part G: Ìsalèè Kitchen & Ingredients Engine
+Route::get('/kitchen', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.index');
+Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWithWhatIHave::class)->name('kitchen.pantry');
+Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
+Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
+
 
 // Customer accounts: password-free sign-in happens in the drawer.
 Route::get('/sign-in', [SessionController::class, 'create'])->middleware('guest')->name('login');
@@ -68,7 +83,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::get('/', Dashboard::class)->name('dashboard');
         Route::get('/orders', OrdersQueue::class)->name('orders');
+        Route::get('/issues', IssuesDesk::class)->name('issues');
         Route::get('/products', ProductsList::class)->name('products');
+
         Route::get('/categories', CategoriesManager::class)->name('categories');
         Route::get('/recipes', RecipesManager::class)->name('recipes');
         Route::get('/settings', StoreSettings::class)->name('settings');

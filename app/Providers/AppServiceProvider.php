@@ -35,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
             'product' => Product::class,
             'category' => Category::class,
             'country' => Country::class,
+            'ingredient' => \App\Models\Ingredient::class,
+            'recipe' => \App\Models\Recipe::class,
+            'meal_combo' => \App\Models\MealCombo::class,
         ]);
     }
 }

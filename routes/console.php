@@ -13,3 +13,14 @@ Schedule::command('square:sync')
     ->everyFiveMinutes()
     ->withoutOverlapping()
     ->when(fn () => filled(config('services.square.token')));
+
+// Expire unanswered substitution requests after 15 minutes
+Schedule::command('substitutions:expire')->everyMinute();
+
+// Alert on open issues exceeding 24-hour response target
+Schedule::command('issues:remind-overdue')->hourly();
+
+// Process uncollected orders and overdue pickup reminders
+Schedule::command('orders:handle-uncollected')->hourly();
+
+

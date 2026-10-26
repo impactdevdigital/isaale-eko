@@ -1,15 +1,15 @@
 <div>
     @if ($isOpen)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="change-password-title" role="dialog" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-3 sm:px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-black/50 transition-opacity" wire:click="close"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div class="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full" style="background-color: #ffffff;">
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-4 sm:my-8 align-middle max-w-md w-full mx-auto" style="background-color: #ffffff;">
                     <!-- Modal Header -->
-                    <div class="p-6 border-b border-[#EEEEEE] flex items-center justify-between">
+                    <div class="p-4 sm:p-6 border-b border-[#EEEEEE] flex items-center justify-between">
                         <div>
-                            <h3 class="text-lg font-extrabold text-[#111111]" id="change-password-title">
+                            <h3 class="text-base sm:text-lg font-extrabold text-[#111111]" id="change-password-title">
                                 Change Your Password
                             </h3>
                             <p class="mt-0.5 text-xs text-[#686868]">
@@ -25,7 +25,7 @@
 
                     <!-- Modal Form -->
                     <form wire:submit="updatePassword">
-                        <div class="p-6 space-y-4">
+                        <div class="p-4 sm:p-6 space-y-4">
                             <!-- Current Password -->
                             <div>
                                 <label class="block text-xs font-bold text-[#111111] mb-1">Current Password *</label>
@@ -57,7 +57,7 @@
                         </div>
 
                         <!-- Modal Actions -->
-                        <div class="p-6 border-t border-[#EEEEEE] bg-[#FAFAFA] flex items-center justify-end gap-3">
+                        <div class="p-4 sm:p-6 border-t border-[#EEEEEE] bg-[#FAFAFA] flex items-center justify-end gap-3">
                             <button type="button"
                                     wire:click="close"
                                     class="px-4 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-xs font-bold text-[#686868] hover:text-[#111111] transition-colors">

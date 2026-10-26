@@ -17,6 +17,7 @@ class StoreNavigation
     {
         return [
             ['label' => 'Shop', 'menu' => 'shop'],
+            ['label' => 'Kitchen & Recipes', 'url' => route('kitchen.index')],
             ['label' => 'Discover', 'menu' => 'discover'],
             ['label' => 'Help', 'menu' => 'help'],
             ['label' => 'Country', 'url' => route('home').'#shop-by-country'],
@@ -62,19 +63,26 @@ class StoreNavigation
                     ->all(),
             ],
             'discover' => [
-                'sidebar' => ['Recipes' => '#', 'Food stories' => '#', 'Product stories' => '#'],
+                'sidebar' => [
+                    'All Recipes' => route('kitchen.index'),
+                    'Cook With What I Have' => route('kitchen.pantry'),
+                    'Food stories' => '#',
+                    'Product stories' => '#',
+                ],
                 'eyebrow' => 'Discover Ìsàlèè Èkó',
                 'title' => 'Cook Something Good',
-                'link' => 'View all',
-                'url' => '#',
-                'recipes' => Recipe::with('country')
+                'link' => 'View all recipes',
+                'url' => route('kitchen.index'),
+                'recipes' => (Recipe::where('status', Recipe::STATUS_APPROVED)->exists() ? Recipe::approved() : Recipe::query())
+                    ->with('country')
                     ->orderBy('sort_order')
                     ->take(4)
                     ->get()
                     ->map(fn (Recipe $recipe) => [
-                        'name' => $recipe->name,
+                        'name' => $recipe->title ?: $recipe->name,
                         'meta' => collect([$recipe->durationLabel(), $recipe->country?->name])->filter()->join(' · '),
-                        'image' => $recipe->thumbnail,
+                        'image' => $recipe->image ?: $recipe->thumbnail,
+                        'url' => route('kitchen.recipe', $recipe),
                     ])
                     ->all(),
             ],

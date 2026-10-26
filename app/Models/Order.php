@@ -25,6 +25,12 @@ class Order extends Model
     /** Cancelled by the customer before the store started on it. */
     public const STATUS_CANCELLED = 'cancelled';
 
+    /** Order was not collected within the store grace period. */
+    public const STATUS_UNCOLLECTED = 'uncollected';
+
+    /** Fully refunded order. */
+    public const STATUS_REFUNDED = 'refunded';
+
     /** Fulfilment progress of a confirmed order; null means just confirmed. */
     public const FULFILMENT_PREPARING = 'preparing';
 
@@ -46,10 +52,17 @@ class Order extends Model
         'discount_cents' => 'integer',
         'delivery_fee_cents' => 'integer',
         'total_cents' => 'integer',
+        'refunded_cents' => 'integer',
         'placed_at' => 'datetime',
         'paid_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'uncollected_at' => 'datetime',
+        'fulfilled_at' => 'datetime',
+        'promised_by' => 'datetime',
+        'pickup_reminder_sent_at' => 'datetime',
+        'pickup_overdue_reminder_sent_at' => 'datetime',
     ];
+
 
     protected static function booted(): void
     {
@@ -174,9 +187,47 @@ class Order extends Model
     {
         return match (true) {
             $this->status === self::STATUS_CANCELLED => 'Cancelled',
+            $this->status === self::STATUS_REFUNDED => 'Refunded',
+            $this->status === self::STATUS_UNCOLLECTED => 'Uncollected',
             $this->status === self::STATUS_PAYMENT_FAILED => 'Payment declined',
             $this->status === self::STATUS_AWAITING_PAYMENT => 'Payment pending',
-            default => $this->trackerSteps()[$this->trackerStep()],
+            ! $this->isConfirmed() => 'Pending confirmation',
+            default => $this->trackerSteps()[$this->trackerStep()] ?? 'Processing',
         };
     }
+
+    public function substitutionRequests(): HasMany
+    {
+        return $this->hasMany(SubstitutionRequest::class);
+    }
+
+    public function activeSubstitutionRequests(): HasMany
+    {
+        return $this->hasMany(SubstitutionRequest::class)
+            ->whereIn('status', [SubstitutionRequest::STATUS_CONTACTING, SubstitutionRequest::STATUS_AWAITING_REPLY]);
+    }
+
+    public function hasPendingSubstitutions(): bool
+    {
+        return $this->substitutionRequests()
+            ->whereIn('status', [SubstitutionRequest::STATUS_CONTACTING, SubstitutionRequest::STATUS_AWAITING_REPLY])
+            ->exists();
+    }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    public function issues(): HasMany
+    {
+        return $this->hasMany(OrderIssue::class);
+    }
+
+    public function activeRefundableCents(): int
+    {
+        return max(0, $this->total_cents - $this->refunded_cents);
+    }
 }
+
+

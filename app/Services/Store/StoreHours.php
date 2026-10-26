@@ -76,7 +76,8 @@ class StoreHours
 
     public function isValidPickup(CarbonInterface $at): bool
     {
-        return $this->slotsFor($at)->contains(fn ($s) => $s->equalTo($at));
+        $target = Carbon::instance($at)->setMicrosecond(0);
+        return $this->slotsFor($at)->contains(fn ($s) => $s->copy()->setMicrosecond(0)->equalTo($target));
     }
 
     public function pickableDays(): Collection

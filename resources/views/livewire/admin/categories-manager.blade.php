@@ -1,14 +1,14 @@
-<div class="space-y-8">
+<div class="space-y-6 sm:space-y-8">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-            <h2 class="text-2xl font-extrabold text-[#111111] tracking-tight">Categories & Sub-Categories</h2>
-            <p class="mt-1 text-sm text-[#686868]">
+            <h2 class="text-xl sm:text-2xl font-extrabold text-[#111111] tracking-tight">Categories & Sub-Categories</h2>
+            <p class="mt-1 text-xs sm:text-sm text-[#686868]">
                 Catalog hierarchy synchronized with Square POS. Manage parent departments, nested sub-categories, Square IDs, and storefront featured visibility.
             </p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
             @if ($lastSync)
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DAF4E7] text-xs font-bold text-[#007D49]">
                     <span class="w-2 h-2 rounded-full bg-[#007D49]"></span>
@@ -23,7 +23,7 @@
 
             <button type="button"
                     wire:click="openCreateModal"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#DF2600] text-white text-sm font-bold shadow-sm hover:bg-[#b82000] transition-colors">
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#DF2600] text-white text-xs sm:text-sm font-bold shadow-sm hover:bg-[#b82000] transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                 </svg>
@@ -39,7 +39,7 @@
                 <svg class="w-5 h-5 text-[#007D49]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                <span class="text-sm font-bold text-[#007D49]">{{ session('success') }}</span>
+                <span class="text-xs sm:text-sm font-bold text-[#007D49]">{{ session('success') }}</span>
             </div>
         </div>
     @endif
@@ -50,68 +50,68 @@
                 <svg class="w-5 h-5 text-[#DF2600]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <span class="text-sm font-bold text-[#DF2600]">{{ session('error') }}</span>
+                <span class="text-xs sm:text-sm font-bold text-[#DF2600]">{{ session('error') }}</span>
             </div>
         </div>
     @endif
 
     <!-- KPI Metric Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#686868]">Total Categories</span>
-            <div class="mt-2 text-2xl font-extrabold text-[#111111]">{{ number_format($counts['total']) }}</div>
-            <span class="text-[11px] text-[#686868]">All levels combined</span>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div class="p-4 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
+            <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#686868]">Total Categories</span>
+            <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-extrabold text-[#111111]">{{ number_format($counts['total']) }}</div>
+            <span class="text-[10px] sm:text-[11px] text-[#686868]">All levels combined</span>
         </div>
 
-        <div class="p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#686868]">Root Departments</span>
-            <div class="mt-2 text-2xl font-extrabold text-[#DF2600]">{{ number_format($counts['roots']) }}</div>
-            <span class="text-[11px] text-[#686868]">Parent departments</span>
+        <div class="p-4 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
+            <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#686868]">Root Departments</span>
+            <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-extrabold text-[#DF2600]">{{ number_format($counts['roots']) }}</div>
+            <span class="text-[10px] sm:text-[11px] text-[#686868]">Parent departments</span>
         </div>
 
-        <div class="p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#686868]">Sub-Categories</span>
-            <div class="mt-2 text-2xl font-extrabold text-[#007D49]">{{ number_format($counts['subcategories']) }}</div>
-            <span class="text-[11px] text-[#686868]">Nested under parents</span>
+        <div class="p-4 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
+            <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#686868]">Sub-Categories</span>
+            <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-extrabold text-[#007D49]">{{ number_format($counts['subcategories']) }}</div>
+            <span class="text-[10px] sm:text-[11px] text-[#686868]">Nested under parents</span>
         </div>
 
-        <div class="p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#686868]">Featured Online</span>
-            <div class="mt-2 text-2xl font-extrabold text-[#D58700]">{{ number_format($counts['featured']) }}</div>
-            <span class="text-[11px] text-[#686868]">Homepage spotlights</span>
+        <div class="p-4 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs">
+            <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#686868]">Featured Online</span>
+            <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-extrabold text-[#D58700]">{{ number_format($counts['featured']) }}</div>
+            <span class="text-[10px] sm:text-[11px] text-[#686868]">Homepage spotlights</span>
         </div>
 
-        <div class="p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs col-span-2 md:col-span-1">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#686868]">Synced with Square</span>
-            <div class="mt-2 text-2xl font-extrabold text-[#111111]">{{ number_format($counts['synced']) }}</div>
-            <span class="text-[11px] text-[#686868]">Has POS Square ID</span>
+        <div class="p-4 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] shadow-xs col-span-2 md:col-span-1">
+            <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#686868]">Synced with Square</span>
+            <div class="mt-1 sm:mt-2 text-xl sm:text-2xl font-extrabold text-[#111111]">{{ number_format($counts['synced']) }}</div>
+            <span class="text-[10px] sm:text-[11px] text-[#686868]">Has POS Square ID</span>
         </div>
     </div>
 
     <!-- Filter & View Switcher Bar -->
-    <div class="bg-white rounded-2xl border border-[#EEEEEE] p-5 shadow-xs space-y-4">
+    <div class="bg-white rounded-2xl border border-[#EEEEEE] p-4 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
         <!-- View Mode Navigation Tabs -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEEEEE]">
-            <div class="flex items-center gap-1.5 p-1 bg-[#FAFAFA] rounded-xl border border-[#EEEEEE] self-start">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-[#EEEEEE]">
+            <div class="flex items-center gap-1.5 p-1 bg-[#FAFAFA] rounded-xl border border-[#EEEEEE] overflow-x-auto max-w-full">
                 <button type="button"
                         wire:click="$set('viewMode', 'hierarchy')"
-                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $viewMode === 'hierarchy' ? 'bg-white text-[#DF2600] shadow-xs' : 'text-[#686868] hover:text-[#111111]' }}">
+                        class="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors {{ $viewMode === 'hierarchy' ? 'bg-white text-[#DF2600] shadow-xs' : 'text-[#686868] hover:text-[#111111]' }}">
                     Hierarchical View (Square POS)
                 </button>
                 <button type="button"
                         wire:click="$set('viewMode', 'all_sub')"
-                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $viewMode === 'all_sub' ? 'bg-white text-[#DF2600] shadow-xs' : 'text-[#686868] hover:text-[#111111]' }}">
+                        class="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors {{ $viewMode === 'all_sub' ? 'bg-white text-[#DF2600] shadow-xs' : 'text-[#686868] hover:text-[#111111]' }}">
                     All Sub-Categories
                 </button>
                 <button type="button"
                         wire:click="$set('viewMode', 'parents')"
-                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors {{ $viewMode === 'parents' ? 'bg-white text-[#DF2600] shadow-xs' : 'text-[#686868] hover:text-[#111111]' }}">
+                        class="px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors {{ $viewMode === 'parents' ? 'bg-white text-[#DF2600] shadow-xs' : 'text-[#686868] hover:text-[#111111]' }}">
                     Parent Departments
                 </button>
             </div>
 
             @if ($viewMode === 'hierarchy')
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 shrink-0">
                     <button type="button"
                             wire:click="expandAll"
                             class="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#686868] hover:text-[#111111] hover:bg-[#F6F6F6] transition-colors">
@@ -128,7 +128,7 @@
         </div>
 
         <!-- Filter Controls -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <!-- Search -->
             <div class="relative">
                 <input type="text"
@@ -308,7 +308,7 @@
                                 </div>
                             @else
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-left text-sm">
+                                    <table class="w-full text-left text-sm min-w-[580px]">
                                         <thead class="bg-[#FAFAFA] text-[11px] font-extrabold uppercase tracking-wider text-[#686868] border-b border-[#EEEEEE]">
                                             <tr>
                                                 <th class="py-2.5 px-6 pl-12">Sub-Category</th>
@@ -433,7 +433,7 @@
     @if ($viewMode === 'all_sub')
         <div class="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden shadow-xs">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-sm min-w-[680px]">
                     <thead class="bg-[#FAFAFA] text-[11px] font-extrabold uppercase tracking-wider text-[#686868] border-b border-[#EEEEEE]">
                         <tr>
                             <th class="py-3 px-6">Sub-Category</th>
@@ -562,7 +562,7 @@
     @if ($viewMode === 'parents')
         <div class="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden shadow-xs">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-sm min-w-[680px]">
                     <thead class="bg-[#FAFAFA] text-[11px] font-extrabold uppercase tracking-wider text-[#686868] border-b border-[#EEEEEE]">
                         <tr>
                             <th class="py-3 px-6">Department</th>
@@ -685,15 +685,15 @@
     <!-- Create / Edit Category Modal -->
     @if ($showModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="category-modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-3 sm:px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-black/50 transition-opacity" wire:click="$set('showModal', false)"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div class="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full" style="background-color: #ffffff;">
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-4 sm:my-8 align-middle max-w-2xl w-full mx-auto" style="background-color: #ffffff;">
                     <!-- Modal Header -->
-                    <div class="p-6 border-b border-[#EEEEEE] flex items-center justify-between">
+                    <div class="p-4 sm:p-6 border-b border-[#EEEEEE] flex items-center justify-between">
                         <div>
-                            <h3 class="text-lg font-extrabold text-[#111111]" id="category-modal-title">
+                            <h3 class="text-base sm:text-lg font-extrabold text-[#111111]" id="category-modal-title">
                                 {{ $editingCategoryId ? 'Edit Category: '.$name : 'Create New Category' }}
                             </h3>
                             <p class="mt-0.5 text-xs text-[#686868]">
@@ -709,7 +709,7 @@
 
                     <!-- Modal Form -->
                     <form wire:submit="save">
-                        <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                        <div class="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
                             <!-- Category Name -->
                             <div>
                                 <label class="block text-xs font-bold text-[#111111] mb-1">Category Name *</label>
@@ -940,7 +940,7 @@
                         </div>
 
                         <!-- Modal Actions -->
-                        <div class="p-6 border-t border-[#EEEEEE] bg-[#FAFAFA] flex items-center justify-end gap-3">
+                        <div class="p-4 sm:p-6 border-t border-[#EEEEEE] bg-[#FAFAFA] flex items-center justify-end gap-3">
                             <button type="button"
                                     wire:click="$set('showModal', false)"
                                     class="px-4 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-xs font-bold text-[#111111] hover:bg-[#F6F6F6] transition-colors">
@@ -968,12 +968,12 @@
     <!-- Delete Confirmation Modal -->
     @if ($showDeleteModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="delete-modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-3 sm:px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-black/50 transition-opacity" wire:click="$set('showDeleteModal', false)"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div class="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full" style="background-color: #ffffff;">
-                    <div class="p-6">
+                <div class="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-4 sm:my-8 align-middle max-w-md w-full mx-auto" style="background-color: #ffffff;">
+                    <div class="p-5 sm:p-6">
                         <div class="w-12 h-12 rounded-full bg-[#FFF0EC] text-[#DF2600] flex items-center justify-center mx-auto mb-4">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />

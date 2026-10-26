@@ -199,3 +199,104 @@ test('staff can toggle advanced settings in recipe modal', function () {
         ->call('toggleAdvanced')
         ->assertSet('showAdvanced', false);
 });
+
+test('staff can manage culinary ingredients and link shelf variations', function () {
+    $product = testProduct('Golden Sella Basmati', 'golden-sella-rice');
+    $variation = \App\Models\ProductVariation::create([
+        'product_id' => $product->id,
+        'name' => '5kg Bag',
+        'price_cents' => 1850,
+        'stock_quantity' => 15,
+    ]);
+
+    Livewire::test(RecipesManager::class)
+        ->call('setTab', 'ingredients')
+        ->assertSet('tab', 'ingredients')
+        ->call('createIngredient')
+        ->set('ingredientName', 'Basmati Rice')
+        ->set('ingredientAltNames', 'aromatic rice, sella')
+        ->set('ingredientIsPantryStaple', false)
+        ->call('saveIngredient')
+        ->assertHasNoErrors()
+        ->assertSet('showIngredientModal', false);
+
+    $ing = \App\Models\Ingredient::where('slug', 'basmati-rice')->first();
+    expect($ing)->not->toBeNull();
+    expect($ing->alt_names)->toBe('aromatic rice, sella');
+
+    // Link variation
+    Livewire::test(RecipesManager::class)
+        ->call('openManageOptions', $ing->id)
+        ->assertSet('showOptionsModal', true)
+        ->set('selectedVariationId', $variation->id)
+        ->set('optionRank', 1)
+        ->set('optionPackFactor', 2.0)
+        ->call('addProductOption')
+        ->assertHasNoErrors();
+
+    $opt = \App\Models\IngredientProduct::where('ingredient_id', $ing->id)->first();
+    expect($opt)->not->toBeNull();
+    expect($opt->product_variation_id)->toBe($variation->id);
+    expect((float) $opt->pack_factor)->toBe(2.0);
+});
+
+test('staff can define and remove curated substitutions', function () {
+    $ing1 = \App\Models\Ingredient::create(['name' => 'Palm Oil', 'slug' => 'test-palm-oil', 'status' => 'active']);
+    $ing2 = \App\Models\Ingredient::create(['name' => 'Groundnut Oil', 'slug' => 'test-groundnut-oil', 'status' => 'active']);
+
+    Livewire::test(RecipesManager::class)
+        ->call('setTab', 'substitutions')
+        ->call('createSubstitution')
+        ->set('subBaseIngredientId', $ing1->id)
+        ->set('subSubstituteId', $ing2->id)
+        ->set('subNote', 'Use equal amounts; imparts golden hue')
+        ->call('saveSubstitution')
+        ->assertHasNoErrors()
+        ->assertSet('showSubstitutionModal', false);
+
+    expect($ing1->substitutes)->toHaveCount(1);
+    expect($ing1->substitutes->first()->id)->toBe($ing2->id);
+
+    Livewire::test(RecipesManager::class)
+        ->call('removeSubstitution', $ing1->id, $ing2->id)
+        ->assertHasNoErrors();
+
+    expect($ing1->fresh()->substitutes)->toHaveCount(0);
+});
+
+test('staff can approve a recipe when all validation rules pass', function () {
+    $product = testProduct('Scotch Bonnet Peppers', 'fresh-peppers-bundle');
+    $variation = \App\Models\ProductVariation::create([
+        'product_id' => $product->id,
+        'name' => 'Bowl',
+        'price_cents' => 300,
+        'stock_quantity' => 20,
+    ]);
+    $ing = \App\Models\Ingredient::create(['name' => 'Scotch Bonnet', 'slug' => 'scotch-bonnet-peppers', 'status' => 'active']);
+    \App\Models\IngredientProduct::create(['ingredient_id' => $ing->id, 'product_variation_id' => $variation->id, 'rank' => 1, 'pack_factor' => 1]);
+
+    $recipe = Recipe::create([
+        'name' => 'Spicy Pepper Dip',
+        'slug' => 'spicy-pepper-dip',
+        'title' => 'Spicy Pepper Dip',
+        'cuisine' => 'nigerian',
+        'steps' => '1. Pound scotch bonnets. 2. Serve with roasted meat.',
+        'base_servings' => 4,
+        'status' => Recipe::STATUS_DRAFT,
+    ]);
+
+    \App\Models\RecipeIngredient::create([
+        'recipe_id' => $recipe->id,
+        'ingredient_id' => $ing->id,
+        'role' => 'required',
+        'people_per_pack' => 4,
+    ]);
+
+    Livewire::test(RecipesManager::class)
+        ->call('approveRecipeAction', $recipe->id)
+        ->assertHasNoErrors();
+
+    expect($recipe->fresh()->status)->toBe(Recipe::STATUS_APPROVED);
+    expect($recipe->fresh()->approved_at)->not->toBeNull();
+});
+

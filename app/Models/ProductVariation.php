@@ -28,4 +28,20 @@ class ProductVariation extends Model
     {
         return $this->stock_quantity === null || $this->stock_quantity > 0;
     }
+
+    /**
+     * Variation is orderable if priced, in stock, and product is active.
+     */
+    public function isOrderable(): bool
+    {
+        if (! $this->inStock() || $this->price_cents <= 0) {
+            return false;
+        }
+
+        if ($this->relationLoaded('product')) {
+            return $this->product && (bool) $this->product->is_active;
+        }
+
+        return true;
+    }
 }

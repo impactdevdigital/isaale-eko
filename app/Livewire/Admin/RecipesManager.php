@@ -61,6 +61,7 @@ class RecipesManager extends Component
     public ?int $duration_minutes = 45;
     public string $tagline = '';
     public string $intro = '';
+    public string $description = '';
     public string $steps = '';
     public ?int $country_id = null;
     public string $image = '';
@@ -173,6 +174,7 @@ class RecipesManager extends Component
         $this->duration_minutes = 45;
         $this->tagline = '';
         $this->intro = '';
+        $this->description = '';
         $this->steps = '';
         $this->country_id = null;
         $this->image = '';
@@ -203,6 +205,7 @@ class RecipesManager extends Component
         $this->duration_minutes = $recipe->duration_minutes ?: $this->prep_minutes;
         $this->tagline = $recipe->tagline ?? '';
         $this->intro = $recipe->intro ?: $this->tagline;
+        $this->description = (string) ($recipe->description ?? '');
         $this->steps = $recipe->steps ?? '';
         $this->country_id = $recipe->country_id;
         $this->image = $recipe->image ?? '';
@@ -315,6 +318,7 @@ class RecipesManager extends Component
             'steps' => 'nullable|string',
             'tagline' => 'nullable|string|max:255',
             'intro' => 'nullable|string|max:1000',
+            'description' => 'nullable|string',
             'country_id' => 'nullable|exists:countries,id',
             'duration_minutes' => 'nullable|integer|min:1|max:480',
             'imageUpload' => 'nullable|mimes:jpeg,jpg,png,webp,svg|max:5120',
@@ -341,6 +345,7 @@ class RecipesManager extends Component
             'duration_minutes' => $this->duration_minutes ?: $this->prep_minutes,
             'tagline' => trim($this->tagline) ?: null,
             'intro' => trim($this->intro) ?: (trim($this->tagline) ?: null),
+            'description' => trim($this->description) ?: null,
             'steps' => trim($this->steps) ?: null,
             'country_id' => $this->country_id ?: null,
             'image' => $imagePath,

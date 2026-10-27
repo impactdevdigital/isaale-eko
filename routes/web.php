@@ -51,6 +51,10 @@ Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWit
 Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
 Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
 
+// Policy Pages
+Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');
+Route::view('/refund-policy', 'store.refund-policy')->name('refund-policy');
+
 
 // Customer accounts: password-free sign-in happens in the drawer.
 Route::get('/sign-in', [SessionController::class, 'create'])->middleware('guest')->name('login');

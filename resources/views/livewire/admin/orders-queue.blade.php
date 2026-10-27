@@ -307,6 +307,13 @@
                                         class="flex-1 py-2 px-3 rounded-xl text-white text-xs font-bold shadow-xs text-center active:scale-98 transition-transform">
                                     {{ $order->fulfilment === 'pickup' ? 'Hand Over' : 'Delivered' }}
                                 </button>
+                                @if ($order->fulfilment === 'pickup')
+                                    <button type="button"
+                                            wire:click="markAsUncollected({{ $order->id }})"
+                                            class="py-2 px-2.5 rounded-xl border border-[#DF2600]/30 bg-[#FFF0EC] text-[#DF2600] text-xs font-bold shadow-xs text-center">
+                                        Uncollected
+                                    </button>
+                                @endif
                             @endif
                         @endif
 
@@ -504,6 +511,13 @@
                                                     class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
                                                 {{ $order->fulfilment === 'pickup' ? 'Hand Over (Collected)' : 'Mark Delivered' }}
                                             </button>
+                                            @if ($order->fulfilment === 'pickup')
+                                                <button type="button"
+                                                        wire:click="markAsUncollected({{ $order->id }})"
+                                                        class="px-2.5 py-1.5 rounded-xl border border-[#DF2600]/30 bg-[#FFF0EC] text-[#DF2600] text-xs font-bold hover:bg-[#FFE0D8] transition-colors">
+                                                    Mark Uncollected
+                                                </button>
+                                            @endif
                                         @endif
                                     @endif
 
@@ -956,6 +970,13 @@
                                             class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center active:scale-98">
                                         {{ $selectedOrder->fulfilment === 'pickup' ? 'Complete & Hand Over' : 'Mark Delivered' }}
                                     </button>
+                                    @if ($selectedOrder->fulfilment === 'pickup')
+                                        <button type="button"
+                                                wire:click="markAsUncollected({{ $selectedOrder->id }})"
+                                                class="py-3 px-4 rounded-xl border border-[#DF2600]/30 bg-[#FFF0EC] text-[#DF2600] font-bold text-sm hover:bg-[#FFE0D8] transition-colors text-center active:scale-98">
+                                            Mark as Uncollected
+                                        </button>
+                                    @endif
                                 @endif
 
                                 <button type="button"

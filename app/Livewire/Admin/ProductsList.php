@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Category;
+use App\Models\Country;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Services\Square\CatalogSync;
@@ -11,8 +12,9 @@ use Livewire\WithPagination;
 
 /**
  * Products & inventory for staff. Names, prices and stock come from Square
- * (square:sync); here staff set what Square doesn't know: hidden online,
- * featured, and the item class used for returns.
+ * (square:sync); here staff inspect complete product details, set what Square
+ * doesn't know (hidden online, featured, French name and description, and
+ * the item class used for returns policy).
  */
 class ProductsList extends Component
 {
@@ -25,6 +27,25 @@ class ProductsList extends Component
     public string $stockFilter = '';
 
     public string $classFilter = '';
+
+    // Product Inspection Drawer & Editing State
+    public ?int $selectedProductId = null;
+
+    public string $editNameFr = '';
+
+    public string $editDescriptionFr = '';
+
+    public string $editDescription = '';
+
+    public string $editItemClass = 'perishable';
+
+    public bool $editIsFeatured = false;
+
+    public bool $editIsHidden = false;
+
+    public ?int $editCategoryId = null;
+
+    public ?int $editCountryId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -53,10 +74,65 @@ class ProductsList extends Component
         $this->resetPage();
     }
 
+    public function viewProduct(int $productId): void
+    {
+        $this->selectedProductId = $productId;
+        $product = Product::findOrFail($productId);
+
+        $this->editNameFr = (string) ($product->name_fr ?? '');
+        $this->editDescriptionFr = (string) ($product->description_fr ?? '');
+        $this->editDescription = (string) ($product->description ?? '');
+        $this->editItemClass = $product->item_class ?: 'perishable';
+        $this->editIsFeatured = (bool) $product->is_featured;
+        $this->editIsHidden = (bool) $product->is_hidden;
+        $this->editCategoryId = $product->category_id;
+        $this->editCountryId = $product->country_id;
+    }
+
+    public function closeDrawer(): void
+    {
+        $this->selectedProductId = null;
+    }
+
+    public function saveProduct(): void
+    {
+        if (! $this->selectedProductId) {
+            return;
+        }
+
+        $this->validate([
+            'editNameFr' => 'nullable|string|max:255',
+            'editDescriptionFr' => 'nullable|string|max:5000',
+            'editDescription' => 'nullable|string|max:5000',
+            'editItemClass' => 'required|in:perishable,non_perishable,non_food',
+            'editIsFeatured' => 'boolean',
+            'editIsHidden' => 'boolean',
+            'editCategoryId' => 'nullable|exists:categories,id',
+            'editCountryId' => 'nullable|exists:countries,id',
+        ]);
+
+        $product = Product::findOrFail($this->selectedProductId);
+        $product->update([
+            'name_fr' => trim($this->editNameFr) ?: null,
+            'description_fr' => trim($this->editDescriptionFr) ?: null,
+            'description' => trim($this->editDescription) ?: null,
+            'item_class' => $this->editItemClass,
+            'is_featured' => $this->editIsFeatured,
+            'is_hidden' => $this->editIsHidden,
+            'category_id' => $this->editCategoryId ?: null,
+            'country_id' => $this->editCountryId ?: null,
+        ]);
+
+        session()->flash('success', "Product '{$product->name}' details and French fields updated successfully.");
+    }
+
     public function toggleFeatured(int $productId): void
     {
         $product = Product::findOrFail($productId);
         $product->update(['is_featured' => ! $product->is_featured]);
+        if ($this->selectedProductId === $productId) {
+            $this->editIsFeatured = (bool) $product->is_featured;
+        }
     }
 
     /**
@@ -66,6 +142,9 @@ class ProductsList extends Component
     {
         $product = Product::findOrFail($productId);
         $product->update(['is_hidden' => ! $product->is_hidden]);
+        if ($this->selectedProductId === $productId) {
+            $this->editIsHidden = (bool) $product->is_hidden;
+        }
     }
 
     public function updateItemClass(int $productId, string $class): void
@@ -75,17 +154,21 @@ class ProductsList extends Component
         }
 
         Product::whereKey($productId)->update(['item_class' => $class]);
+        if ($this->selectedProductId === $productId) {
+            $this->editItemClass = $class;
+        }
     }
 
     public function render()
     {
         $low = (int) Setting::get('low_stock_threshold', 5);
 
-        $query = Product::with(['category.parent', 'variations'])
+        $query = Product::with(['category.parent', 'country', 'variations'])
             ->when(trim($this->search) !== '', function ($q) {
                 $term = '%'.trim($this->search).'%';
                 $q->where(fn ($sq) => $sq
                     ->whereLike('name', $term)
+                    ->orWhereLike('name_fr', $term)
                     ->orWhereHas('variations', fn ($v) => $v->whereLike('sku', $term)));
             })
             // A category includes its sub-categories.
@@ -109,12 +192,18 @@ class ProductsList extends Component
             'untracked' => Product::whereHas('variations', fn ($v) => $v->whereNull('stock_quantity'))->count(),
         ];
 
+        $selectedProduct = $this->selectedProductId
+            ? Product::with(['category.parent', 'country', 'variations', 'recipes'])->find($this->selectedProductId)
+            : null;
+
         return view('livewire.admin.products-list', [
             'products' => $query->orderBy('name')->paginate(20),
             'categories' => Category::roots()->with('children')->get(),
+            'countries' => Country::orderBy('name')->get(),
             'counts' => $counts,
             'low' => $low,
             'lastSync' => cache(CatalogSync::STATE_KEY),
+            'selectedProduct' => $selectedProduct,
         ])->layout('layouts.admin', ['header' => 'Products & Inventory']);
     }
 }

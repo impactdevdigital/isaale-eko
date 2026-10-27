@@ -116,3 +116,30 @@ test('staff can cancel an active order', function () {
     expect($freshOrder->status)->toBe(Order::STATUS_CANCELLED);
     expect($freshOrder->cancelled_at)->not->toBeNull();
 });
+
+test('staff can mark ready pickup order as uncollected and subsequently complete or reschedule it', function () {
+    $order = createTestOrder([
+        'status' => Order::STATUS_PAID,
+        'fulfilment' => 'pickup',
+        'fulfilment_status' => Order::FULFILMENT_READY,
+    ]);
+
+    // 1. Staff marks order as Uncollected
+    Livewire::test(OrdersQueue::class)
+        ->call('markAsUncollected', $order->id)
+        ->assertHasNoErrors()
+        ->assertSee('marked as Uncollected');
+
+    $uncollectedOrder = $order->fresh();
+    expect($uncollectedOrder->status)->toBe(Order::STATUS_UNCOLLECTED)
+        ->and($uncollectedOrder->uncollected_at)->not->toBeNull();
+
+    // 2. Customer shows up late; staff completes the order
+    Livewire::test(OrdersQueue::class)
+        ->call('markAsCompleted', $order->id)
+        ->assertHasNoErrors();
+
+    $completedOrder = $order->fresh();
+    expect($completedOrder->fulfilment_status)->toBe(Order::FULFILMENT_COMPLETED)
+        ->and($completedOrder->status)->toBe(Order::STATUS_PAID);
+});

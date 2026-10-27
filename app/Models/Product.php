@@ -180,4 +180,14 @@ class Product extends Model
     {
         return $this->gallery ?: array_filter([$this->image]);
     }
+
+    public function getLocalizedNameAttribute(): string
+    {
+        return $this->tr('name') ?: (string) $this->name;
+    }
+
+    public function getLocalizedDescriptionAttribute(): ?string
+    {
+        return $this->tr('description') ?: $this->description;
+    }
 }

@@ -21,6 +21,11 @@ trait HasTranslations
         $default = config('locales.default', 'en');
 
         if ($locale !== $default) {
+            $column = "{$field}_{$locale}";
+            if (array_key_exists($column, $this->attributes) && filled($this->attributes[$column])) {
+                return $this->attributes[$column];
+            }
+
             $row = $this->translations->where('locale', $locale)->firstWhere('field', $field);
             $usable = $row && filled($row->value)
                 && ($row->review_status === 'reviewed' || Setting::get('show_unreviewed_translations') === 'yes');

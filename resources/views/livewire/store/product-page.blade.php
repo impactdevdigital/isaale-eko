@@ -16,7 +16,7 @@
                 <li><a href="{{ route('shop', ['category' => $category->slug]) }}" wire:navigate class="hover:text-ink">{{ $category->name }}</a></li>
             @endif
             <li aria-hidden="true">/</li>
-            <li class="font-bold text-ink" aria-current="page">{{ $product->name }}</li>
+            <li class="font-bold text-ink" aria-current="page">{{ $product->localized_name }}</li>
         </ol>
     </nav>
 
@@ -37,7 +37,7 @@
 
             <div class="relative aspect-[520/480] flex-1 overflow-hidden rounded-sm bg-grayscale-10">
                 @foreach ($images as $i => $image)
-                    <img src="{{ asset($image) }}" alt="{{ $i === 0 ? $product->name : '' }}" x-show="active === {{ $i }}" @if ($i > 0) x-cloak @endif
+                    <img src="{{ asset($image) }}" alt="{{ $i === 0 ? $product->localized_name : '' }}" x-show="active === {{ $i }}" @if ($i > 0) x-cloak @endif
                          @class(['absolute inset-0 size-full object-cover', 'opacity-50 grayscale' => ! $canBuy])>
                 @endforeach
             </div>
@@ -46,9 +46,14 @@
         {{-- Details --}}
         <div class="flex flex-col gap-4">
             <div>
-                <h1 class="text-hero-mobile">{{ $product->name }}</h1>
+                <h1 class="text-hero-mobile">{{ $product->localized_name }}</h1>
                 @if ($variation?->name)
                     <p class="mt-1 text-body text-body-muted">{{ $variation->name }}</p>
+                @endif
+                @if ($product->localized_description)
+                    <div class="mt-2 text-sm text-[#555555] leading-relaxed whitespace-pre-line">
+                        {{ $product->localized_description }}
+                    </div>
                 @endif
             </div>
 

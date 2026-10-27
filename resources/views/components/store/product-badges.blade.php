@@ -16,15 +16,11 @@
     @if ($product->bestseller_rank)
         <span @class([$tag, 'flex items-center gap-1 bg-best-40 px-2 text-white'])>
             <x-store.icon name="star" />
-            #{{ $product->bestseller_rank }} Bestseller
+            Bestseller
         </span>
     @endif
 
     @if ($product->is_hot)
         <span @class([$tag, 'flex items-center bg-sale-50 px-2 text-white'])>Hot</span>
-    @endif
-
-    @if ($product->discount_estimate)
-        <x-store.discount-tag :percent="$product->discount_estimate" :compact="$compact" />
     @endif
 </div>

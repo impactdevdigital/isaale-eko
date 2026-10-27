@@ -97,6 +97,7 @@ class Dashboard extends Component
             'store_status_text' => $storeStatusText,
             'total_products' => Product::count(),
             'total_recipes' => Recipe::count(),
+            'uncollected_orders_count' => Order::where('status', Order::STATUS_UNCOLLECTED)->count(),
         ];
 
         return view('livewire.admin.dashboard', [

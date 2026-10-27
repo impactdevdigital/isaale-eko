@@ -67,7 +67,7 @@ class StoreNavigation
                     'All Recipes' => route('kitchen.index'),
                     'Cook With What I Have' => route('kitchen.pantry'),
                     'Food stories' => '#',
-                    'Product stories' => '#',
+                    'Brand Updates' => '#',
                 ],
                 'eyebrow' => 'Discover Ìsàlèè Èkó',
                 'title' => 'Cook Something Good',

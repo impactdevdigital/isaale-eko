@@ -105,3 +105,36 @@ test('admin products list filters by stock state and category', function () {
     // A parent category includes its sub-categories.
     $list->set('stockFilter', '')->set('categoryFilter', (string) $parent->id)->assertSee('Plenty')->assertDontSee('Few Left');
 });
+
+test('admin products list opens inspection drawer and updates French product fields', function () {
+    $product = Product::create([
+        'square_id' => 'ITEM_FR_TEST',
+        'name' => 'African Honey Beans',
+        'slug' => 'african-honey-beans',
+        'description' => 'Sweet brown honey beans from West Africa.',
+        'item_class' => 'perishable',
+    ]);
+    $product->variations()->create(['name' => '1kg Pack', 'sku' => 'HB-1000', 'price_cents' => 950, 'stock_quantity' => 12]);
+
+    Livewire::test(ProductsList::class)
+        ->assertStatus(200)
+        ->call('viewProduct', $product->id)
+        ->assertSet('selectedProductId', $product->id)
+        ->assertSee('Product Inspection')
+        ->assertSee('African Honey Beans')
+        ->assertSee('HB-1000')
+        ->set('editNameFr', 'Haricots Miel Africains')
+        ->set('editDescriptionFr', 'Délicieux haricots bruns doux d’Afrique de l’Ouest.')
+        ->call('saveProduct')
+        ->assertHasNoErrors()
+        ->assertSee('Product \'African Honey Beans\' details and French fields updated successfully.');
+
+    $product->refresh();
+    expect($product->name_fr)->toBe('Haricots Miel Africains')
+        ->and($product->description_fr)->toBe('Délicieux haricots bruns doux d’Afrique de l’Ouest.')
+        ->and($product->tr('name', 'fr'))->toBe('Haricots Miel Africains')
+        ->and($product->tr('name', 'en'))->toBe('African Honey Beans')
+        ->and($product->tr('description', 'fr'))->toBe('Délicieux haricots bruns doux d’Afrique de l’Ouest.')
+        ->and($product->tr('description', 'en'))->toBe('Sweet brown honey beans from West Africa.');
+});
+

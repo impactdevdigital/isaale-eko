@@ -45,7 +45,7 @@
             'capitalize',
             'min-h-[34px] pb-2 text-link' => $compact,
             'pb-[23px] text-button-sm' => ! $compact,
-        ])><a href="{{ route('product', $product) }}" wire:navigate class="hover:underline">{{ $product->name }}</a></h3>
+        ])><a href="{{ route('product', $product) }}" wire:navigate class="hover:underline">{{ $product->localized_name }}</a></h3>
 
         @if (! $compact && $variation?->name)
             <p class="text-body-xs text-body-muted">{{ $variation->name }}</p>

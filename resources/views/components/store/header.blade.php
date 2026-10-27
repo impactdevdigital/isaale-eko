@@ -4,7 +4,22 @@
     $user = auth()->user();
 @endphp
 
-<header x-data="{ menu: null }" @keydown.escape.window="menu = null" @click.outside="menu = null" class="relative z-30">
+<header x-data="{
+    menu: null,
+    timeout: null,
+    open(name) {
+        clearTimeout(this.timeout);
+        this.menu = name;
+    },
+    close(delay = 180) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => { this.menu = null; }, delay);
+    },
+    toggle(name) {
+        clearTimeout(this.timeout);
+        this.menu = this.menu === name ? null : name;
+    }
+}" @keydown.escape.window="clearTimeout(timeout); menu = null" @click.outside="clearTimeout(timeout); menu = null" class="sticky top-0 z-30 bg-surface shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
     {{-- Utility bar --}}
     <div class="bg-ink text-caption">
         <div class="flex h-8 items-center justify-between px-4 md:px-7">
@@ -41,11 +56,15 @@
                     </button>
                 </form>
 
-                <a href="#" class="hidden shrink-0 items-center gap-2 lg:flex">
-                    <x-store.icon name="location" />
+                <a href="https://www.google.com/maps/place/%C3%8Csal%C3%A8%C3%A8+%C3%88k%C3%B2/@45.2753734,-66.0789801,17z/data=!3m1!4b1!4m6!3m5!1s0x4ca7b34f93111275:0xf3bb0621841cf6d5!8m2!3d45.2753734!4d-66.0789801!16s%2Fg%2F11vx3g_llm?authuser=0&amp;hl=en&amp;entry=ttu&amp;g_ep=EgoyMDI2MTAyMC4wIKXMDSoASAFQAw%3D%3D"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   title="View Ìsàlèè Èkó on Google Maps"
+                   class="group hidden shrink-0 items-center gap-2 transition-opacity hover:opacity-80 lg:flex">
+                    <x-store.icon name="location" class="transition-transform group-hover:scale-110" />
                     <span class="flex flex-col">
                         <span class="text-body-xs font-normal text-body-muted">Store Location</span>
-                        <strong class="text-body-xs font-extrabold capitalize">Saint John, Canada</strong>
+                        <strong class="text-body-xs font-extrabold capitalize text-ink">Saint John, Canada</strong>
                     </span>
                 </a>
 
@@ -87,7 +106,9 @@
                     @foreach ($navLinks as $link)
                         @isset($link['menu'])
                             <button type="button"
-                                    @click="menu = menu === '{{ $link['menu'] }}' ? null : '{{ $link['menu'] }}'"
+                                    @mouseenter="open('{{ $link['menu'] }}')"
+                                    @mouseleave="close(180)"
+                                    @click="toggle('{{ $link['menu'] }}')"
                                     :aria-expanded="menu === '{{ $link['menu'] }}'"
                                     aria-controls="menu-{{ $link['menu'] }}"
                                     :class="menu === '{{ $link['menu'] }}' ? 'border-brand-yellow' : 'border-transparent'"
@@ -96,7 +117,9 @@
                                 <x-store.icon name="arrow-down" class="size-2.5 transition-transform" x-bind:class="menu === '{{ $link['menu'] }}' && 'rotate-180'" />
                             </button>
                         @else
-                            <a href="{{ $link['url'] }}" class="flex shrink-0 items-center border-b-[3px] border-transparent px-[15px] text-nav capitalize transition-colors hover:border-brand-yellow">
+                            <a href="{{ $link['url'] }}"
+                               @mouseenter="close(50)"
+                               class="flex shrink-0 items-center border-b-[3px] border-transparent px-[15px] text-nav capitalize transition-colors hover:border-brand-yellow">
                                 {{ $link['label'] }}
                             </a>
                         @endisset

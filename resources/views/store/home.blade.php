@@ -1,11 +1,11 @@
 <x-layouts::store>
-    <div class="page-container flex flex-col pt-4 md:pt-6">
+    <div class="page-container flex flex-col pt-6 md:pt-6">
         <x-store.banner-carousel :slides="$heroSlides" tall />
 
         {{-- Fresh this week --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
             <x-store.section-heading title="Fresh This Week" subtitle="Popular picks. Great prices. Real flavour." link="View all" :href="route('shop')" />
-            <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-6 xl:grid-cols-7">
+            <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] after:w-4 after:shrink-0 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 md:after:hidden lg:grid-cols-6 xl:grid-cols-7">
                 @foreach ($freshThisWeek as $product)
                     <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" />
                 @endforeach
@@ -15,7 +15,7 @@
         {{-- Shop ingredients by recipe --}}
         <section class="flex flex-col gap-4 pt-10 pb-2 md:pt-[55px]">
             <x-store.section-heading eyebrow="Cook by craving" title="Shop Ingredients By Recipe" subtitle="Real recipes. Real ingredients. Real home cooking." link="View more recipes" />
-            <div class="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
+            <div class="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 [scrollbar-width:none] after:w-4 after:shrink-0 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:after:hidden">
                 @foreach ($recipes as $recipe)
                     <x-store.recipe-card :recipe="$recipe" class="w-[340px] shrink-0 snap-start lg:w-auto" />
                 @endforeach
@@ -27,7 +27,7 @@
         {{-- More from the shelves --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
             <x-store.section-heading title="More From The Shelves" subtitle="Everyday essentials and new things worth trying." link="Explore all products" :href="route('shop')" />
-            <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-6 xl:grid-cols-7">
+            <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] after:w-4 after:shrink-0 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 md:after:hidden lg:grid-cols-6 xl:grid-cols-7">
                 @foreach ($moreFromTheShelves as $product)
                     <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" />
                 @endforeach
@@ -53,7 +53,7 @@
         {{-- Shop by country --}}
         <section id="shop-by-country" class="flex scroll-mt-4 flex-col gap-4 pt-10 pb-12">
             <x-store.section-heading title="Shop By Country" subtitle="Explore authentic flavours from across Africa and the Caribbean." />
-            <div class="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:-mr-[30px] md:ml-0 md:pl-0 xl:-mr-[72px]">
+            <div class="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 [scrollbar-width:none] after:w-4 after:shrink-0 md:-mr-[30px] md:ml-0 md:pl-0 md:after:hidden xl:-mr-[72px]">
                 @foreach ($countries as $country)
                     <a href="{{ route('shop.country', $country) }}" @class([
                         'relative isolate flex size-[170px] shrink-0 snap-start flex-col gap-2 overflow-hidden rounded-sm p-4 md:size-[260px] md:gap-4 md:p-8',
@@ -68,10 +68,13 @@
             </div>
         </section>
 
+        {{-- Why customers return (Testimonials) --}}
+        <x-store.testimonials />
+
         {{-- Ask Asha + community --}}
         <div class="mb-12 overflow-hidden rounded-sm">
             <section class="grid gap-6 bg-surface-hero-cream p-3.5 lg:grid-cols-[664fr_604fr] lg:gap-0">
-                <img src="{{ asset('images/store/community/asha.webp') }}" alt="Asha, holding a woven basket in the Ìsàlèè Èkó store" loading="lazy" class="aspect-[3/2] w-full rounded-xl object-cover lg:h-[440px] lg:aspect-auto">
+                <img src="{{ asset('images/store/community/asha.webp') }}" alt="Asha, your grocery concierge" loading="lazy" class="aspect-[3/2] w-full rounded-xl object-cover lg:h-[440px] lg:aspect-auto">
                 <div class="flex flex-col gap-2 px-4 pb-10 lg:justify-center lg:px-[52px] lg:py-[72px]">
                     <p class="text-eyebrow uppercase text-[#574B2F]">Your grocery concierge</p>
                     <h2 class="text-h2-mobile md:text-hero-mobile">Meet Asha.</h2>

@@ -146,8 +146,8 @@ class OrdersQueue extends Component
             'fulfilment_status' => Order::FULFILMENT_COMPLETED,
         ];
 
-        // If it was pay at pickup, fulfilling confirms counter payment
-        if ($order->status === Order::STATUS_PLACED) {
+        // If it was pay at pickup or was uncollected, fulfilling confirms payment/collection
+        if ($order->status === Order::STATUS_PLACED || $order->status === Order::STATUS_UNCOLLECTED) {
             $updates['status'] = Order::STATUS_PAID;
             $updates['paid_at'] = now();
         }
@@ -156,6 +156,27 @@ class OrdersQueue extends Component
 
         $action = $order->fulfilment === 'pickup' ? 'Collected' : 'Delivered';
         session()->flash('success', "Order #{$order->number} has been completed ({$action}).");
+    }
+
+    public function markAsUncollected(int $orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+        if ($order->fulfilment !== 'pickup') {
+            session()->flash('warning', "Only in-store pickup orders can be marked as uncollected.");
+            return;
+        }
+
+        $order->update([
+            'status' => Order::STATUS_UNCOLLECTED,
+            'uncollected_at' => now(),
+        ]);
+
+        if ($order->contact_email) {
+            \Illuminate\Support\Facades\Notification::route('mail', $order->contact_email)
+                ->notify(new \App\Notifications\OrderUncollected($order, 'held'));
+        }
+
+        session()->flash('warning', "Order #{$order->number} marked as Uncollected and moved to the Uncollected Orders Desk.");
     }
 
     // -------------------------------------------------------------

@@ -300,3 +300,27 @@ test('staff can approve a recipe when all validation rules pass', function () {
     expect($recipe->fresh()->approved_at)->not->toBeNull();
 });
 
+test('staff can save explanatory description content on a recipe', function () {
+    $recipe = Recipe::create([
+        'name' => 'Banga Palm Nut Soup',
+        'slug' => 'banga-palm-nut-soup',
+        'title' => 'Banga Palm Nut Soup',
+        'cuisine' => 'nigerian',
+        'tagline' => 'Delta delicacy',
+        'intro' => 'A rich palm nut extract soup from the Niger Delta.',
+        'description' => 'Traditional Urhobo and Itsekiri soup prepared with fresh palm fruits, beletiete, and oburunbebe stick.',
+        'steps' => '1. Extract palm oil juice. 2. Boil with traditional banga spices.',
+        'base_servings' => 4,
+        'status' => Recipe::STATUS_DRAFT,
+    ]);
+
+    Livewire::test(RecipesManager::class)
+        ->call('editRecipe', $recipe->id)
+        ->assertSet('description', 'Traditional Urhobo and Itsekiri soup prepared with fresh palm fruits, beletiete, and oburunbebe stick.')
+        ->set('description', 'Updated rich cultural description with preparation details and serving suggestions.')
+        ->call('saveRecipe')
+        ->assertHasNoErrors();
+
+    expect($recipe->fresh()->description)->toBe('Updated rich cultural description with preparation details and serving suggestions.');
+});
+

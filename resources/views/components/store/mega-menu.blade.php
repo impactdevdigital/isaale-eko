@@ -4,6 +4,8 @@
     x-show="menu === '{{ $name }}'"
     x-cloak
     x-transition.opacity.duration.150ms
+    @mouseenter="open('{{ $name }}')"
+    @mouseleave="close(180)"
     id="menu-{{ $name }}"
     class="absolute inset-x-0 top-full z-30 flex max-h-[min(640px,calc(100vh-160px))] border-b border-grayscale-40 bg-surface shadow-card"
 >

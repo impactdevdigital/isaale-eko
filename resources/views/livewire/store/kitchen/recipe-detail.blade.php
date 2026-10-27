@@ -70,6 +70,12 @@
                         {{ $recipe->intro }}
                     </p>
                 @endif
+
+                @if ($recipe->description)
+                    <div class="text-xs sm:text-sm text-[#444444] leading-relaxed pt-2 border-t border-[#EEEEEE] whitespace-pre-line">
+                        {{ $recipe->description }}
+                    </div>
+                @endif
             </div>
 
             <!-- Servings Selector & Kit Estimate Card -->

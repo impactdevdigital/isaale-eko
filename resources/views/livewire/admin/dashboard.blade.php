@@ -42,8 +42,8 @@
         </div>
     </div>
 
-    <!-- 4 Live Scorecard KPI Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <!-- 5 Live Scorecard KPI Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <!-- KPI 1: Today's Gross Sales -->
         <div class="p-3.5 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] space-y-1.5 sm:space-y-2 shadow-2xs">
             <div class="flex items-center justify-between text-xs text-[#686868]">
@@ -88,7 +88,30 @@
             </div>
         </div>
 
-        <!-- KPI 3: Inventory Alerts -->
+        <!-- KPI 3: Uncollected Orders Desk -->
+        <a href="{{ route('admin.orders', ['statusFilter' => 'uncollected']) }}"
+           class="p-3.5 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] space-y-1.5 sm:space-y-2 shadow-2xs hover:border-[#DF2600]/40 transition-colors block">
+            <div class="flex items-center justify-between text-xs text-[#686868]">
+                <span class="font-extrabold uppercase tracking-wider text-[10px] sm:text-[11px] text-[#DF2600]">Uncollected</span>
+                <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#FFF0EC] text-[#DF2600] flex items-center justify-center font-bold">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </span>
+            </div>
+            <div class="text-xl sm:text-2xl font-black {{ $kpis['uncollected_orders_count'] > 0 ? 'text-[#DF2600]' : 'text-[#111111]' }}">
+                {{ $kpis['uncollected_orders_count'] }}
+            </div>
+            <div class="text-[11px] sm:text-xs">
+                @if ($kpis['uncollected_orders_count'] > 0)
+                    <span class="font-bold text-[#DF2600]">Needs Review &rarr;</span>
+                @else
+                    <span class="font-bold text-[#007D49]">None overdue</span>
+                @endif
+            </div>
+        </a>
+
+        <!-- KPI 4: Inventory Alerts -->
         <div class="p-3.5 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] space-y-1.5 sm:space-y-2 shadow-2xs">
             <div class="flex items-center justify-between text-xs text-[#686868]">
                 <span class="font-extrabold uppercase tracking-wider text-[10px] sm:text-[11px]">Low Stock</span>
@@ -110,7 +133,7 @@
             </div>
         </div>
 
-        <!-- KPI 4: Store Status -->
+        <!-- KPI 5: Store Status -->
         <div class="p-3.5 sm:p-5 bg-white rounded-2xl border border-[#EEEEEE] space-y-1.5 sm:space-y-2 shadow-2xs">
             <div class="flex items-center justify-between text-xs text-[#686868]">
                 <span class="font-extrabold uppercase tracking-wider text-[10px] sm:text-[11px]">Store Status</span>

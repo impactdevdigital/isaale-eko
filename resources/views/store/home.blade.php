@@ -74,7 +74,7 @@
         {{-- Ask Asha + community --}}
         <div class="mb-12 overflow-hidden rounded-sm">
             <section class="grid gap-6 bg-surface-hero-cream p-3.5 lg:grid-cols-[664fr_604fr] lg:gap-0">
-                <img src="{{ asset('images/store/community/asha.webp') }}" alt="Asha, your grocery concierge" loading="lazy" class="aspect-[3/2] w-full rounded-xl object-cover lg:h-[440px] lg:aspect-auto">
+                <img src="{{ asset('images/store/community/asha.webp?v=2') }}" alt="Asha, your grocery concierge" loading="lazy" class="aspect-[3/2] w-full rounded-xl object-cover lg:h-[440px] lg:aspect-auto">
                 <div class="flex flex-col gap-2 px-4 pb-10 lg:justify-center lg:px-[52px] lg:py-[72px]">
                     <p class="text-eyebrow uppercase text-[#574B2F]">Your grocery concierge</p>
                     <h2 class="text-h2-mobile md:text-hero-mobile">Meet Asha.</h2>

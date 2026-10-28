@@ -21,8 +21,8 @@
     </nav>
 
     <div class="mt-6 grid gap-8 lg:mt-9 lg:grid-cols-[610fr_661fr] lg:gap-6">
-        {{-- Gallery --}}
-        <div x-data="{ active: 0 }" class="flex flex-col-reverse gap-2.5 sm:flex-row lg:sticky lg:top-6 lg:self-start lg:pt-[160px]">
+        {{-- Gallery: stays under the header while the details scroll, then both scroll away together --}}
+        <div x-data="{ active: 0 }" class="flex flex-col-reverse gap-2.5 sm:flex-row lg:sticky lg:top-[calc(var(--header-h,0px)+1.5rem)] lg:self-start">
             @if (count($images) > 1)
                 <div class="flex gap-2.5 sm:flex-col">
                     @foreach ($images as $i => $image)
@@ -132,10 +132,10 @@
 
             {{-- Buy --}}
             <div class="flex items-center gap-3 sm:gap-4">
-                <div @class(['flex h-11 shrink-0 items-center rounded-full border border-grayscale-40', 'opacity-50' => ! $canBuy])>
-                    <button type="button" wire:click="decrement" @disabled(! $canBuy || $quantity <= 1) class="flex h-full w-11 items-center justify-center rounded-l-full border-r border-grayscale-40" aria-label="Decrease quantity"><x-store.icon name="minus" /></button>
-                    <span class="w-12 text-center text-[16px] font-bold" aria-live="polite">{{ $quantity }}</span>
-                    <button type="button" wire:click="increment" @disabled(! $canBuy) class="flex h-full w-11 items-center justify-center rounded-r-full border-l border-grayscale-40" aria-label="Increase quantity"><x-store.icon name="plus" class="size-3" /></button>
+                <div @class(['flex h-11 shrink-0 items-center rounded-full border border-grayscale-40 bg-surface', 'opacity-50' => ! $canBuy])>
+                    <button type="button" wire:click="decrement" @disabled(! $canBuy || $quantity <= 1) class="-m-px flex size-11 items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[16px] leading-[21px] font-extrabold transition-colors enabled:hover:border-ink" aria-label="Decrease quantity">−</button>
+                    <span class="w-[50px] text-center text-[16px] leading-[21px] font-extrabold" aria-live="polite">{{ $quantity }}</span>
+                    <button type="button" wire:click="increment" @disabled(! $canBuy) class="-m-px flex size-11 items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[16px] leading-[21px] font-extrabold transition-colors enabled:hover:border-ink" aria-label="Increase quantity">+</button>
                 </div>
 
                 @if ($canBuy)

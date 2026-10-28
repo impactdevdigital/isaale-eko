@@ -19,7 +19,8 @@
         clearTimeout(this.timeout);
         this.menu = this.menu === name ? null : name;
     }
-}" @keydown.escape.window="clearTimeout(timeout); menu = null" @click.outside="clearTimeout(timeout); menu = null" class="sticky top-0 z-30 bg-surface shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+}" x-init="new ResizeObserver(() => document.documentElement.style.setProperty('--header-h', $el.offsetHeight + 'px')).observe($el)"
+   @keydown.escape.window="clearTimeout(timeout); menu = null" @click.outside="clearTimeout(timeout); menu = null" class="sticky top-0 z-30 bg-surface shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
     {{-- Utility bar --}}
     <div class="bg-ink text-caption">
         <div class="flex h-8 items-center justify-between px-4 md:px-7">

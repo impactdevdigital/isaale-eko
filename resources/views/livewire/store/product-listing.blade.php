@@ -55,15 +55,15 @@
         </nav>
 
         <div x-data="{ filtersOpen: false }" class="mt-6 flex flex-col gap-8 lg:mt-9 lg:flex-row lg:gap-12">
-            {{-- Filters --}}
-            <aside class="lg:w-60 lg:shrink-0">
+            {{-- Filters: their own scroll area, pinned under the header while the products scroll --}}
+            <aside class="lg:sticky lg:top-[calc(var(--header-h,0px)+1.5rem)] lg:max-h-[calc(100vh-var(--header-h,0px)-3rem)] lg:w-60 lg:shrink-0 lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pr-2 lg:[scrollbar-width:thin]">
                 <button type="button" @click="filtersOpen = ! filtersOpen" :aria-expanded="filtersOpen"
                         class="flex w-full items-center justify-between rounded-sm border border-grayscale-40 px-4 py-3 text-[14px] font-bold lg:hidden">
                     Filter products
                     <x-store.icon name="arrow-down" class="size-3 transition-transform" x-bind:class="filtersOpen && 'rotate-180'" />
                 </button>
 
-                <div x-show="filtersOpen" x-cloak class="mt-4 lg:mt-0 lg:!block">
+                <div x-show="filtersOpen" x-cloak class="mt-4 max-h-[60vh] overflow-y-auto overscroll-contain lg:mt-0 lg:!block lg:max-h-none lg:overflow-visible">
                     <p class="hidden pb-8 text-[14px] leading-[18px] font-bold lg:block">Filter products</p>
 
                     @if ($categoryTree->isNotEmpty())

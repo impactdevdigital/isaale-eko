@@ -38,7 +38,7 @@ window.squarePayments = ({ env, appId, locationId, method, amount, currency, cou
     walletAvailable: { applePay: false, googlePay: false },
 
     async init() {
-        if (method === 'pay_at_pickup') return;
+        if (!method) return;
 
         try {
             const Square = await loadSdk(env);
@@ -74,13 +74,13 @@ window.squarePayments = ({ env, appId, locationId, method, amount, currency, cou
                 } catch (e) { /* Needs Safari and a registered domain. */ }
 
                 if (!this.walletAvailable.googlePay && !this.walletAvailable.applePay) {
-                    this.error = 'Apple Pay and Google Pay aren’t available in this browser. Choose card or Pay at Pickup instead.';
+                    this.error = 'Apple Pay and Google Pay aren’t available in this browser. Choose card instead.';
                 }
             }
 
             this.ready = true;
         } catch (e) {
-            this.error = 'Card payments are unavailable right now. Please try again shortly or choose Pay at Pickup.';
+            this.error = 'Card payments are unavailable right now. Please try again shortly.';
         }
     },
 
@@ -94,13 +94,6 @@ window.squarePayments = ({ env, appId, locationId, method, amount, currency, cou
 
     async pay(wallet = null) {
         if (this.busy) return;
-
-        if (this.method === 'pay_at_pickup') {
-            this.busy = true;
-            window.dispatchEvent(new CustomEvent('payment-processing', { detail: true }));
-            try { await this.$wire.pay(); } finally { this.done(); }
-            return;
-        }
 
         const source = this.method === 'card'
             ? this.instance

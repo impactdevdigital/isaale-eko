@@ -24,9 +24,11 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 /**
- * One-page checkout (Figma "Revised guest & returning customer proposal"):
- * Pickup or Delivery, verified contact, slot or address, payment method and
- * a single order summary. Entered details survive switching methods.
+ * One-page checkout (Figma 04 "Fulfilment & Order Review"): Pickup or
+ * Delivery, email, slot or address, payment method and items on one page.
+ * "Proceed to checkout" checks what's missing and verifies a guest's email
+ * with a code; once signed in and complete, the summary shows Pay.
+ * Entered details survive switching methods.
  */
 #[Layout('layouts::store')]
 #[Title('Checkout')]
@@ -34,17 +36,13 @@ class Checkout extends Component
 {
     public string $fulfilment = 'pickup';
 
-    /** Open dialog: contact, code, slot, address or addresses. */
+    /** Open dialog: code, slot, address or addresses. */
     public ?string $modal = null;
 
-    // Contact (guest)
+    // Contact (guest). Guests always check out with an email so the order can follow them to their account.
     public string $name = '';
 
-    public string $channel = 'email';
-
     public string $email = '';
-
-    public string $phone = '';
 
     public bool $marketing = false;
 
@@ -81,9 +79,6 @@ class Checkout extends Component
 
     public bool $saveToAddressBook = false;
 
-    /** With SMS on delivery, the shopper confirms the recipient phone is their own. */
-    public bool $recipientPhoneIsMine = true;
-
     /** @var array<string, string|null>|null */
     public ?array $address = null;
 
@@ -119,6 +114,7 @@ class Checkout extends Component
 
         if ($user = Auth::user()) {
             $this->name = $user->name;
+            $this->email = $user->email ?? '';
 
             if ($default = $user->addresses()->first()) {
                 $this->useAddress($default->id);
@@ -158,41 +154,59 @@ class Checkout extends Component
         $this->modal = null;
     }
 
-    // ----- Contact verification -------------------------------------------------
+    // ----- Proceed and contact verification -------------------------------------
 
-    public function sendCode(): void
+    /**
+     * "Proceed to checkout": flag anything missing, then send a guest the
+     * email code. Signed-in shoppers with everything chosen see Pay instead.
+     */
+    public function proceed(): void
     {
-        $rules = ['name' => ['required', 'string', 'max:120']];
+        $this->resetErrorBag();
+        $this->problem = null;
 
-        if ($this->fulfilment === 'delivery') {
-            $rules += $this->addressRules();
+        if (Auth::guest() && validator(['email' => $this->email], ['email' => ['required', 'email:rfc', 'max:255']])->fails()) {
+            $this->addError('email', 'Enter a valid email address.');
         }
 
-        $useRecipientPhone = $this->fulfilment === 'delivery' && $this->channel === 'phone' && $this->recipientPhoneIsMine;
+        if ($this->fulfilment === 'pickup' && ! $this->pickupStart) {
+            $this->addError('pickupStart', 'Choose a pickup day and time.');
+        }
 
-        $rules += match (true) {
-            $this->channel === 'email' => ['email' => ['required', 'email:rfc', 'max:255']],
-            $useRecipientPhone => [],
-            default => ['phone' => ['required', 'regex:/^\+?[0-9 ()-]{10,20}$/']],
-        };
+        if ($this->fulfilment === 'delivery' && ! $this->address) {
+            $this->addError('address', 'Add a delivery address.');
+        } elseif ($this->fulfilment === 'delivery' && $this->addressStatus !== 'ok') {
+            $this->addError('address', 'We can’t deliver to this address. Edit it or choose Pickup.');
+        }
 
-        $this->validate($rules, [
-            'phone.regex' => 'Enter a mobile number with area code.',
-            'recipientPhone.regex' => 'Enter a phone number with area code.',
-        ]);
+        if (! $this->paymentMethod) {
+            $this->addError('paymentMethod', 'Choose a payment method.');
+        }
 
-        if ($this->fulfilment === 'delivery' && ! $this->checkAddressForm()) {
+        if ($this->getErrorBag()->isNotEmpty()) {
+            $this->problem = 'Complete the highlighted details to continue.';
+
             return;
         }
 
-        $destination = $this->channel === 'email'
-            ? strtolower(trim($this->email))
-            : self::normalisePhone($useRecipientPhone ? $this->recipientPhone : $this->phone);
+        if (Auth::guest()) {
+            $this->sendCode();
+        }
+    }
 
+    public function sendCode(): void
+    {
+        $this->validate(['email' => ['required', 'email:rfc', 'max:255']]);
+
+        if ($this->fulfilment === 'delivery' && $this->address && trim($this->name) === '') {
+            $this->name = $this->address['recipient_name'];
+        }
+
+        $destination = strtolower(trim($this->email));
         $key = 'checkout-code:'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($key, 6)) {
-            $this->addError($this->channel === 'email' ? 'email' : 'phone', 'Too many codes requested. Try again in a few minutes.');
+            $this->addError('email', 'Too many codes requested. Try again in a few minutes.');
 
             return;
         }
@@ -200,11 +214,11 @@ class Checkout extends Component
         RateLimiter::hit($key, 600);
 
         $otp = app(OneTimeCode::class);
-        $otp->send($this->channel, $destination);
+        $otp->send('email', $destination);
 
-        $this->codeChannel = $this->channel;
+        $this->codeChannel = 'email';
         $this->codeDestination = $destination;
-        $this->resendAt = now()->addSeconds($otp->cooldown($this->channel, $destination))->timestamp;
+        $this->resendAt = now()->addSeconds($otp->cooldown('email', $destination))->timestamp;
         $this->code = '';
         $this->modal = 'code';
     }
@@ -223,12 +237,16 @@ class Checkout extends Component
 
     public function changeContact(): void
     {
-        $this->open($this->fulfilment === 'delivery' ? 'address' : 'contact');
+        // Back to the page to correct the email; the code is sent again on Proceed.
+        $this->modal = null;
     }
 
     public function verifyCode(): void
     {
-        $this->validate(['code' => ['required', 'digits:6']], ['code.digits' => 'Enter all six digits.']);
+        $this->validate(
+            ['code' => ['required', 'digits:6'], 'name' => ['required', 'string', 'max:120']],
+            ['code.digits' => 'Enter all six digits.', 'name.required' => 'Enter your full name.'],
+        );
 
         if (! app(OneTimeCode::class)->verify($this->codeChannel, $this->codeDestination, $this->code)) {
             $this->addError('code', 'This code is invalid or has expired. Check the latest code, or request a new one when the timer ends.');
@@ -244,12 +262,7 @@ class Checkout extends Component
 
         $this->code = '';
         $this->modal = null;
-
-        if ($this->fulfilment === 'delivery') {
-            $this->confirmAddress();
-        } elseif (! $this->pickupStart) {
-            $this->open('slot');
-        }
+        $this->email = $user->email ?? $this->email;
     }
 
     /**
@@ -293,12 +306,13 @@ class Checkout extends Component
         $this->pickupStart = $window['start']->toIso8601String();
         $this->modal = null;
         $this->problem = null;
+        $this->resetErrorBag('pickupStart');
     }
 
     // ----- Delivery -----------------------------------------------------------
 
     /**
-     * Signed-in shoppers: validate the form, then use it straight away.
+     * Validate the address form, then use it straight away.
      */
     public function saveAddress(): void
     {
@@ -310,6 +324,15 @@ class Checkout extends Component
 
         $this->confirmAddress();
         $this->modal = null;
+        $this->resetErrorBag('address');
+    }
+
+    /**
+     * Take the address off this order. Saved addresses stay in the address book.
+     */
+    public function removeAddress(): void
+    {
+        $this->reset('address', 'addressStatus', 'selectedAddressId');
     }
 
     public function useAddress(int $id): void
@@ -389,6 +412,22 @@ class Checkout extends Component
         ];
     }
 
+    // ----- Items ----------------------------------------------------------------
+
+    public function increment(int $variation): void
+    {
+        $cart = app(Cart::class);
+        $cart->setQuantity($variation, $cart->quantity($variation) + 1);
+        $this->dispatch('cart-updated', count: $cart->count());
+    }
+
+    public function decrement(int $variation): void
+    {
+        $cart = app(Cart::class);
+        $cart->setQuantity($variation, max(1, $cart->quantity($variation) - 1));
+        $this->dispatch('cart-updated', count: $cart->count());
+    }
+
     // ----- Payment ------------------------------------------------------------
 
     public function applyCoupon(): void
@@ -408,14 +447,13 @@ class Checkout extends Component
 
     /**
      * Place the order. Card and wallet payments pass the token from Square's
-     * Web Payments SDK; Pay at Pickup needs none.
+     * Web Payments SDK.
      */
     public function pay(?string $token = null, ?string $attempt = null): void
     {
         $user = Auth::user();
-        $online = $this->paymentMethod !== 'pay_at_pickup';
 
-        if (! $user || ! $this->paymentMethod || ($online && ! $token)) {
+        if (! $user || ! $this->paymentMethod || ! $token) {
             return;
         }
 
@@ -429,7 +467,7 @@ class Checkout extends Component
                 paymentMethod: $this->paymentMethod,
                 pickupStart: $this->pickupStart ? CarbonImmutable::parse($this->pickupStart) : null,
                 address: $this->fulfilment === 'delivery' ? $this->address : null,
-                clearCart: ! $online,
+                clearCart: false,
             );
         } catch (CheckoutProblem $problem) {
             // Keep the verified identity, address and slot; just explain what to fix.
@@ -442,19 +480,17 @@ class Checkout extends Component
             return;
         }
 
-        if ($online) {
-            $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
+        $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
 
-            if ($failure) {
-                // The order isn't placed; the basket, details and slot stay as they were.
-                $this->declined = $failure;
-                $this->declinedAmount = $order->total_cents;
+        if ($failure) {
+            // The order isn't placed; the basket, details and slot stay as they were.
+            $this->declined = $failure;
+            $this->declinedAmount = $order->total_cents;
 
-                return;
-            }
-
-            app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
+            return;
         }
+
+        app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
 
         app(OrderReceipt::class)->send($order);
         session()->flash('order_placed', $order->number);

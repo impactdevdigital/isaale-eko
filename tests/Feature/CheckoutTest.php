@@ -2,12 +2,12 @@
 
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
+use App\Livewire\Store\SignIn;
 use App\Mail\VerificationCodeMail;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\Messaging\SmsSender;
 use App\Support\Cart;
 use Carbon\CarbonImmutable;
 use Database\Seeders\DemoCatalogSeeder;
@@ -87,17 +87,27 @@ test('checkout sends shoppers with an empty basket back to the basket', function
     Livewire::test(Checkout::class)->assertRedirect(route('cart'));
 });
 
-test('guest pickup: verify by email, choose a slot and place a pay-at-pickup order', function () {
+test('guest pickup: choose a slot, confirm the email on proceed and pay by card', function () {
     addToCart('fresh-okra', 2);
+    $start = CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String();
 
     $component = Livewire::test(Checkout::class)
-        ->assertSee('Payment not ready')
-        ->call('open', 'contact')
-        ->set('name', 'Valentine Akin')
-        ->set('channel', 'email')
+        ->assertSee('Fulfilment &amp; Order Review', false)
+        ->assertSee('Pickup selected · No delivery address needed')
+        ->assertSee('Proceed to checkout')
+        ->call('proceed')
+        ->assertHasErrors(['email', 'pickupStart', 'paymentMethod'])
+        ->assertSet('modal', null)
+        ->call('pickDay', '2026-10-26')
+        ->set('slotStart', $start)
+        ->call('confirmSlot')
+        ->assertSet('pickupStart', $start)
         ->set('email', 'Valentine@Example.com')
-        ->call('sendCode')
+        ->set('paymentMethod', 'card')
+        ->call('proceed')
+        ->assertHasNoErrors()
         ->assertSet('modal', 'code')
+        ->set('name', 'Valentine Akin')
         ->set('code', '000000')
         ->call('verifyCode')
         ->assertHasErrors('code');
@@ -105,26 +115,20 @@ test('guest pickup: verify by email, choose a slot and place a pay-at-pickup ord
     $component->set('code', sentCode())
         ->call('verifyCode')
         ->assertHasNoErrors()
-        ->assertSet('modal', 'slot');
+        ->assertSet('modal', null)
+        ->assertSee('Pay '.money(498));
 
     $user = User::where('email', 'valentine@example.com')->firstOrFail();
-    expect(Auth::id())->toBe($user->id)->and($user->email_verified_at)->not->toBeNull();
+    expect(Auth::id())->toBe($user->id)->and($user->email_verified_at)->not->toBeNull()->and($user->name)->toBe('Valentine Akin');
 
-    $start = CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String();
-
-    $component->call('pickDay', '2026-10-26')
-        ->set('slotStart', $start)
-        ->call('confirmSlot')
-        ->assertSet('pickupStart', $start)
-        ->set('paymentMethod', 'pay_at_pickup')
-        ->assertSee('Place order')
-        ->call('pay');
+    $component->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
 
     $order = Order::firstOrFail();
     $component->assertRedirect(route('orders.show', $order));
 
-    expect($order->status)->toBe(Order::STATUS_PLACED)
+    expect($order->status)->toBe(Order::STATUS_PAID)
         ->and($order->user_id)->toBe($user->id)
+        ->and($order->contact_email)->toBe('valentine@example.com')
         ->and($order->total_cents)->toBe(498)
         ->and($order->items)->toHaveCount(1)
         ->and(app(Cart::class)->count())->toBe(0);
@@ -132,55 +136,58 @@ test('guest pickup: verify by email, choose a slot and place a pay-at-pickup ord
     $this->get(route('orders.show', $order))->assertOk()->assertSee($order->number);
 });
 
-test('guest delivery: address out of area blocks payment; a Saint John address adds the fee', function () {
+test('guest delivery: an out-of-area address blocks proceeding; a Saint John address adds the fee', function () {
     addToCart('fresh-okra');
-
-    $sms = new class implements SmsSender
-    {
-        /** @var array<int, array{0: string, 1: string}> */
-        public array $sent = [];
-
-        public function send(string $phone, string $message): void
-        {
-            $this->sent[] = [$phone, $message];
-        }
-    };
-    $this->app->instance(SmsSender::class, $sms);
 
     $component = Livewire::test(Checkout::class)
         ->call('choose', 'delivery')
+        ->assertSee('Enter your address to calculate the delivery fee')
         ->call('open', 'address')
-        ->set('name', 'Valentine Akin')
         ->set('recipient', 'Valentine Akin')
         ->set('recipientPhone', '506 555 0123')
         ->set('street', '24 Berkeley Road')
         ->set('city', 'Toronto')
         ->set('postalCode', 'M5V 2T6')
-        ->set('channel', 'phone')
-        ->call('sendCode')
-        ->assertSet('codeDestination', '+15065550123');
-
-    expect($sms->sent)->toHaveCount(1)->and($sms->sent[0][0])->toBe('+15065550123');
-    preg_match('/code is (\d{6})/', $sms->sent[0][1], $match);
-
-    $component->set('code', $match[1])->call('verifyCode')
+        ->call('saveAddress')
         ->assertSet('addressStatus', 'out_of_area')
-        ->assertSee('We can’t deliver to this address')
+        ->assertSee('Outside our delivery area')
+        ->set('email', 'valentine@example.com')
         ->set('paymentMethod', 'card')
-        ->assertSee('Payment not ready');
+        ->call('proceed')
+        ->assertHasErrors('address')
+        ->assertSet('modal', null);
 
-    expect(User::where('phone', '+15065550123')->whereNotNull('phone_verified_at')->exists())->toBeTrue();
-
-    $component->set('city', 'Saint John')->set('postalCode', 'e2l4l1')->call('saveAddress')
+    $component->call('open', 'address')
+        ->set('city', 'Saint John')->set('postalCode', 'e2l4l1')->call('saveAddress')
         ->assertSet('addressStatus', 'ok')
+        ->assertSee('Delivering to E2L 4L1')
+        ->call('proceed')
+        ->assertSet('modal', 'code')
+        ->assertSet('name', 'Valentine Akin');
+
+    $component->set('code', sentCode())->call('verifyCode')
+        ->assertHasNoErrors()
         ->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
 
     $order = Order::firstOrFail();
     expect($order->status)->toBe(Order::STATUS_PAID)
         ->and($order->payment_id)->toBe('sq-pay-1')
+        ->and($order->contact_email)->toBe('valentine@example.com')
         ->and($order->delivery_address['postal_code'])->toBe('E2L 4L1')
         ->and($order->delivery_fee_cents)->toBe(799)
         ->and($order->total_cents)->toBe(249 + 799);
+});
+
+test('item quantities can be changed from the checkout page', function () {
+    $variation = addToCart('fresh-okra');
+
+    Livewire::test(Checkout::class)
+        ->call('increment', $variation)
+        ->call('increment', $variation)
+        ->call('decrement', $variation)
+        ->assertViewHas('totals', fn ($totals) => $totals->subtotal === 249 * 2);
+
+    expect(app(Cart::class)->quantity($variation))->toBe(2);
 });
 
 test('signed-in shoppers use a saved address without verifying again', function () {
@@ -213,6 +220,48 @@ test('a full pickup window can’t be booked', function () {
         ->call('confirmSlot')
         ->assertHasErrors('slotStart')
         ->assertSet('pickupStart', null);
+});
+
+test('pay at pickup is not offered at checkout', function () {
+    addToCart('fresh-okra');
+
+    Livewire::test(Checkout::class)
+        ->assertViewHas('paymentMethods', fn ($methods) => ! $methods->contains('code', 'pay_at_pickup'))
+        ->assertDontSee('Pay at Pickup')
+        ->call('choose', 'delivery')
+        ->assertDontSee('Pay at Pickup');
+});
+
+test('a guest’s orders appear in their order history when they sign in later with the same email', function () {
+    addToCart('fresh-okra');
+
+    $component = Livewire::test(Checkout::class)
+        ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
+        ->call('confirmSlot')
+        ->set('email', 'valentine@example.com')
+        ->set('paymentMethod', 'card')
+        ->call('proceed');
+    $component->set('name', 'Valentine Akin')->set('code', sentCode())->call('verifyCode')
+        ->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
+
+    $order = Order::firstOrFail();
+    Auth::logout();
+    Mail::fake();
+    $this->travel(1)->day();
+
+    // Later, on another visit: sign in with the same email, typed differently.
+    Livewire::test(SignIn::class)
+        ->set('channel', 'email')
+        ->set('email', 'Valentine@Example.COM')
+        ->call('sendCode')
+        ->assertHasNoErrors()
+        ->set('code', sentCode())
+        ->call('verifyCode');
+
+    expect(Auth::id())->toBe($order->user_id)
+        ->and(User::where('email', 'valentine@example.com')->count())->toBe(1);
+
+    $this->get(route('account.orders'))->assertOk()->assertSee($order->number);
 });
 
 test('orders are only visible to their owner', function () {

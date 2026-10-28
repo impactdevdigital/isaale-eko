@@ -3,24 +3,31 @@
 
     $contact = $user?->signInContact();
     $contactLabel = $contact ? $contact['value'].' · Verified '.($contact['channel'] === 'email' ? 'email' : 'mobile') : null;
-    $methodIcons = ['card' => 'card', 'wallet' => 'wallet', 'pay_at_pickup' => 'store'];
-    $methodHints = ['card' => 'Visa, Mastercard, Amex and more', 'wallet' => 'Apple Pay or Google Pay on supported devices', 'pay_at_pickup' => 'Cash, card or Interac at the counter'];
+    $methodIcons = ['card' => 'card', 'wallet' => 'wallet'];
+    $methodHints = ['card' => 'Visa, Mastercard, Amex and more', 'wallet' => 'Apple Pay or Google Pay on supported devices'];
+    $methodBadges = [
+        'card' => [['VISA', 'bg-surface text-[#1a1f71]'], ['MC', 'bg-surface text-[#eb001b]'], ['AMEX', 'bg-[#016fd0] text-white']],
+        'wallet' => [['Apple Pay', 'bg-black text-white'], ['G Pay', 'bg-surface text-[#333333]']],
+    ];
 
-    [$feeLabel, $feeValue, $totalLabel] = match (true) {
-        $fulfilment === 'pickup' => ['Pickup fee', money(0), null],
-        $totals->deliveryFee !== null => ['Delivery fee', $totals->deliveryFee ? money($totals->deliveryFee) : 'Free', null],
-        default => ['Delivery fee', 'Calculated after address check', 'Pending address check'],
+    [$feeLabel, $feeValue] = match (true) {
+        $fulfilment === 'pickup' => ['Pickup fee', money(0)],
+        $totals->deliveryFee !== null => ['Delivery fee', $totals->deliveryFee ? money($totals->deliveryFee) : 'Free'],
+        default => ['Delivery fee', 'Calculated after address check'],
     };
 
-    $notReadyHelp = match (true) {
-        ! $user => $fulfilment === 'pickup'
-            ? 'Add and verify pickup details, choose a slot and payment method to enable payment.'
-            : 'Add a delivery address and verify your contact, then choose a payment method.',
-        ! $fulfilmentReady => $fulfilment === 'pickup'
-            ? 'Choose a pickup slot to enable payment.'
-            : 'Confirm a delivery address we can reach, then choose a payment method.',
-        ! $paymentMethod => 'Choose a payment method to enable payment.',
-        default => null,
+    // The coloured note under the costs (Figma: pickup green, delivery yellow until an address is checked).
+    [$note, $noteTone] = match (true) {
+        $fulfilment === 'pickup' => ['Pickup selected · No delivery address needed', 'ok'],
+        ! $address => ['🚚 Enter your address to calculate the delivery fee', 'pending'],
+        $addressStatus === 'ok' => ['🚚 Delivering to '.$address['postal_code'], 'ok'],
+        default => ['We can’t deliver to this address. Edit it or choose Pickup.', 'error'],
+    };
+
+    $subtitle = match (true) {
+        (bool) $user => 'Signed in as '.$user->name.' — choose how you’d like to receive your order.',
+        $fulfilment === 'delivery' && $address => 'Checkout as a guest — your details are saved for delivery.',
+        default => 'Checkout as a guest — enter your details and choose how you’d like to receive your order.',
     };
 @endphp
 
@@ -49,7 +56,7 @@
                 <button type="button" wire:click="retryPayment" class="h-[42px] rounded-full bg-ink text-[15px] font-bold text-white">Retry payment</button>
                 <button type="button" wire:click="changePaymentMethod" class="h-[42px] rounded-full border border-ink text-[15px] font-bold">Change payment method</button>
             </div>
-            <p class="mt-4 text-body-sm text-body-muted">Other options: Apple Pay / Google Pay, or Pay at Pickup.</p>
+            <p class="mt-4 text-body-sm text-body-muted">Other options: Apple Pay / Google Pay.</p>
             <p class="mt-4 text-body-sm text-body-muted">Need a hand? <a href="mailto:{{ \App\Models\Setting::get('support_email') }}" class="font-bold text-ink">Contact us</a></p>
         </section>
     @else
@@ -69,123 +76,125 @@
             </div>
         </div>
 
-        <div class="flex flex-col gap-8">
-            <div>
-                <h1 class="text-h2-mobile md:text-h2">Checkout</h1>
-                <p class="mt-2 text-lead-mobile font-normal text-body-muted md:text-lead">
-                    {{ $user ? 'Signed in as '.$user->name.'.' : 'Checkout as a guest — add your details without leaving this page.' }}
-                </p>
+        <div class="flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+                <h1 class="text-h2-mobile md:text-h2">Fulfilment &amp; Order Review</h1>
+                <p class="text-[14px] leading-[22px] font-medium text-body-muted">{{ $subtitle }}</p>
             </div>
 
-            @if ($problem)
-                <p class="rounded-sm border border-price-40 bg-sale-0 px-4 py-3 text-body-sm font-bold text-price-40" role="alert">{{ $problem }}</p>
-            @endif
             @if ($quantityChanged)
                 <p class="rounded-sm bg-brand-yellow-10 px-4 py-3 text-body-sm text-brand-yellow-90" role="status">Some quantities changed because stock ran low. Your order summary shows what’s available.</p>
             @endif
 
-            {{-- Pickup or Delivery --}}
-            <fieldset>
-                <legend class="mb-3 text-[15px]">Pickup or Delivery</legend>
-                <div class="grid gap-3 sm:grid-cols-2">
-                    @foreach (['pickup' => 'Pickup', 'delivery' => 'Delivery'] as $value => $label)
-                        <button type="button" wire:click="choose('{{ $value }}')" role="radio" aria-checked="{{ $fulfilment === $value ? 'true' : 'false' }}"
-                                @class(['flex h-12 items-center gap-3 rounded-sm border px-4 text-[16px] font-bold', 'border-brand-yellow bg-brand-yellow-0 border-2' => $fulfilment === $value, 'border-grayscale-40' => $fulfilment !== $value])>
-                            <x-store.radio :checked="$fulfilment === $value" />
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                </div>
-            </fieldset>
+            <div class="flex flex-col gap-4">
+                {{-- Pickup or Delivery + email --}}
+                <div class="flex flex-col gap-5 sm:flex-row">
+                    <div class="flex flex-col gap-2 sm:w-[150px] sm:shrink-0">
+                        <label for="fulfilment" class="text-[14px] leading-5">Pickup or Delivery</label>
+                        <div class="relative">
+                            <select id="fulfilment" wire:change="choose($event.target.value)"
+                                    class="h-12 w-full appearance-none rounded-sm border border-grayscale-40 bg-surface pr-10 pl-4 text-[14px] font-medium focus:border-ink focus:outline-none">
+                                <option value="pickup" @selected($fulfilment === 'pickup')>Pickup</option>
+                                <option value="delivery" @selected($fulfilment === 'delivery')>Delivery</option>
+                            </select>
+                            <x-store.icon name="arrow-down" class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
+                        </div>
+                    </div>
 
-            {{-- Details --}}
-            <section aria-labelledby="details-title">
-                <h2 id="details-title" class="mb-3 text-[15px] font-bold">{{ $fulfilment === 'pickup' ? 'Pickup details' : 'Delivery details' }}</h2>
-
-                @if ($user)
-                    <div class="mb-4 rounded-sm bg-grayscale-0 px-4 py-4">
-                        <p class="text-[16px] font-bold">{{ $user->name }}</p>
-                        @if ($contactLabel)
-                            <p class="text-[15px]">{{ $contactLabel }}</p>
+                    <div class="flex min-w-0 flex-1 flex-col gap-2">
+                        @if ($user)
+                            <label for="contact" class="text-[14px] leading-5">{{ $contact && $contact['channel'] === 'phone' ? 'Mobile Number' : 'Email Address' }}</label>
+                            <div id="contact" class="flex h-12 items-center justify-between gap-3 rounded-sm border border-grayscale-40 bg-grayscale-0 px-4 text-[14px]">
+                                <span class="truncate">{{ $contact['value'] ?? $user->email }}</span>
+                                @if ($contact)
+                                    <span class="flex shrink-0 items-center gap-1 text-[11px] font-bold text-stock-50"><x-store.icon name="check" class="size-3" /> Verified</span>
+                                @endif
+                            </div>
+                        @else
+                            <label for="email" class="text-[14px] leading-5">Email Address</label>
+                            <input id="email" type="email" wire:model.blur="email" autocomplete="email" placeholder="name@example.com"
+                                   @class(['h-12 w-full rounded-sm border bg-surface px-4 text-[14px] placeholder:text-body-muted focus:border-ink focus:outline-none', 'border-price-40' => $errors->has('email'), 'border-grayscale-40' => ! $errors->has('email')])>
+                            @error('email')
+                                <p class="text-body-xs text-price-40">{{ $message }}</p>
+                            @else
+                                <p class="text-[12px] leading-[18px] font-medium text-body-muted">We’ll send a code to confirm it and keep your order in your account.</p>
+                            @enderror
                         @endif
-                        <p class="mt-1 text-body-xs text-body-muted">Your order will be linked to this verified account.</p>
+                    </div>
+                </div>
+
+                {{-- Pickup slot or delivery address --}}
+                @if ($fulfilment === 'pickup')
+                    <div class="flex flex-col gap-2">
+                        <span class="text-[14px] leading-5">Pickup day &amp; time</span>
+                        <button type="button" wire:click="open('slot')"
+                                @class(['flex h-12 items-center gap-2.5 rounded-sm border px-4 text-left text-[14px]', 'border-price-40' => $errors->has('pickupStart'), 'border-grayscale-40 hover:border-ink' => ! $errors->has('pickupStart')])>
+                            <x-store.icon name="calendar" class="size-4 shrink-0" />
+                            <span @class(['flex-1 truncate', 'text-body-muted' => ! $pickupLabel])>{{ $pickupLabel ?? 'Choose pickup day and time' }}</span>
+                            @if ($pickupLabel)
+                                <span class="text-[12px] font-bold">Change</span>
+                            @endif
+                        </button>
+                        @error('pickupStart')
+                            <p class="text-body-xs text-price-40">{{ $message }}</p>
+                        @else
+                            <p class="text-[12px] leading-[18px] font-medium text-body-muted">{{ $pickupLabel ? 'Your selected pickup slot. You can change it before checkout.' : 'Open the calendar to select a pickup slot · '.config('shop.pickup.location') }}</p>
+                        @enderror
+                    </div>
+                @elseif ($address)
+                    <div class="airmail rounded-lg bg-surface">
+                        <dl class="grid gap-4 p-6 text-[14px] sm:grid-cols-[1fr_1fr_1.3fr_1.3fr]">
+                            @foreach (['Full Name' => $address['recipient_name'], 'Phone Number' => $address['phone'], 'Delivery Address' => $address['street'].', '.$address['city'].', Canada', 'Postcode' => $address['postal_code']] as $term => $detail)
+                                <div class="min-w-0">
+                                    <dt class="text-[12px] leading-[18px] font-medium text-body-muted">{{ $term }}</dt>
+                                    <dd class="mt-1.5 truncate leading-5" title="{{ $detail }}">{{ $detail }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                        <div class="flex items-center justify-between gap-3 border-t border-grayscale-40 px-6 py-3">
+                            <span @class(['flex items-center gap-1.5 rounded-sm px-2 py-1 text-[11px] font-bold', 'bg-stock-0 text-stock-50' => $addressStatus === 'ok', 'bg-sale-0 text-price-40' => $addressStatus !== 'ok'])>
+                                <x-store.icon :name="$addressStatus === 'ok' ? 'check' : 'close'" class="size-3" />
+                                {{ match ($addressStatus) {
+                                    'ok' => 'We deliver here · '.($totals->deliveryFee ? money($totals->deliveryFee).' delivery fee' : 'free delivery'),
+                                    'invalid_postcode' => 'Check the postal code',
+                                    default => 'Outside our delivery area',
+                                } }}
+                            </span>
+                            <div class="flex gap-4 text-[12px] font-bold">
+                                <button type="button" wire:click="open('{{ $user && $savedAddresses->isNotEmpty() ? 'addresses' : 'address' }}')" class="hover:underline">Edit address</button>
+                                <button type="button" wire:click="removeAddress" class="hover:underline">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    @error('address') <p class="-mt-2 text-body-xs text-price-40">{{ $message }}</p> @enderror
+                @else
+                    <div class="flex flex-col items-start gap-2">
+                        <button type="button" wire:click="open('{{ $user && $savedAddresses->isNotEmpty() ? 'addresses' : 'address' }}')"
+                                class="flex h-[42px] items-center gap-2 rounded-full bg-ink px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
+                            <x-store.icon name="plus" class="size-3.5" /> Add address
+                        </button>
+                        @error('address') <p class="text-body-xs text-price-40">{{ $message }}</p> @enderror
                     </div>
                 @endif
-
-                @if ($fulfilment === 'pickup')
-                    @if (! $user)
-                        <div class="rounded-sm border border-grayscale-40 p-6">
-                            <p class="text-[16px] font-bold">Who will collect your order?</p>
-                            <p class="mt-2 text-body text-body-muted">Add your name and verify an email or mobile number, then choose your pickup slot. No delivery address needed.</p>
-                            <button type="button" wire:click="open('contact')" class="mt-5 rounded-full bg-ink px-5 py-3 text-[14px] font-extrabold text-white">Add pickup details</button>
-                        </div>
-                    @else
-                        <div class="rounded-sm border border-grayscale-40 p-5">
-                            <p class="text-[15px] font-bold">Store collection · {{ config('shop.pickup.location') }}</p>
-                            <p class="mt-1 text-body text-body-muted">Pickup is free · {{ money(0) }}</p>
-                            @if ($pickupLabel)
-                                <p class="mt-3 text-[15px] font-bold">{{ $pickupLabel }}</p>
-                            @else
-                                <p class="mt-3 text-[15px] font-bold">Choose a pickup slot for this order</p>
-                            @endif
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <button type="button" wire:click="open('slot')" class="rounded-full border border-grayscale-40 px-5 py-2.5 text-[14px] font-bold hover:border-ink">{{ $pickupLabel ? 'Change slot' : 'Choose pickup slot' }}</button>
-                            </div>
-                            <p class="mt-3 text-body-xs text-body-muted">Your slot is not reserved until checkout succeeds.</p>
-                        </div>
-                    @endif
-                @else
-                    @if ($address)
-                        <div class="overflow-hidden rounded-sm border border-grayscale-40">
-                            <div class="grid gap-4 p-5 sm:grid-cols-[1fr_auto]">
-                                <div class="text-[14px]">
-                                    <p class="font-bold">{{ $address['recipient_name'] }}</p>
-                                    <p class="mt-1">{{ $address['street'] }}, {{ $address['city'] }}, Canada</p>
-                                    <p class="mt-1 text-body-muted">Recipient phone · {{ $address['phone'] }}</p>
-                                    <p class="mt-1 text-body-muted">Courier contact only · does not change your sign-in</p>
-                                </div>
-                                <div class="text-[14px] sm:text-right">
-                                    <p class="font-bold">Postal code</p>
-                                    <p class="mt-1">{{ $address['postal_code'] }}</p>
-                                </div>
-                            </div>
-                            <div @class([
-                                'flex items-center justify-between gap-3 px-5 py-3 text-body-sm',
-                                'bg-stock-0 text-stock-50' => $addressStatus === 'ok',
-                                'bg-sale-0 text-price-40' => $addressStatus !== 'ok',
-                            ])>
-                                <span>
-                                    {{ match ($addressStatus) {
-                                        'ok' => 'We deliver here · '.($totals->deliveryFee ? money($totals->deliveryFee).' delivery fee' : 'free delivery'),
-                                        'invalid_postcode' => 'Check the postal code — Canadian codes look like E2L 4L1.',
-                                        default => 'We can’t deliver to this address. Edit it or choose Pickup.',
-                                    } }}
-                                </span>
-                                <button type="button" wire:click="open('{{ $user && $savedAddresses->isNotEmpty() ? 'addresses' : 'address' }}')" class="shrink-0 rounded-full border border-current bg-surface px-4 py-2 text-[13px] font-bold text-ink">Edit address</button>
-                            </div>
-                        </div>
-                    @else
-                        <div class="rounded-sm border border-grayscale-40 p-6">
-                            <p class="text-[16px] font-bold">Where should we deliver your order?</p>
-                            <p class="mt-2 text-body text-body-muted">{{ $user ? 'Choose a saved address or add a new one.' : 'Add a delivery address and verify one contact. We’ll check delivery availability before payment.' }}</p>
-                            <button type="button" wire:click="open('{{ $user && $savedAddresses->isNotEmpty() ? 'addresses' : 'address' }}')" class="mt-5 rounded-full bg-ink px-5 py-3 text-[14px] font-extrabold text-white">Add address</button>
-                        </div>
-                    @endif
-                @endif
-            </section>
+            </div>
 
             {{-- Payment method --}}
-            <fieldset>
-                <legend class="mb-3 text-[15px] font-bold">Payment method</legend>
-                <div class="divide-y divide-grayscale-40 rounded-sm border border-grayscale-40">
+            <fieldset class="flex flex-col gap-4">
+                <legend class="mb-4 text-[14px] leading-[18px] font-extrabold">Payment method</legend>
+                <div @class(['overflow-hidden rounded-sm border', 'border-price-40' => $errors->has('paymentMethod'), 'border-grayscale-40' => ! $errors->has('paymentMethod')])>
                     @foreach ($paymentMethods as $method)
-                        <label @class(['flex cursor-pointer items-center gap-4 px-4 py-4', 'bg-grayscale-0' => $paymentMethod === $method->code])>
+                        <label @class(['flex cursor-pointer items-center gap-3 border-grayscale-40 px-4 py-3.5', 'border-t' => ! $loop->first])>
                             <input type="radio" wire:model.live="paymentMethod" value="{{ $method->code }}" class="sr-only peer">
                             <x-store.radio :checked="$paymentMethod === $method->code" />
                             <x-store.icon :name="$methodIcons[$method->code] ?? 'card'" class="size-5 shrink-0" />
-                            <span>
-                                <span class="block text-[15px] font-bold">{{ $method->label() }}</span>
-                                <span class="block text-body-sm font-normal text-body-muted">{{ $methodHints[$method->code] ?? $method->description() }}</span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-[14px] leading-[18px] font-bold">{{ $method->label() }}</span>
+                                <span class="block text-[12px] leading-[18px] font-medium text-body-muted">{{ $methodHints[$method->code] ?? $method->description() }}</span>
+                            </span>
+                            <span class="hidden gap-1 sm:flex">
+                                @foreach ($methodBadges[$method->code] ?? [] as [$badge, $tone])
+                                    <span class="rounded-[3px] border border-grayscale-40 px-1.5 py-0.5 text-[9px] font-extrabold {{ $tone }}">{{ $badge }}</span>
+                                @endforeach
                             </span>
                         </label>
 
@@ -207,53 +216,57 @@
                         @endif
                     @endforeach
                 </div>
-                <p x-show="error" x-cloak x-text="error" role="alert" class="mt-3 rounded-sm bg-sale-0 px-4 py-3 text-body-sm text-price-40"></p>
+                @error('paymentMethod') <p class="text-body-xs text-price-40">{{ $message }}</p> @enderror
+                <p x-show="error" x-cloak x-text="error" role="alert" class="rounded-sm bg-sale-0 px-4 py-3 text-body-sm text-price-40"></p>
             </fieldset>
+
+            {{-- Items --}}
+            @if ($checkoutLines->isNotEmpty())
+                <section class="flex flex-col gap-4" aria-labelledby="items-title">
+                    <h2 id="items-title" class="text-[14px] leading-[18px] font-extrabold">Items</h2>
+                    <ul class="flex flex-wrap gap-4 bg-grayscale-0 p-3">
+                        @foreach ($checkoutLines as $line)
+                            @php($variation = $line->variation)
+                            <li class="flex w-[98px] flex-col gap-2" wire:key="item-{{ $variation->id }}">
+                                <img src="{{ asset($variation->product->image) }}" alt="{{ $variation->product->name }}" class="size-[98px] rounded-sm border border-grayscale-40 bg-surface object-cover">
+                                <strong class="text-[16px] leading-[22px] font-extrabold text-price-40">{{ money($variation->price_cents * $line->quantity) }}</strong>
+                                <div class="flex h-[34px] items-center justify-between rounded-full border border-grayscale-40 bg-surface">
+                                    <button type="button" wire:click="decrement({{ $variation->id }})" @disabled($line->quantity <= 1) class="-m-px flex size-[34px] items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[14px] font-extrabold disabled:opacity-40" aria-label="Decrease quantity of {{ $variation->product->name }}">−</button>
+                                    <span class="text-[13px] font-extrabold" aria-live="polite">{{ $line->quantity }}</span>
+                                    <button type="button" wire:click="increment({{ $variation->id }})" class="-m-px flex size-[34px] items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[14px] font-extrabold" aria-label="Increase quantity of {{ $variation->product->name }}">+</button>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
         </div>
 
         <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
-                               :fee-label="$feeLabel" :fee-value="$feeValue" :total-label="$totalLabel" class="lg:self-start">
-            @if ($readyToPay && $totalLabel === null)
-                <button type="button" @click="pay()" :disabled="busy || (method !== 'pay_at_pickup' && ! ready)"
-                        class="flex h-[50px] items-center justify-center rounded-full bg-ink text-[16px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
-                    <span x-show="! busy">{{ $paymentMethod === 'pay_at_pickup' ? 'Place order' : 'Pay '.money($totals->total()) }}</span>
-                    <span x-show="busy" x-cloak>{{ $paymentMethod === 'pay_at_pickup' ? 'Placing your order…' : 'Processing…' }}</span>
+                               :fee-label="$feeLabel" :fee-value="$feeValue" savings-label="Savings" :note="$note" :note-tone="$noteTone" class="lg:self-start">
+            @if ($readyToPay)
+                <button type="button" @click="pay()" :disabled="busy || ! ready"
+                        class="flex h-[42px] items-center justify-center rounded-full bg-ink text-[14px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
+                    <span x-show="! busy">Pay {{ money($totals->total()) }}</span>
+                    <span x-show="busy" x-cloak>Processing…</span>
                 </button>
-                <p class="text-center text-body-sm text-body-muted">Your details, {{ $fulfilment === 'pickup' ? 'pickup slot' : 'delivery address' }} and payment method are complete.</p>
             @else
-                <span aria-disabled="true" class="flex h-[50px] cursor-not-allowed items-center justify-center rounded-full bg-grayscale-20 text-[16px] font-extrabold text-grayscale-60">Payment not ready</span>
-                @if ($notReadyHelp)
-                    <p class="text-body-sm text-body-muted">{{ $notReadyHelp }}</p>
-                @endif
+                <button type="button" wire:click="proceed"
+                        class="flex h-[42px] items-center justify-center gap-2 rounded-full bg-ink text-[14px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
+                    Proceed to checkout <x-store.icon name="arrow-right" class="size-4" />
+                </button>
+            @endif
+            @if ($problem)
+                <p class="rounded-sm bg-sale-0 px-3 py-2 text-body-sm font-bold text-price-40" role="alert">{{ $problem }}</p>
             @endif
         </x-store.order-summary>
     </div>
     @endif
 
     {{-- Dialogs --}}
-    @if ($modal === 'contact')
-        <x-store.modal title="Add pickup details" subtitle="Add your name, then choose one way to verify your contact.">
-            <form wire:submit="sendCode" class="flex flex-col gap-5">
-                <x-store.field model="name" label="Full name" autocomplete="name" />
-                <x-store.channel-tabs :channel="$channel" />
-                @if ($channel === 'email')
-                    <x-store.field model="email" label="Email address" type="email" autocomplete="email" />
-                @else
-                    <x-store.field model="phone" label="Mobile number" type="tel" autocomplete="tel" placeholder="+1 506 555 0123" />
-                @endif
-                <p class="text-body-sm text-body-muted">We’ll verify your contact and create or sign you into a password-free account so you can track this order and find it later.</p>
-                <x-store.check model="marketing" :label="$channel === 'email' ? 'Email me offers and news (optional)' : 'Text me offers and news (optional)'" />
-                <div class="flex justify-end gap-3">
-                    <button type="button" wire:click="close" class="rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold">Cancel</button>
-                    <button type="submit" class="rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-white">Send code</button>
-                </div>
-            </form>
-        </x-store.modal>
-    @endif
-
     @if ($modal === 'address')
         <x-store.modal :title="$user ? 'Add new address' : 'Add address'" subtitle="All fields are required unless marked optional. We’ll check delivery availability before payment." width="max-w-[680px]">
-            <form wire:submit="{{ $user ? 'saveAddress' : 'sendCode' }}" class="grid gap-5 sm:grid-cols-2">
+            <form wire:submit="saveAddress" class="grid gap-5 sm:grid-cols-2">
                 <div>
                     <label for="field-country" class="mb-2 block text-[11px] font-medium uppercase tracking-[0.3px] text-grayscale-80">Country / Region</label>
                     <select id="field-country" wire:model="country" class="h-11 w-full rounded-sm border border-grayscale-30 bg-surface px-4 text-[16px]">
@@ -266,32 +279,13 @@
                 <x-store.field model="city" label="City" autocomplete="address-level2" />
                 <x-store.field model="postalCode" label="Postal code" autocomplete="postal-code" placeholder="E2L 4L1" />
 
-                @unless ($user)
-                    <div class="flex flex-col gap-4 sm:col-span-2">
-                        <x-store.field model="name" label="Your full name" autocomplete="name" hint="For your account. The recipient above can be someone else." />
-                        <x-store.channel-tabs :channel="$channel" />
-                        @if ($channel === 'email')
-                            <x-store.field model="email" label="Email address" type="email" autocomplete="email" />
-                        @else
-                            <x-store.check model="recipientPhoneIsMine" label="The phone number above is my own mobile — send my code there" live />
-                            @unless ($recipientPhoneIsMine)
-                                <x-store.field model="phone" label="Your mobile number" type="tel" autocomplete="tel" hint="We’ll sign you in with this number. The courier keeps using the recipient phone." />
-                            @endunless
-                        @endif
-                        <p class="text-body-sm text-body-muted">We’ll verify your contact and create or sign you into a password-free account so you can track this order and find it later.</p>
-                    </div>
-                @endunless
-
-                <div class="flex flex-col gap-3 sm:col-span-2">
-                    @if ($user)
-                        <x-store.check model="saveToAddressBook" label="Save to my address book" />
-                    @endif
-                    <x-store.check model="marketing" label="Email me offers and news (optional)" />
-                </div>
+                @if ($user)
+                    <div class="sm:col-span-2"><x-store.check model="saveToAddressBook" label="Save to my address book" /></div>
+                @endif
 
                 <div class="flex justify-end gap-3 sm:col-span-2">
                     <button type="button" wire:click="close" class="rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold">Cancel</button>
-                    <button type="submit" class="rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-white">{{ $user ? 'Use this address' : 'Continue / Send code' }}</button>
+                    <button type="submit" class="rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-white">{{ $user ? 'Use this address' : 'Add address' }}</button>
                 </div>
             </form>
         </x-store.modal>
@@ -318,7 +312,7 @@
     @endif
 
     @if ($modal === 'code')
-        <x-store.modal title="Enter the 6-digit code" :subtitle="'Use the code sent to '.$codeDestination.'.'" width="max-w-[600px]">
+        <x-store.modal title="Confirm your email" :subtitle="'Enter the 6-digit code we sent to '.$codeDestination.'. This keeps your order in your account.'" width="max-w-[600px]">
             <form wire:submit="verifyCode" class="flex flex-col gap-5"
                   x-data="{ left: Math.max(0, {{ $resendAt }} - Math.floor(Date.now() / 1000)), tick() { this.left = Math.max(0, {{ $resendAt }} - Math.floor(Date.now() / 1000)) } }"
                   x-init="setInterval(() => tick(), 1000)">
@@ -334,9 +328,11 @@
                         <p class="mt-3 rounded-sm bg-sale-0 px-4 py-3 text-body-sm text-price-40" role="alert">{{ $message }}</p>
                     @enderror
                 </div>
+                <x-store.field model="name" label="Your full name" autocomplete="name" />
+                <x-store.check model="marketing" label="Email me offers and news (optional)" />
                 <button type="submit" class="h-12 rounded-full bg-ink text-[15px] font-bold text-white">Verify and continue</button>
                 <div class="flex items-center justify-between gap-3">
-                    <button type="button" wire:click="changeContact" class="rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold">Change contact</button>
+                    <button type="button" wire:click="changeContact" class="rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold">Change email</button>
                     <span x-show="left > 0" class="text-body-sm text-body-muted">Resend code in <span x-text="`00:${String(left).padStart(2, '0')}`"></span></span>
                     <button type="button" x-show="left === 0" x-cloak wire:click="resendCode" class="text-body-sm font-bold underline">Resend code</button>
                 </div>

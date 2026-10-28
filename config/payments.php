@@ -12,10 +12,5 @@ return [
             'description' => 'Digital wallet checkout on supported browsers.',
             'fulfilment' => ['pickup', 'delivery'],
         ],
-        'pay_at_pickup' => [
-            'label' => 'Pay at Pickup',
-            'description' => 'Pay at the counter upon order collection (Cash, Card, Interac).',
-            'fulfilment' => ['pickup'],
-        ],
     ],
 ];

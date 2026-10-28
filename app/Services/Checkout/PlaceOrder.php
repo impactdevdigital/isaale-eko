@@ -82,7 +82,7 @@ class PlaceOrder
             $order = Order::create([
                 'number' => $this->newNumber(),
                 'user_id' => $user->id,
-                'status' => $method->code === 'pay_at_pickup' ? Order::STATUS_PLACED : Order::STATUS_AWAITING_PAYMENT,
+                'status' => Order::STATUS_AWAITING_PAYMENT,
                 'fulfilment' => $fulfilment,
                 'contact_name' => $contactName,
                 'contact_email' => $contact['channel'] === 'email' ? $contact['value'] : null,

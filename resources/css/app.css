@@ -270,6 +270,14 @@
     }
 }
 
+/* Airmail-envelope border around the checkout delivery address (Figma 04 Fulfilment & Order Review). */
+@utility airmail {
+    border: 2px solid transparent;
+    background:
+        linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+        repeating-linear-gradient(-45deg, #c8102e 0 12px, transparent 12px 20px, #1f3a93 20px 32px, transparent 32px 40px) border-box;
+}
+
 [x-cloak] {
     display: none !important;
 }

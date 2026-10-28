@@ -10,6 +10,9 @@
     'feeValue' => 'Calculated at checkout',
     'totalLabel' => null,
     'showFreeDeliveryHint' => false,
+    'savingsLabel' => 'Product savings (included)',
+    'note' => null,
+    'noteTone' => 'ok',
 ])
 
 @php
@@ -65,7 +68,7 @@
         </div>
         @if ($totals->savings)
             <div class="flex justify-between">
-                <dt class="text-grayscale-80">Product savings (included)</dt>
+                <dt class="text-grayscale-80">{{ $savingsLabel }}</dt>
                 <dd class="font-bold text-stock-50">&minus;{{ money($totals->savings) }}</dd>
             </div>
         @endif
@@ -87,6 +90,14 @@
                     🚚 You’ve unlocked FREE delivery
                 @endif
             </div>
+        @endif
+        @if ($note)
+            <div @class([
+                'rounded-sm px-3 py-1.5 text-[11px] font-medium',
+                'bg-stock-0 text-stock-50' => $noteTone === 'ok',
+                'bg-brand-yellow-10 text-brand-yellow-90' => $noteTone === 'pending',
+                'bg-sale-0 text-price-40' => $noteTone === 'error',
+            ]) role="status">{{ $note }}</div>
         @endif
     </dl>
 

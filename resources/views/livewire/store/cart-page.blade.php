@@ -137,7 +137,7 @@
     @if ($popular->isNotEmpty())
         <section class="mt-16 flex flex-col gap-4">
             <x-store.section-heading eyebrow="While you’re here" title="Popular Picks" subtitle="Bestsellers and everyday essentials to get you started" link="View all products" :href="route('shop')" />
-            <div class="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-7">
+            <div class="flex snap-x gap-2.5 overflow-x-auto [scrollbar-width:none] md:grid md:grid-cols-4 md:overflow-visible lg:grid-cols-7">
                 @foreach ($popular as $product)
                     <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" wire:key="popular-{{ $product->id }}" />
                 @endforeach

@@ -23,7 +23,7 @@
    @keydown.escape.window="clearTimeout(timeout); menu = null" @click.outside="clearTimeout(timeout); menu = null" class="sticky top-0 z-30 bg-surface shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
     {{-- Utility bar --}}
     <div class="bg-ink text-caption">
-        <div class="flex h-8 items-center justify-between px-4 md:px-7">
+        <div class="page-container flex h-8 items-center justify-between">
             <p class="hidden items-center gap-1.5 text-white lg:flex">
                 <x-store.icon name="bus" />
                 Fresh African &amp; Caribbean groceries, delivered
@@ -37,7 +37,7 @@
     </div>
 
     <div class="border-b border-grayscale-30 bg-surface">
-        <div class="px-4 md:px-[30px]">
+        <div class="page-container">
             {{-- Logo, search, location, account, cart --}}
             <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-4 py-[18px] md:flex-nowrap md:py-1.5 md:h-[76px]">
                 <a href="{{ url('/') }}" class="shrink-0" aria-label="Ìsàlèè Èkó home">

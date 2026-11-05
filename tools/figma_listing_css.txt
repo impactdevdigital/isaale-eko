@@ -1,0 +1,6 @@
+/* 1440w Recipes Listing CSS from Figma */
+/* 
+Container: 1440px x 2197px
+Main padding: 32px 72px 48px
+Content width: 1296px
+*/

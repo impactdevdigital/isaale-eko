@@ -271,8 +271,8 @@
 
             <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($cookNext as $nextRecipe)
-                    <article class="flex flex-col rounded-xl overflow-hidden border border-grayscale-30 bg-surface shadow-2xs hover:shadow-md transition-all group">
-                        <a href="{{ route('kitchen.recipe', $nextRecipe) }}" class="relative block h-[240px] sm:h-[260px] bg-grayscale-90 overflow-hidden">
+                    <article class="flex flex-col rounded-2xl overflow-hidden border border-grayscale-30 bg-surface shadow-2xs hover:shadow-md transition-all group">
+                        <a href="{{ route('kitchen.recipe', $nextRecipe) }}" class="relative block h-[250px] sm:h-[270px] bg-grayscale-90 overflow-hidden">
                             @if ($nextRecipe->image || $nextRecipe->image_url)
                                 <img src="{{ asset($nextRecipe->image ?: $nextRecipe->image_url) }}" alt="{{ $nextRecipe->title }}"
                                      class="size-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -281,9 +281,11 @@
                                     {{ $nextRecipe->title }}
                                 </div>
                             @endif
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30"></div>
+                            <!-- Subtle bottom-only gradient -->
+                            <div class="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/90 via-black/45 to-transparent pointer-events-none"></div>
 
-                            <div class="absolute top-3.5 inset-x-3.5 flex items-center gap-2 text-[11px] font-semibold text-white">
+                            <!-- Top Meta Badges -->
+                            <div class="absolute top-3.5 left-3.5 flex items-center gap-1.5 text-[11px] font-semibold text-white">
                                 @if ($nextRecipe->durationLabel())
                                     <span class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xs">
                                         <x-store.icon name="clock" class="size-3" />
@@ -302,8 +304,9 @@
                                 @endif
                             </div>
 
-                            <div class="absolute bottom-4 inset-x-4 text-white">
-                                <h3 class="text-[22px] font-bold tracking-tight leading-snug">
+                            <!-- Bottom Title & Tagline -->
+                            <div class="absolute bottom-3.5 inset-x-4 text-white z-10">
+                                <h3 class="text-[22px] font-bold tracking-tight leading-tight">
                                     {{ $nextRecipe->title }}
                                 </h3>
                                 @if ($nextRecipe->intro || $nextRecipe->tagline)
@@ -311,8 +314,8 @@
                                         {{ $nextRecipe->intro ?: $nextRecipe->tagline }}
                                     </p>
                                 @endif
-                                <div class="mt-3">
-                                    <span class="inline-flex items-center rounded-full border border-white/80 px-3 py-1 text-[11px] font-semibold text-white group-hover:bg-white group-hover:text-ink transition-colors">
+                                <div class="mt-2.5">
+                                    <span class="inline-flex items-center rounded-full border border-white/80 px-3 py-0.5 text-[11px] font-semibold text-white group-hover:bg-white group-hover:text-ink transition-colors">
                                         Cook this
                                     </span>
                                 </div>
@@ -320,7 +323,7 @@
                         </a>
 
                         <a href="{{ route('kitchen.recipe', $nextRecipe) }}"
-                           class="flex h-12 items-center justify-center bg-grayscale-0 border-t border-grayscale-30 text-[14px] font-bold text-ink hover:bg-grayscale-20 transition-colors">
+                           class="flex h-12 items-center justify-center bg-grayscale-10 border-t border-grayscale-30 text-[13px] font-bold text-ink hover:bg-grayscale-20 hover:text-brand-yellow-80 transition-colors">
                             View Ingredient Recipe
                         </a>
                     </article>

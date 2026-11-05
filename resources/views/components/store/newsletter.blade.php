@@ -1,27 +1,39 @@
-<section class="bg-brand-yellow">
-    <div class="flex flex-col gap-6 px-4 py-8 md:px-[30px] md:py-10 lg:flex-row lg:items-center lg:justify-between lg:py-12">
-        <div class="flex flex-col gap-1">
-            <p class="text-[10px] leading-[13px] font-black tracking-[1px] uppercase text-ink">Recipes, offers &amp; community</p>
-            <h2 class="pt-0.5 text-[24px] leading-[30px] font-bold tracking-tight text-ink sm:text-[28px] sm:leading-[34px] md:text-[36px] md:leading-[44px] lg:text-[42px] lg:leading-[52px]">Your pantry misses you already.</h2>
-            <p class="text-[12px] leading-4 text-ink/80">Fresh finds and good ideas, straight to your inbox.</p>
+<section class="border-t border-grayscale-30 bg-grayscale-10">
+    <div class="page-container py-12 md:py-16 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-12">
+        <div class="max-w-xl space-y-2">
+            <span class="block text-[11px] font-bold uppercase tracking-widest text-grayscale-80">Recipes, offers &amp; community</span>
+            <h2 class="text-[28px] sm:text-[34px] lg:text-[42px] font-bold tracking-tight text-ink leading-tight">Your pantry misses you already.</h2>
+            <p class="text-body-sm text-body-muted">Fresh finds and good ideas, straight to your inbox.</p>
         </div>
 
-        <form action="#" method="POST" class="flex w-full flex-col gap-3 lg:w-[520px]">
+        <form action="#" method="POST" class="w-full lg:max-w-[480px] space-y-3">
             @csrf
-            <div class="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
-                <label for="newsletter-name" class="sr-only">Full Name</label>
-                <input id="newsletter-name" type="text" name="name" required placeholder="Full Name"
-                       class="h-[46px] w-full shrink-0 rounded-full border border-grayscale-30 bg-surface px-5 text-[14px] text-ink placeholder:text-grayscale-60 focus:border-ink focus:outline-none sm:w-[200px]">
-
-                <label for="newsletter-email" class="sr-only">Your email address</label>
-                <input id="newsletter-email" type="email" name="email" required placeholder="Your email address"
-                       class="h-[46px] w-full shrink-0 rounded-full border border-grayscale-30 bg-surface px-5 text-[14px] text-ink placeholder:text-grayscale-60 focus:border-ink focus:outline-none sm:flex-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label for="newsletter-first-name" class="sr-only">First Name</label>
+                    <input id="newsletter-first-name" type="text" name="first_name" required placeholder="First Name"
+                           class="h-11 w-full rounded-xl border border-grayscale-30 bg-white px-4 text-body-sm text-ink placeholder:text-grayscale-60 focus:outline-none focus:border-ink transition-colors">
+                </div>
+                <div>
+                    <label for="newsletter-last-name" class="sr-only">Last Name</label>
+                    <input id="newsletter-last-name" type="text" name="last_name" required placeholder="Last Name"
+                           class="h-11 w-full rounded-xl border border-grayscale-30 bg-white px-4 text-body-sm text-ink placeholder:text-grayscale-60 focus:outline-none focus:border-ink transition-colors">
+                </div>
             </div>
 
-            <button type="submit" class="flex h-[46px] w-full shrink-0 items-center justify-center gap-2 rounded-full bg-ink px-6 text-[14px] leading-[18px] font-extrabold text-white transition-colors hover:bg-grayscale-90 active:scale-[0.99]">
+            <div>
+                <label for="newsletter-email" class="sr-only">Your email address</label>
+                <input id="newsletter-email" type="email" name="email" required placeholder="Your email address"
+                       class="h-11 w-full rounded-xl border border-grayscale-30 bg-white px-4 text-body-sm text-ink placeholder:text-grayscale-60 focus:outline-none focus:border-ink transition-colors">
+            </div>
+
+            <button type="submit" class="h-11 w-full rounded-full bg-ink text-white font-bold text-button-sm hover:bg-grayscale-90 transition-colors shadow-2xs">
                 Join
-                <x-store.icon name="arrow-right" class="size-4" />
             </button>
+
+            <p class="text-[11px] text-body-muted leading-relaxed">
+                By subscribing you agree to our <a href="{{ route('privacy-policy') }}" class="underline hover:text-ink">Terms &amp; Conditions</a> and <a href="{{ route('privacy-policy') }}" class="underline hover:text-ink">Privacy &amp; Cookies Policy</a>.
+            </p>
         </form>
     </div>
 </section>

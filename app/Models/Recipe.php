@@ -96,4 +96,37 @@ class Recipe extends Model
 
         return trim(($hours ? "{$hours} hr " : '').($remainder ? "{$remainder} min" : ''));
     }
+
+    /**
+     * @return array<int, array{number: int, title: string, body: string}>
+     */
+    public function parsedSteps(): array
+    {
+        $lines = collect(explode("\n", (string) $this->steps))
+            ->map(fn ($s) => trim($s))
+            ->filter()
+            ->values();
+
+        $parsed = [];
+        foreach ($lines as $i => $line) {
+            $clean = preg_replace('/^\d+[\.\)]\s*/', '', $line);
+            if (str_contains($clean, ':')) {
+                [$title, $body] = explode(':', $clean, 2);
+                $parsed[] = [
+                    'number' => $i + 1,
+                    'title' => trim($title),
+                    'body' => trim($body),
+                ];
+            } else {
+                $parts = explode('.', $clean, 2);
+                $parsed[] = [
+                    'number' => $i + 1,
+                    'title' => trim($parts[0]),
+                    'body' => isset($parts[1]) && trim($parts[1]) ? trim($parts[1]) . '.' : trim($parts[0]),
+                ];
+            }
+        }
+
+        return $parsed;
+    }
 }

@@ -92,22 +92,48 @@ class RecipeDetail extends Component
         }
     }
 
+    public function addAllIngredients(AddRecipeToCart $action): void
+    {
+        $result = $action->handle(
+            recipe: $this->recipe,
+            people: $this->people,
+            onlyIngredientIds: null,
+            includeOptional: true
+        );
+
+        $this->lastAddedCount = count($result['added']);
+        $this->addedSuccess = true;
+
+        $this->dispatch('cart-updated');
+
+        if ($this->lastAddedCount > 0) {
+            session()->flash('cart_success', "Added all {$this->lastAddedCount} ingredients to your basket!");
+        } else {
+            session()->flash('cart_warning', 'No ingredients available to add right now.');
+        }
+    }
+
+    public function addSingleVariation(int $variationId): void
+    {
+        app(\App\Support\Cart::class)->add($variationId, 1);
+        $this->dispatch('cart-updated');
+        session()->flash('cart_success', 'Ingredient added to your basket!');
+    }
+
     public function render(RecipeResolver $resolver)
     {
         $resolved = $resolver->resolve($this->recipe, $this->people);
 
-        // Find pairs/combos featuring this recipe
-        $combos = $this->recipe->mealCombos ?? collect();
-
-        // Parse steps into numbered list
-        $stepLines = collect(explode("\n", (string) $this->recipe->steps))
-            ->map(fn ($s) => trim($s))
-            ->filter()
-            ->values();
+        // Find recipes for "Cook Next"
+        $cookNext = Recipe::approved()
+            ->where('id', '!=', $this->recipe->id)
+            ->with('country')
+            ->take(3)
+            ->get();
 
         return view('livewire.store.kitchen.recipe-detail', [
             'resolved' => $resolved,
-            'stepLines' => $stepLines,
+            'cookNext' => $cookNext,
             'cuisines' => config('kitchen.cuisines', []),
         ])->title("{$this->recipe->title} — Ìsalèè Kitchen");
     }

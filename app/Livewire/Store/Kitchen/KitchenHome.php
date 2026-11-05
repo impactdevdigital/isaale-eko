@@ -18,11 +18,19 @@ class KitchenHome extends Component
     public string $cuisine = '';
 
     #[Url]
+    public string $meal = '';
+
+    #[Url]
     public string $search = '';
 
     public function setCuisine(string $cuisine): void
     {
         $this->cuisine = $this->cuisine === $cuisine ? '' : $cuisine;
+    }
+
+    public function setMeal(string $meal): void
+    {
+        $this->meal = $this->meal === $meal ? '' : $meal;
     }
 
     public function render(RecipeResolver $resolver)
@@ -32,6 +40,15 @@ class KitchenHome extends Component
         $recipes = Recipe::approved()
             ->with(['country', 'ingredients.ingredient.options.variation'])
             ->when($this->cuisine, fn ($q) => $q->where('cuisine', $this->cuisine))
+            ->when($this->meal, function ($q) {
+                $term = strtolower($this->meal);
+                $q->where(function ($sub) use ($term) {
+                    $sub->whereJsonContains('diet_tags', $term)
+                        ->orWhere('title', 'like', "%{$term}%")
+                        ->orWhere('name', 'like', "%{$term}%")
+                        ->orWhere('intro', 'like', "%{$term}%");
+                });
+            })
             ->when($this->search, function ($q) {
                 $term = trim($this->search);
                 $q->where(fn ($sub) => $sub->where('name', 'like', "%{$term}%")

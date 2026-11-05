@@ -1,198 +1,252 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-12">
-    <!-- Hero Banner -->
-    <div class="relative rounded-3xl overflow-hidden bg-[#111111] text-white p-6 sm:p-10 lg:p-12 shadow-xl border border-white/10">
-        <div class="relative z-10 max-w-2xl space-y-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[#DF2600] text-white">
-                Ìsalèè Èkó Kitchen
-            </span>
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
-                Authentic Heritage Recipes &amp; Ingredient Kits
-            </h1>
-            <p class="text-sm sm:text-base text-white/80 leading-relaxed">
-                Step-by-step culinary guides for rich West African and Caribbean dishes. Scale servings dynamically and order perfectly portioned shelf ingredients with a single click.
-            </p>
+<div class="page-container py-6 md:py-10">
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 text-body-xs text-body-muted">
+            <li><a href="{{ route('home') }}" class="transition-colors hover:text-ink">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li><span class="cursor-default">Discover</span></li>
+            <li aria-hidden="true">/</li>
+            <li class="font-bold text-ink" aria-current="page">Recipes</li>
+        </ol>
+    </nav>
 
-            <div class="pt-2 flex flex-wrap items-center gap-3">
-                <a href="{{ route('kitchen.pantry') }}"
-                   style="background-color: #DF2600;"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-extrabold text-sm hover:opacity-95 transition-opacity shadow-md">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    Cook With What I Have (Pantry Matcher)
-                </a>
+    <!-- Hero Banner (Figma 07.01) -->
+    <div class="relative overflow-hidden rounded-2xl border border-grayscale-30 bg-surface">
+        <div class="flex flex-col-reverse lg:flex-row items-center justify-between min-h-[220px] lg:min-h-[260px] p-6 sm:p-8 lg:p-10 gap-6">
+            <div class="max-w-xl z-10 space-y-3">
+                <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-grayscale-80">
+                    Discover
+                </span>
+                <h1 class="text-[28px] sm:text-[36px] lg:text-[44px] font-bold tracking-tight text-ink leading-tight">
+                    Recipes, Stories &amp; The People Behind The Food.
+                </h1>
+                <p class="text-body-sm sm:text-body text-body-muted leading-relaxed">
+                    Cook the classics step by step, then shop every ingredient in one tap. Read the stories behind what's on our shelves.
+                </p>
+                <div class="pt-2">
+                    <a href="{{ route('kitchen.pantry') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-ink text-white text-button-sm font-bold hover:bg-grayscale-90 transition-colors shadow-2xs">
+                        <span>Cook With What I Have</span>
+                        <x-store.icon name="arrow-right" class="size-3.5 text-brand-yellow" />
+                    </a>
+                </div>
+            </div>
+            <div class="relative shrink-0 w-full sm:w-[420px] lg:w-[480px] h-[180px] sm:h-[220px] flex items-center justify-center lg:justify-end">
+                <img src="{{ asset('images/store/banners/recipes-hero-art.png') }}" alt="" class="h-full w-auto object-contain">
             </div>
         </div>
-
-        <div class="absolute right-0 bottom-0 top-0 w-1/3 opacity-20 lg:opacity-30 pointer-events-none bg-linear-to-l from-[#DF2600] to-transparent"></div>
     </div>
 
-    <!-- Cuisines & Search Bar -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-        <!-- Cuisine Filter Pills -->
-        <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 [scrollbar-width:none]">
-            <button type="button"
-                    wire:click="setCuisine('')"
-                    class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all shrink-0 {{ $cuisine === '' ? 'bg-[#111111] text-white shadow-xs' : 'bg-white border border-[#EEEEEE] text-[#686868] hover:text-[#111111]' }}">
-                All Cuisines
+    <!-- Category Filter Pills & Search Bar -->
+    <div class="mt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <!-- Meal Category Filters -->
+        <div class="-mx-4 flex overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0 gap-2 shrink-0">
+            <button type="button" wire:click="setMeal('')"
+                    @class([
+                        'px-4 py-2 rounded-full text-button-sm transition-all shrink-0',
+                        'bg-ink text-white font-bold shadow-xs' => $meal === '',
+                        'bg-white border border-grayscale-30 text-ink hover:border-ink font-medium' => $meal !== ''
+                    ])>
+                All Recipes
             </button>
-            @foreach ($cuisines as $cKey => $cLabel)
-                <button type="button"
-                        wire:click="setCuisine('{{ $cKey }}')"
-                        class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all shrink-0 {{ $cuisine === $cKey ? 'bg-[#DF2600] text-white shadow-xs' : 'bg-white border border-[#EEEEEE] text-[#686868] hover:text-[#111111]' }}">
-                    {{ $cLabel }}
-                </button>
-            @endforeach
+            <button type="button" wire:click="setMeal('breakfast')"
+                    @class([
+                        'px-4 py-2 rounded-full text-button-sm transition-all shrink-0',
+                        'bg-ink text-white font-bold shadow-xs' => $meal === 'breakfast',
+                        'bg-white border border-grayscale-30 text-ink hover:border-ink font-medium' => $meal !== 'breakfast'
+                    ])>
+                Breakfast Recipe
+            </button>
+            <button type="button" wire:click="setMeal('lunch')"
+                    @class([
+                        'px-4 py-2 rounded-full text-button-sm transition-all shrink-0',
+                        'bg-ink text-white font-bold shadow-xs' => $meal === 'lunch',
+                        'bg-white border border-grayscale-30 text-ink hover:border-ink font-medium' => $meal !== 'lunch'
+                    ])>
+                Lunch Recipe
+            </button>
+            <button type="button" wire:click="setMeal('dinner')"
+                    @class([
+                        'px-4 py-2 rounded-full text-button-sm transition-all shrink-0',
+                        'bg-ink text-white font-bold shadow-xs' => $meal === 'dinner',
+                        'bg-white border border-grayscale-30 text-ink hover:border-ink font-medium' => $meal !== 'dinner'
+                    ])>
+                Dinner Recipe
+            </button>
         </div>
 
-        <!-- Search Input -->
-        <div class="w-full md:w-72 relative">
-            <input type="text"
-                   wire:model.live.debounce.300ms="search"
-                   placeholder="Search dishes or flavours..."
-                   class="w-full pl-9 pr-3 py-2 rounded-xl border border-[#EEEEEE] bg-white text-xs text-[#111111] placeholder-[#686868] focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-            <svg class="w-4 h-4 text-[#686868] absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            @if ($search)
-                <button type="button" wire:click="$set('search', '')" class="absolute right-3 top-2.5 text-xs text-[#686868] hover:text-[#111111]">Clear</button>
-            @endif
-        </div>
+        <!-- Search Bar -->
+        <form wire:submit.prevent="$refresh" class="relative w-full md:w-[380px]">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-body-muted">
+                <x-store.icon name="search" class="size-4" />
+            </span>
+            <input type="search" wire:model.live.debounce.300ms="search"
+                   placeholder="Search products, ingredients or recipes..."
+                   class="w-full h-11 pl-10 pr-24 rounded-full border border-grayscale-30 bg-white text-body-sm text-ink placeholder:text-body-muted focus:outline-none focus:border-ink transition-colors">
+            <button type="submit"
+                    class="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-full bg-ink text-white text-xs font-bold hover:bg-grayscale-90 transition-colors">
+                Search
+            </button>
+        </form>
     </div>
 
-    <!-- Recipes Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Recipes Grid (Figma 07.01) -->
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse ($recipes as $recipe)
-            @php
-                $kitCost = $costPreviews[$recipe->id] ?? 0;
-            @endphp
-            <div class="bg-white rounded-3xl border border-[#EEEEEE] shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-[#DF2600]/30 transition-all group">
-                <div>
-                    <!-- Photo Header -->
-                    <a href="{{ route('kitchen.recipe', $recipe) }}" class="relative block h-52 bg-[#242424] overflow-hidden">
-                        @if ($recipe->image)
-                            <img src="{{ asset($recipe->image) }}" alt="{{ $recipe->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        @elseif ($recipe->thumbnail)
-                            <img src="{{ asset($recipe->thumbnail) }}" alt="{{ $recipe->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        @else
-                            <div class="w-full h-full flex items-center justify-center bg-linear-to-br from-[#DF2600] to-[#111111] text-white font-extrabold text-2xl">
-                                {{ $recipe->title }}
-                            </div>
-                        @endif
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <article class="flex flex-col rounded-xl overflow-hidden border border-grayscale-30 bg-surface shadow-2xs hover:shadow-md transition-all group">
+                <!-- Recipe Photo Top with Dark Gradient and Meta -->
+                <a href="{{ route('kitchen.recipe', $recipe) }}" class="relative block h-[240px] sm:h-[260px] bg-grayscale-90 overflow-hidden">
+                    @if ($recipe->image || $recipe->image_url)
+                        <img src="{{ asset($recipe->image ?: $recipe->image_url) }}" alt="{{ $recipe->title }}"
+                             class="size-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    @else
+                        <div class="size-full flex items-center justify-center bg-grayscale-80 text-white font-bold text-xl">
+                            {{ $recipe->title }}
+                        </div>
+                    @endif
+                    <!-- Gradient overlay for text legibility -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30"></div>
 
-                        <!-- Top Badges -->
-                        <div class="absolute top-3 inset-x-3 flex items-center justify-between">
-                            <span class="px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold">
-                                {{ $cuisines[$recipe->cuisine] ?? ucfirst($recipe->cuisine) }}
+                    <!-- Top Meta Badges -->
+                    <div class="absolute top-3.5 inset-x-3.5 flex items-center gap-2 text-[11px] font-semibold text-white">
+                        @if ($recipe->durationLabel())
+                            <span class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xs">
+                                <x-store.icon name="clock" class="size-3" />
+                                {{ $recipe->durationLabel() }}
                             </span>
+                        @endif
+                        <span class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xs">
+                            <x-store.icon name="user" class="size-3" />
+                            {{ $recipe->base_servings }} &ndash; {{ $recipe->base_servings + 2 }}
+                        </span>
+                        @if ($recipe->country)
+                            <span class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xs">
+                                <x-store.icon name="location" class="size-3" />
+                                {{ $recipe->country->name }}
+                            </span>
+                        @endif
+                    </div>
 
-                            @if ($recipe->durationLabel())
-                                <span class="px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-xs text-white text-[11px] font-semibold">
-                                    ⏱ {{ $recipe->durationLabel() }}
-                                </span>
-                            @endif
-                        </div>
-
-                        <!-- Bottom Title -->
-                        <div class="absolute bottom-3 inset-x-3 text-white">
-                            <h3 class="text-lg font-extrabold tracking-tight truncate group-hover:text-white transition-colors">
-                                {{ $recipe->title }}
-                            </h3>
-                            @if ($recipe->country)
-                                <span class="text-xs text-white/80 font-medium block">
-                                    {{ $recipe->country->name }} Tradition
-                                </span>
-                            @endif
-                        </div>
-                    </a>
-
-                    <!-- Card Body -->
-                    <div class="p-5 space-y-3">
-                        @if ($recipe->intro)
-                            <p class="text-xs sm:text-sm text-[#686868] line-clamp-2 leading-relaxed">
-                                {{ $recipe->intro }}
+                    <!-- Bottom Title & Tagline -->
+                    <div class="absolute bottom-4 inset-x-4 text-white">
+                        <h2 class="text-[22px] font-bold tracking-tight leading-snug">
+                            {{ $recipe->title }}
+                        </h2>
+                        @if ($recipe->intro || $recipe->tagline)
+                            <p class="mt-1 text-xs text-white/90 line-clamp-1">
+                                {{ $recipe->intro ?: $recipe->tagline }}
                             </p>
                         @endif
 
-                        <div class="flex items-center justify-between pt-2 border-t border-[#EEEEEE] text-xs">
-                            <span class="text-[#686868]">
-                                Serves <strong class="text-[#111111]">{{ $recipe->base_servings }} people</strong>
-                            </span>
-                            <span class="text-[#686868]">
-                                <strong class="text-[#111111]">{{ $recipe->ingredients->count() }}</strong> ingredients
+                        <div class="mt-3 flex items-center justify-between">
+                            <span class="inline-flex items-center rounded-full border border-white/80 px-3 py-1 text-[11px] font-semibold text-white transition-colors group-hover:bg-white group-hover:text-ink">
+                                Cook this
                             </span>
                         </div>
                     </div>
-                </div>
+                </a>
 
-                <!-- Footer & CTA -->
-                <div class="p-4 sm:p-5 bg-[#FAFAFA] border-t border-[#EEEEEE] flex items-center justify-between gap-3">
-                    <div>
-                        <span class="block text-[10px] uppercase font-bold text-[#686868]">Kit (4 People)</span>
-                        <span class="block text-sm sm:text-base font-extrabold text-[#007D49]">
-                            {{ $kitCost > 0 ? money($kitCost) : 'Check Kit' }}
-                        </span>
-                    </div>
-
-                    <a href="{{ route('kitchen.recipe', $recipe) }}"
-                       style="background-color: #DF2600;"
-                       class="px-4 py-2 rounded-xl text-white text-xs font-extrabold hover:opacity-90 transition-opacity shadow-xs inline-flex items-center gap-1">
-                        View Recipe
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
+                <!-- Bottom Bar: View Ingredient Recipe -->
+                <a href="{{ route('kitchen.recipe', $recipe) }}"
+                   class="flex h-12 items-center justify-center bg-grayscale-0 border-t border-grayscale-30 text-[14px] font-bold text-ink hover:bg-grayscale-20 transition-colors">
+                    View Ingredient Recipe
+                </a>
+            </article>
         @empty
-            <div class="col-span-full py-16 px-6 text-center bg-white rounded-3xl border border-[#EEEEEE]">
-                <div class="max-w-sm mx-auto space-y-3">
-                    <div class="w-12 h-12 mx-auto rounded-full bg-[#FAFAFA] border border-[#EEEEEE] flex items-center justify-center text-[#686868]">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </div>
-                    <h3 class="text-base font-extrabold text-[#111111]">No recipes found</h3>
-                    <p class="text-xs text-[#686868]">Try selecting another cuisine or clearing your search query.</p>
-                </div>
+            <div class="col-span-full py-16 text-center">
+                <x-store.icon name="search" class="mx-auto size-10 text-body-muted" />
+                <p class="mt-3 text-body font-bold text-ink">No recipes match your criteria.</p>
+                <p class="text-body-sm text-body-muted">Try clearing your filters or searching for something else.</p>
+                <button type="button" wire:click="$set('search', ''); $set('meal', ''); $set('cuisine', '');"
+                        class="mt-4 px-4 py-2 rounded-full bg-ink text-white text-xs font-bold">
+                    View All Recipes
+                </button>
             </div>
         @endforelse
     </div>
 
-    <!-- Curated Pairings (Meal Combos) -->
-    @if ($combos->isNotEmpty())
-        <div class="pt-8 sm:pt-12 border-t border-[#EEEEEE] space-y-6">
+    <!-- Discover More / Food Stories Section (Figma 07.01) -->
+    <section class="mt-16 md:mt-24 border-t border-grayscale-20 pt-12 md:pt-16">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-[#DF2600]">Curated Pairings</span>
-                <h2 class="text-xl sm:text-2xl font-extrabold text-[#111111] tracking-tight">Authentic Meal Combinations</h2>
-                <p class="text-xs sm:text-sm text-[#686868]">Popular complementary dishes often served together for Sunday gatherings and feasts.</p>
+                <span class="block text-body-xs font-bold uppercase tracking-wider text-grayscale-80">
+                    Discover More
+                </span>
+                <h2 class="mt-1 text-h2-mobile md:text-h2 font-bold text-ink">
+                    Food Stories
+                </h2>
+                <p class="mt-1 text-body-sm text-body-muted">
+                    The history and meaning behind the ingredients on our shelves.
+                </p>
             </div>
+            <a href="#" class="inline-flex items-center gap-1.5 text-body-sm font-bold text-ink hover:text-brand-yellow-80 transition-colors shrink-0">
+                <span>View more food stories</span>
+                <x-store.icon name="arrow-right" class="size-4" />
+            </a>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @foreach ($combos as $combo)
-                    <div class="p-5 sm:p-6 rounded-3xl bg-white border border-[#EEEEEE] shadow-xs space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-base sm:text-lg font-extrabold text-[#111111]">{{ $combo->name }}</h3>
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#DAF4E7] text-[#007D49]">Combo</span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            @foreach ($combo->recipes as $r)
-                                <a href="{{ route('kitchen.recipe', $r) }}" class="group block p-3 rounded-2xl bg-[#FAFAFA] border border-[#EEEEEE] hover:border-[#DF2600]/30 transition-all">
-                                    <div class="h-24 rounded-xl overflow-hidden bg-[#242424] mb-2">
-                                        @if ($r->image)
-                                            <img src="{{ asset($r->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
-                                        @endif
-                                    </div>
-                                    <span class="text-xs font-bold text-[#111111] line-clamp-1 group-hover:text-[#DF2600]">{{ $r->title }}</span>
-                                    <span class="text-[10px] text-[#686868] block">{{ $r->durationLabel() }}</span>
-                                </a>
-                            @endforeach
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Story Card 1 -->
+            <article class="flex flex-col sm:flex-row rounded-2xl overflow-hidden border border-grayscale-30 bg-surface">
+                <div class="sm:w-1/2 h-56 sm:h-auto relative overflow-hidden bg-grayscale-90">
+                    <img src="{{ asset('images/store/stories/story-jollof.png') }}" alt="Why Jollof Rice Is Never Just Rice"
+                         class="size-full object-cover">
+                </div>
+                <div class="sm:w-1/2 p-6 flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="text-xl font-bold tracking-tight text-ink leading-snug">
+                            Why Jollof Rice Is Never Just Rice
+                        </h3>
+                        <p class="mt-2 text-body-xs text-body-muted leading-relaxed line-clamp-3">
+                            Behind every pot is a family, a debate and a standard that can never quite be met.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="#" class="inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-2.5 text-button-sm font-bold text-ink hover:bg-brand-yellow-40 transition-colors">
+                            Read story
+                        </a>
+                        <div class="mt-4 flex items-center gap-3 text-body-xs text-body-muted border-t border-grayscale-20 pt-3">
+                            <span class="flex items-center gap-1">
+                                <x-store.icon name="clock" class="size-3.5" />
+                                50 min
+                            </span>
+                            <span>&vert;</span>
+                            <span>By Amina Yusuf</span>
                         </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            </article>
+
+            <!-- Story Card 2 -->
+            <article class="flex flex-col sm:flex-row rounded-2xl overflow-hidden border border-grayscale-30 bg-surface">
+                <div class="sm:w-1/2 h-56 sm:h-auto relative overflow-hidden bg-grayscale-90">
+                    <img src="{{ asset('images/store/stories/story-scotch-bonnet.png') }}" alt="The Scotch Bonnet: Heat With A Heart"
+                         class="size-full object-cover">
+                </div>
+                <div class="sm:w-1/2 p-6 flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="text-xl font-bold tracking-tight text-ink leading-snug">
+                            The Scotch Bonnet: Heat With A Heart
+                        </h3>
+                        <p class="mt-2 text-body-xs text-body-muted leading-relaxed line-clamp-3">
+                            It&rsquo;s fruity, aromatic and the single ingredient that makes West African and Caribbean kitchens sing.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="#" class="inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-2.5 text-button-sm font-bold text-ink hover:bg-brand-yellow-40 transition-colors">
+                            Read story
+                        </a>
+                        <div class="mt-4 flex items-center gap-3 text-body-xs text-body-muted border-t border-grayscale-20 pt-3">
+                            <span class="flex items-center gap-1">
+                                <x-store.icon name="clock" class="size-3.5" />
+                                50 min
+                            </span>
+                            <span>&vert;</span>
+                            <span>By Amina Yusuf</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
         </div>
-    @endif
+    </section>
 </div>

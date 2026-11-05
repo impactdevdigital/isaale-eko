@@ -47,9 +47,11 @@ Route::get('/orders/{number}/reschedule', \App\Livewire\Store\RescheduleOrder::c
 
 // Part G: Ìsalèè Kitchen & Ingredients Engine
 Route::get('/kitchen', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.index');
+Route::get('/recipes', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('recipes.index');
 Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWithWhatIHave::class)->name('kitchen.pantry');
 Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
 Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
+Route::get('/recipes/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('recipes.show');
 
 // Policy Pages
 Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');

@@ -89,8 +89,8 @@
         </form>
     </div>
 
-    <!-- Recipes Grid (Figma 07.01: 3 columns, gap 12px, gap-y 16px, cards 424px x 230px, border-radius 4px) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 gap-y-4">
+    <!-- Recipes Grid (Figma Frame 1000003084: 3 columns, gap 12px, gap-y 16px, cards 424px x 230px, border-radius 4px, pb-80px) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 gap-y-4 mb-20">
         @forelse ($recipes as $recipe)
             <article class="flex flex-col justify-between rounded-[4px] overflow-hidden border border-[#DEDEDE] bg-white shadow-2xs hover:shadow-md transition-all group">
                 <!-- Upper Card: Image area (Figma: height 190px, padding 23px, bottom-aligned content) -->
@@ -142,9 +142,9 @@
                             </p>
                         @endif
 
-                        <!-- Cook this Pill (shown on hover / active) -->
+                        <!-- Cook this Pill (Figma: height 30px, 12px/16px font-extrabold #FFFFFF, border 1px #FFFFFF, rounded-full) -->
                         <div class="mt-2.5 flex items-center justify-between">
-                            <span class="inline-flex items-center rounded-full border border-white px-2.5 py-0.5 text-[11px] leading-[14px] font-semibold text-white bg-white/10 backdrop-blur-xs transition-colors group-hover:bg-white group-hover:text-ink">
+                            <span class="inline-flex items-center justify-center h-[30px] px-2.5 rounded-full border border-white text-[12px] leading-[16px] font-extrabold text-white bg-white/5 backdrop-blur-xs transition-colors group-hover:bg-white group-hover:text-[#111111]">
                                 Cook this
                             </span>
                         </div>
@@ -170,8 +170,8 @@
         @endforelse
     </div>
 
-    <!-- Discover More / Food Stories Section (Figma 07.01) -->
-    <section class="mt-16 md:mt-20 border-t border-grayscale-20 pt-10 md:pt-14">
+    <!-- Discover More / Food Stories Section (Figma 07.01: Frame 1000003072, no border divider) -->
+    <section class="mb-20">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div class="max-w-[600px]">
                 <span class="block text-[11px] leading-[14px] font-extrabold uppercase tracking-[1.35px] text-[#574B2F]">
@@ -181,7 +181,7 @@
                     Food Stories
                 </h2>
                 <p class="mt-1 text-[14px] leading-[22px] font-medium text-[#686868]">
-                    The history and meaning behind the ingredients on our shelves. Or try our <a href="{{ route('kitchen.pantry') }}" class="underline font-bold text-ink hover:text-brand-yellow-80 transition-colors">Cook With What I Have</a> pantry matcher.
+                    The history and meaning behind the ingredients on our shelves. Or try our <a href="{{ route('kitchen.pantry') }}" class="underline font-bold text-[#111111] hover:text-[#806500] transition-colors">Cook With What I Have</a> pantry matcher.
                 </p>
             </div>
             <a href="#" class="inline-flex items-center gap-1.5 text-[12px] leading-[16px] font-extrabold text-[#111111] hover:text-brand-yellow-80 transition-colors shrink-0">

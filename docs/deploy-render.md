@@ -63,7 +63,7 @@ In the `isaale-eko-shared` environment group:
 
 - `SQUARE_ENV` → `production`
 - `SQUARE_ACCESS_TOKEN`, `SQUARE_LOCATION_ID`, `SQUARE_APP_ID` → production values
-- an email provider (e.g. Postmark): `MAIL_MAILER=postmark`, `POSTMARK_API_KEY=...`
+- email via Resend: `MAIL_MAILER=resend`, `RESEND_API_KEY=re_...`. Before the domain is verified in Resend, use `MAIL_FROM_ADDRESS=onboarding@resend.dev` (only delivers to the Resend account owner). After verifying the domain, set `MAIL_FROM_ADDRESS=orders@<domain>`.
 
 Then in the Shell: `php artisan square:sync --full --retire-demo`.
 
@@ -76,6 +76,6 @@ Before announcing: the `/admin` pages have **no login yet** and must be protecte
 - **Free plan:** no Shell, no pre-deploy step, and no background worker, so the
   5-minute Square sync and background emails don't run. The site sleeps after 15
   minutes without visitors. Use Starter plans for the real shop.
-- **Logs:** each service → **Logs**. Until email is set up (`MAIL_MAILER=log`), sign-in codes appear there.
+- **Logs:** each service → **Logs**. If `MAIL_MAILER=log`, sign-in codes appear there instead of being emailed.
 - **Health check:** `https://<your domain>/up` should say the app is up.
 - **Sync by hand:** Shell → `php artisan square:sync`.

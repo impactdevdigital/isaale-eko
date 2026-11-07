@@ -130,6 +130,16 @@ class SquareGateway
         return $this->http()->get("/v2/orders/{$orderId}")->throw()->json('order', []);
     }
 
+    /**
+     * Register a domain for Apple Pay on the Web. Square fetches
+     * https://{domain}/.well-known/apple-developer-merchantid-domain-association
+     * to verify it, so deploy that file first. Returns VERIFIED or VERIFICATION_PENDING.
+     */
+    public function registerApplePayDomain(string $domain): string
+    {
+        return $this->http()->post('/v2/apple-pay/domains', ['domain_name' => $domain])->throw()->json('status', 'UNKNOWN');
+    }
+
     // ---- writing (always with an idempotency key) ----
     public function calculateOrder(array $lineItems): array
     {

@@ -30,6 +30,15 @@
                         A receipt is on its way to {{ $receiptTo }}.
                     @endif
                 </p>
+            @elseif ($order->isAwaitingETransfer())
+                <span class="flex size-[72px] items-center justify-center rounded-full bg-brand-yellow-0 text-ink">
+                    <x-store.icon name="mail" class="size-8" />
+                </span>
+                <h1 class="mt-5 text-h2-mobile md:text-h2">{{ $justPlaced ? 'Order Placed — Send Your e-Transfer' : 'Order '.$order->number }}</h1>
+                <p class="mt-3 max-w-[480px] text-lead-mobile font-normal text-body-muted md:text-lead">
+                    Your order <strong class="text-ink">{{ $order->number }}</strong> is reserved. Send the Interac e-Transfer below and we’ll confirm it by email.
+                </p>
+                <x-store.etransfer-instructions :order="$order" class="mt-6" />
             @elseif ($order->status === Order::STATUS_PAYMENT_FAILED)
                 <span class="flex size-[72px] items-center justify-center rounded-full bg-sale-10 text-price-40"><x-store.icon name="card" class="size-8" /></span>
                 <h1 class="mt-5 text-h2-mobile md:text-h2">Payment Not Completed</h1>
@@ -89,10 +98,11 @@
                 </div>
                 <div class="text-right">
                     <p class="font-bold">{{ match ($order->status) {
-                        Order::STATUS_PAID => 'Paid online',
+                        Order::STATUS_PAID => $order->payment_method === 'etransfer' ? 'Paid by e-Transfer' : 'Paid online',
                         Order::STATUS_PLACED => 'Pay at pickup',
                         Order::STATUS_PAYMENT_FAILED => 'Payment declined',
-                        default => 'Awaiting payment',
+                        Order::STATUS_CANCELLED => 'Cancelled',
+                        default => $order->payment_method === 'etransfer' ? 'Awaiting e-Transfer' : 'Awaiting payment',
                     } }}</p>
                     <p class="mt-1 text-body-muted">Placed {{ $order->placed_at->setTimezone(config('shop.timezone'))->format('j M Y, H:i') }}</p>
                 </div>

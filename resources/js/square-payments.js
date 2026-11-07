@@ -38,7 +38,8 @@ window.squarePayments = ({ env, appId, locationId, method, amount, currency, cou
     walletAvailable: { applePay: false, googlePay: false },
 
     async init() {
-        if (!method) return;
+        // Interac e-Transfer is placed without Square; nothing to load.
+        if (method !== 'card' && method !== 'wallet') return;
 
         try {
             const Square = await loadSdk(env);

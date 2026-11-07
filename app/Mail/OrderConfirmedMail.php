@@ -17,7 +17,9 @@ class OrderConfirmedMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "Your Ìsàlèè Èkó order {$this->order->number} is confirmed");
+        return new Envelope(subject: $this->order->isAwaitingETransfer()
+            ? "Your Ìsàlèè Èkó order {$this->order->number}: send your Interac e-Transfer"
+            : "Your Ìsàlèè Èkó order {$this->order->number} is confirmed");
     }
 
     public function content(): Content

@@ -12,6 +12,7 @@ use App\Models\OrderItem;
 use App\Models\ProductVariation;
 use App\Models\Setting;
 use App\Models\SubstitutionRequest;
+use App\Services\Checkout\OrderReceipt;
 use App\Services\Store\StoreHours;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -104,9 +105,60 @@ class OrdersQueue extends Component
         $this->showRescheduleModal = false;
     }
 
+    /**
+     * Staff saw the Interac e-Transfer land in the store's bank account.
+     */
+    public function confirmETransfer(int $orderId, OrderReceipt $receipt): void
+    {
+        $order = Order::findOrFail($orderId);
+
+        if (! $order->isAwaitingETransfer()) {
+            return;
+        }
+
+        $order->update(['status' => Order::STATUS_PAID, 'payment_error' => null, 'paid_at' => now()]);
+        $receipt->send($order->refresh());
+
+        session()->flash('success', "e-Transfer for order #{$order->number} confirmed. The customer has been emailed and the order is in the queue.");
+    }
+
+    /**
+     * The e-Transfer never arrived: release the order. No money was taken, so there is nothing to refund.
+     */
+    public function cancelUnpaidETransfer(int $orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+
+        if (! $order->isAwaitingETransfer()) {
+            return;
+        }
+
+        $order->update(['status' => Order::STATUS_CANCELLED, 'cancelled_at' => now(), 'payment_error' => 'ETRANSFER_NOT_RECEIVED']);
+
+        session()->flash('success', "Order #{$order->number} cancelled: e-Transfer not received.");
+    }
+
+    /**
+     * e-Transfer orders can't move through fulfilment until the money is confirmed.
+     */
+    private function blockedUntilPaid(Order $order): bool
+    {
+        if (! $order->isAwaitingETransfer()) {
+            return false;
+        }
+
+        session()->flash('warning', "Order #{$order->number} is waiting for its e-Transfer. Confirm the payment first.");
+
+        return true;
+    }
+
     public function startPreparing(int $orderId): void
     {
         $order = Order::findOrFail($orderId);
+
+        if ($this->blockedUntilPaid($order)) {
+            return;
+        }
         $order->update([
             'fulfilment_status' => Order::FULFILMENT_PREPARING,
         ]);
@@ -117,6 +169,10 @@ class OrdersQueue extends Component
     public function markAsReady(int $orderId, ExpireSubstitutions $expire): void
     {
         $order = Order::findOrFail($orderId);
+
+        if ($this->blockedUntilPaid($order)) {
+            return;
+        }
 
         // Stage Gate Rule (Part E9): auto-refund any unresolved substitution requests before marking ready
         $expiredCount = $expire->forOrder($order);
@@ -135,6 +191,10 @@ class OrdersQueue extends Component
     public function markAsCompleted(int $orderId, ExpireSubstitutions $expire): void
     {
         $order = Order::findOrFail($orderId);
+
+        if ($this->blockedUntilPaid($order)) {
+            return;
+        }
 
         // Stage Gate Rule (Part E9): auto-refund any unresolved substitution requests before completing
         $expiredCount = $expire->forOrder($order);
@@ -378,6 +438,7 @@ class OrdersQueue extends Component
                     'preparing' => $q->whereIn('status', [Order::STATUS_PLACED, Order::STATUS_PAID])->where('fulfilment_status', Order::FULFILMENT_PREPARING),
                     'ready' => $q->whereIn('status', [Order::STATUS_PLACED, Order::STATUS_PAID])->where('fulfilment_status', Order::FULFILMENT_READY),
                     'uncollected' => $q->where('status', Order::STATUS_UNCOLLECTED),
+                    'etransfer' => $q->awaitingETransfer(),
                     'completed' => $q->where('fulfilment_status', Order::FULFILMENT_COMPLETED),
                     'cancelled' => $q->whereIn('status', [Order::STATUS_CANCELLED, Order::STATUS_REFUNDED]),
                     default => null, // 'all'
@@ -392,6 +453,7 @@ class OrdersQueue extends Component
             'preparing' => Order::whereIn('status', [Order::STATUS_PLACED, Order::STATUS_PAID])->where('fulfilment_status', Order::FULFILMENT_PREPARING)->count(),
             'ready' => Order::whereIn('status', [Order::STATUS_PLACED, Order::STATUS_PAID])->where('fulfilment_status', Order::FULFILMENT_READY)->count(),
             'uncollected' => Order::where('status', Order::STATUS_UNCOLLECTED)->count(),
+            'etransfer' => Order::awaitingETransfer()->count(),
             'completed_today' => Order::where('fulfilment_status', Order::FULFILMENT_COMPLETED)->whereDate('updated_at', Carbon::today())->count(),
         ];
 

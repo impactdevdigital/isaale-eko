@@ -3,6 +3,7 @@
 namespace App\Livewire\Store;
 
 use App\Models\Address;
+use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Services\Checkout\CheckoutProblem;
@@ -451,16 +452,51 @@ class Checkout extends Component
      */
     public function pay(?string $token = null, ?string $attempt = null): void
     {
-        $user = Auth::user();
-
-        if (! $user || ! $this->paymentMethod || ! $token) {
+        if (! Auth::check() || ! $this->paymentMethod || $this->paymentMethod === 'etransfer' || ! $token) {
             return;
         }
 
         $this->declined = null;
 
+        if (! $order = $this->placeOrder()) {
+            return;
+        }
+
+        $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
+
+        if ($failure) {
+            // The order isn't placed; the basket, details and slot stay as they were.
+            $this->declined = $failure;
+            $this->declinedAmount = $order->total_cents;
+
+            return;
+        }
+
+        $this->finish($order);
+    }
+
+    /**
+     * Interac e-Transfer: the order is placed straight away and waits as
+     * "awaiting payment" until staff confirm the transfer arrived. The
+     * shopper gets the e-Transfer details on the next page and by email.
+     */
+    public function placeETransferOrder(): void
+    {
+        if (! Auth::check() || $this->paymentMethod !== 'etransfer') {
+            return;
+        }
+
+        if ($order = $this->placeOrder()) {
+            $this->finish($order);
+        }
+    }
+
+    private function placeOrder(): ?Order
+    {
+        $user = Auth::user();
+
         try {
-            $order = app(PlaceOrder::class)->handle(
+            return app(PlaceOrder::class)->handle(
                 user: $user,
                 contactName: $this->fulfilment === 'delivery' && $this->address ? $this->address['recipient_name'] : ($this->name ?: $user->name),
                 fulfilment: $this->fulfilment,
@@ -477,19 +513,12 @@ class Checkout extends Component
                 $this->pickupStart = null;
             }
 
-            return;
+            return null;
         }
+    }
 
-        $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
-
-        if ($failure) {
-            // The order isn't placed; the basket, details and slot stay as they were.
-            $this->declined = $failure;
-            $this->declinedAmount = $order->total_cents;
-
-            return;
-        }
-
+    private function finish(Order $order): void
+    {
         app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
 
         app(OrderReceipt::class)->send($order);
@@ -556,6 +585,7 @@ class Checkout extends Component
             'readyToPay' => $user && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
             'fulfilmentReady' => $fulfilmentReady,
             'pickupLabel' => $this->pickupStart ? self::windowLabel(CarbonImmutable::parse($this->pickupStart)) : null,
+            'etransfer' => config('payments.etransfer'),
             'square' => [
                 'env' => config('services.square.env'),
                 'appId' => config('services.square.app_id'),

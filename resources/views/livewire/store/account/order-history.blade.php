@@ -35,7 +35,12 @@
                         <a href="{{ route('account.orders.show', $order) }}" class="text-brand-blue hover:underline">Order Details</a>
                     </div>
 
-                    @if ($order->status === Order::STATUS_AWAITING_PAYMENT)
+                    @if ($order->isAwaitingETransfer())
+                        <p class="flex items-center gap-2 bg-brand-yellow-0 px-5 py-2.5 text-[13px]">
+                            <x-store.icon name="mail" class="size-4" />
+                            Send {{ money($order->total_cents) }} by Interac e-Transfer to {{ config('payments.etransfer.email') }} with message {{ $order->number }}.
+                        </p>
+                    @elseif ($order->status === Order::STATUS_AWAITING_PAYMENT)
                         <p class="flex items-center gap-2 bg-sale-10 px-5 py-2.5 text-[13px] text-price-40">
                             <x-store.icon name="card" class="size-4" />
                             We’re waiting for the payment service to confirm this order. Please don’t pay again.

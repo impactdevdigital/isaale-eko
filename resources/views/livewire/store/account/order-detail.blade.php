@@ -9,6 +9,7 @@
     $contact = $order->contact_email ?? $order->contact_phone;
     $statusText = match (true) {
         $order->status === Order::STATUS_CANCELLED => 'This order was cancelled'.($order->cancelled_at ? ' on '.$order->cancelled_at->setTimezone(config('shop.timezone'))->format('j M Y') : '').'. You haven’t been charged.',
+        $order->isAwaitingETransfer() => 'We’re waiting for your Interac e-Transfer. We’ll start preparing your order once it arrives.',
         $order->status === Order::STATUS_AWAITING_PAYMENT => 'We’re waiting for the payment service to confirm your payment. Please don’t pay again — this page updates once it’s confirmed.',
         $current === 3 => $order->fulfilment === 'pickup' ? 'Collected. Enjoy your groceries!' : 'Delivered. Enjoy your groceries!',
         $current === 2 => $order->fulfilment === 'pickup' ? 'Your order is ready to collect. Bring your order number.' : 'Your order is out for delivery.',
@@ -52,6 +53,10 @@
                     @endif
                 </div>
             </div>
+
+            @if ($order->isAwaitingETransfer())
+                <x-store.etransfer-instructions :order="$order" class="mt-6" />
+            @endif
 
             @if ($order->status !== Order::STATUS_CANCELLED)
                 <ol class="mt-6 grid grid-cols-4">

@@ -3,11 +3,12 @@
 
     $contact = $user?->signInContact();
     $contactLabel = $contact ? $contact['value'].' · Verified '.($contact['channel'] === 'email' ? 'email' : 'mobile') : null;
-    $methodIcons = ['card' => 'card', 'wallet' => 'wallet'];
-    $methodHints = ['card' => 'Visa, Mastercard, Amex and more', 'wallet' => 'Apple Pay or Google Pay on supported devices'];
+    $methodIcons = ['card' => 'card', 'wallet' => 'wallet', 'etransfer' => 'mail'];
+    $methodHints = ['card' => 'Visa, Mastercard, Amex and more', 'wallet' => 'Apple Pay or Google Pay on supported devices', 'etransfer' => 'Send from your bank app after you place the order'];
     $methodBadges = [
         'card' => [['VISA', 'bg-surface text-[#1a1f71]'], ['MC', 'bg-surface text-[#eb001b]'], ['AMEX', 'bg-[#016fd0] text-white']],
         'wallet' => [['Apple Pay', 'bg-black text-white'], ['G Pay', 'bg-surface text-[#333333]']],
+        'etransfer' => [['INTERAC', 'bg-[#fdb913] text-black']],
     ];
 
     [$feeLabel, $feeValue] = match (true) {
@@ -214,6 +215,17 @@
                                 <p x-show="! ready && ! error" class="text-body-sm text-body-muted">Checking Apple Pay and Google Pay…</p>
                             </div>
                         @endif
+                        @if ($paymentMethod === $method->code && $method->code === 'etransfer')
+                            <div class="bg-grayscale-0 px-4 pb-4 text-body-sm">
+                                <p class="font-bold">How it works</p>
+                                <ol class="mt-2 list-decimal space-y-1 pl-5 text-body-muted">
+                                    <li>Place your order. We’ll show you the e-Transfer details and email them to you.</li>
+                                    <li>Send <strong class="text-ink">{{ money($totals->total()) }}</strong> to <strong class="text-ink">{{ $etransfer['email'] }}</strong>, with your order number in the message.</li>
+                                    <li>We start preparing your order once the transfer arrives, usually within a few hours.</li>
+                                </ol>
+                                <p class="mt-2 text-[12px] text-body-muted">Unpaid orders are cancelled after {{ $etransfer['hold_hours'] }} hours.</p>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
                 @error('paymentMethod') <p class="text-body-xs text-price-40">{{ $message }}</p> @enderror
@@ -244,7 +256,13 @@
 
         <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
                                :fee-label="$feeLabel" :fee-value="$feeValue" savings-label="Savings" :note="$note" :note-tone="$noteTone" class="lg:self-start">
-            @if ($readyToPay)
+            @if ($readyToPay && $paymentMethod === 'etransfer')
+                <button type="button" wire:click="placeETransferOrder" wire:loading.attr="disabled" wire:target="placeETransferOrder"
+                        class="flex h-[42px] items-center justify-center rounded-full bg-ink text-[14px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
+                    <span wire:loading.remove wire:target="placeETransferOrder">Place order · {{ money($totals->total()) }}</span>
+                    <span wire:loading wire:target="placeETransferOrder">Placing order…</span>
+                </button>
+            @elseif ($readyToPay)
                 <button type="button" @click="pay()" :disabled="busy || ! ready"
                         class="flex h-[42px] items-center justify-center rounded-full bg-ink text-[14px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
                     <span x-show="! busy">Pay {{ money($totals->total()) }}</span>

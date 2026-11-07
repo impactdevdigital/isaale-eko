@@ -105,7 +105,7 @@
                 <select wire:model.live="paymentFilter" class="w-full px-3 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-xs font-semibold text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20">
                     <option value="">All Payments</option>
                     <option value="paid">Paid Online</option>
-                    <option value="unpaid">Pay at Counter</option>
+                    <option value="unpaid">Unpaid (Counter or e-Transfer)</option>
                 </select>
             </div>
         </div>
@@ -140,6 +140,12 @@
                     wire:click="$set('statusFilter', 'uncollected')"
                     class="px-3.5 py-1.5 rounded-lg transition-colors shrink-0 {{ $statusFilter === 'uncollected' ? 'bg-[#DF2600] text-white' : 'hover:bg-[#F6F6F6] text-[#686868]' }}">
                 Uncollected ({{ $counts['uncollected'] }})
+            </button>
+
+            <button type="button"
+                    wire:click="$set('statusFilter', 'etransfer')"
+                    class="px-3.5 py-1.5 rounded-lg transition-colors shrink-0 {{ $statusFilter === 'etransfer' ? 'bg-[#7A5A00] text-white' : 'hover:bg-[#F6F6F6] text-[#686868]' }}">
+                e-Transfers to Confirm ({{ $counts['etransfer'] }})
             </button>
 
             <button type="button"
@@ -187,6 +193,10 @@
                             @elseif ($order->status === \App\Models\Order::STATUS_CANCELLED)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#F6F6F6] text-[#686868]">
                                     Cancelled
+                                </span>
+                            @elseif ($order->isAwaitingETransfer())
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF4CC] text-[#7A5A00]">
+                                    Awaiting e-Transfer
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9EA] text-[#D58700]">
@@ -279,6 +289,12 @@
                                     class="flex-1 py-2 px-3 rounded-xl text-white text-xs font-bold shadow-xs text-center active:scale-98 transition-transform">
                                 Review & Reschedule
                             </button>
+                        @elseif ($order->isAwaitingETransfer())
+                            <button type="button"
+                                    wire:click="viewOrder({{ $order->id }})"
+                                    class="flex-1 py-2 px-3 rounded-xl border border-[#FFE8A3] bg-[#FFF4CC] text-[#7A5A00] text-xs font-bold text-center">
+                                Check e-Transfer
+                            </button>
                         @elseif ($order->status !== \App\Models\Order::STATUS_CANCELLED && $order->status !== \App\Models\Order::STATUS_REFUNDED && $order->fulfilment_status !== \App\Models\Order::FULFILMENT_COMPLETED)
                             @if ($order->fulfilment_status === null)
                                 <button type="button"
@@ -369,6 +385,10 @@
                                     @elseif ($order->status === \App\Models\Order::STATUS_CANCELLED)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#F6F6F6] text-[#686868]">
                                             Cancelled
+                                        </span>
+                                    @elseif ($order->isAwaitingETransfer())
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF4CC] text-[#7A5A00]">
+                                            Awaiting e-Transfer
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#FFF9EA] text-[#D58700]">
@@ -483,6 +503,12 @@
                                                 class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
                                             Review & Reschedule
                                         </button>
+                                    @elseif ($order->isAwaitingETransfer())
+                                        <button type="button"
+                                                wire:click="viewOrder({{ $order->id }})"
+                                                class="flex-1 py-2 px-3 rounded-xl border border-[#FFE8A3] bg-[#FFF4CC] text-[#7A5A00] text-xs font-bold text-center">
+                                            Check e-Transfer
+                                        </button>
                                     @elseif ($order->status !== \App\Models\Order::STATUS_CANCELLED && $order->status !== \App\Models\Order::STATUS_REFUNDED && $order->fulfilment_status !== \App\Models\Order::FULFILMENT_COMPLETED)
                                         @if ($order->fulfilment_status === null)
                                             <button type="button"
@@ -587,6 +613,10 @@
                                 @elseif ($selectedOrder->status === \App\Models\Order::STATUS_CANCELLED)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-[#F6F6F6] text-[#686868]">
                                         Cancelled
+                                    </span>
+                                @elseif ($selectedOrder->isAwaitingETransfer())
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-[#FFF4CC] text-[#7A5A00]">
+                                        Awaiting e-Transfer
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-[#FFF9EA] text-[#D58700]">
@@ -918,7 +948,29 @@
 
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
 
-                            @if ($selectedOrder->status === \App\Models\Order::STATUS_UNCOLLECTED)
+                            @if ($selectedOrder->isAwaitingETransfer())
+                                <div class="w-full space-y-2">
+                                    <p class="text-xs text-[#686868]">
+                                        Check the store’s bank account for an Interac e-Transfer of <strong class="text-[#111111]">{{ money($selectedOrder->total_cents) }}</strong>
+                                        with message <strong class="text-[#111111]">{{ $selectedOrder->number }}</strong>, sent to {{ config('payments.etransfer.email') }}.
+                                    </p>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <button type="button"
+                                                wire:click="confirmETransfer({{ $selectedOrder->id }})"
+                                                wire:confirm="Confirm you received {{ money($selectedOrder->total_cents) }} by e-Transfer for #{{ $selectedOrder->number }}?"
+                                                style="background-color: #007D49;"
+                                                class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center active:scale-98">
+                                            Confirm e-Transfer Received
+                                        </button>
+                                        <button type="button"
+                                                wire:click="cancelUnpaidETransfer({{ $selectedOrder->id }})"
+                                                wire:confirm="Cancel #{{ $selectedOrder->number }} because the e-Transfer never arrived?"
+                                                class="py-3 px-4 rounded-xl border border-[#EEEEEE] bg-white text-[#DF2600] font-bold text-sm hover:bg-[#FFF0EC] transition-colors text-center">
+                                            Cancel (Not Paid)
+                                        </button>
+                                    </div>
+                                </div>
+                            @elseif ($selectedOrder->status === \App\Models\Order::STATUS_UNCOLLECTED)
                                 <button type="button"
                                         wire:click="openRescheduleModal({{ $selectedOrder->id }})"
                                         style="background-color: #0055D4;"

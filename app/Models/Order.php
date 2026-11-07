@@ -63,7 +63,6 @@ class Order extends Model
         'pickup_overdue_reminder_sent_at' => 'datetime',
     ];
 
-
     protected static function booted(): void
     {
         // Points are earned once the order is paid for, online or at the counter.
@@ -139,11 +138,29 @@ class Order extends Model
 
     /**
      * Customers may cancel a pay-at-pickup order until the store starts
-     * preparing it. Paid orders need a refund, so they go through support.
+     * preparing it, or an e-Transfer order before the money arrives.
+     * Paid orders need a refund, so they go through support.
      */
     public function canBeCancelled(): bool
     {
-        return $this->status === self::STATUS_PLACED && $this->fulfilment_status === null;
+        return ($this->status === self::STATUS_PLACED && $this->fulfilment_status === null)
+            || $this->isAwaitingETransfer();
+    }
+
+    /**
+     * Placed with Interac e-Transfer and waiting for staff to confirm the money arrived.
+     */
+    public function isAwaitingETransfer(): bool
+    {
+        return $this->payment_method === 'etransfer' && $this->status === self::STATUS_AWAITING_PAYMENT;
+    }
+
+    /**
+     * Narrow to e-Transfer orders staff still have to confirm.
+     */
+    public function scopeAwaitingETransfer(Builder $query): void
+    {
+        $query->where('payment_method', 'etransfer')->where('status', self::STATUS_AWAITING_PAYMENT);
     }
 
     public function itemCount(): int
@@ -190,6 +207,7 @@ class Order extends Model
             $this->status === self::STATUS_REFUNDED => 'Refunded',
             $this->status === self::STATUS_UNCOLLECTED => 'Uncollected',
             $this->status === self::STATUS_PAYMENT_FAILED => 'Payment declined',
+            $this->isAwaitingETransfer() => 'Awaiting e-Transfer',
             $this->status === self::STATUS_AWAITING_PAYMENT => 'Payment pending',
             ! $this->isConfirmed() => 'Pending confirmation',
             default => $this->trackerSteps()[$this->trackerStep()] ?? 'Processing',
@@ -229,5 +247,3 @@ class Order extends Model
         return max(0, $this->total_cents - $this->refunded_cents);
     }
 }
-
-

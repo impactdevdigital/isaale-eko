@@ -63,9 +63,13 @@ envVarGroups:
       - key: SQUARE_WEBHOOK_URL
         sync: false          # https://<your domain>/api/webhooks/square
 
-      # Email (sign-in codes, receipts). Until a provider is set up, "log" only writes them to the logs.
+      # Email (sign-in codes, receipts) via Resend. Set RESEND_API_KEY in the dashboard.
+      # Until the client's domain is verified in Resend, MAIL_FROM_ADDRESS must be
+      # onboarding@resend.dev and mail only reaches the Resend account owner's inbox.
       - key: MAIL_MAILER
-        value: log
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
       - key: MAIL_FROM_ADDRESS
         sync: false
       - key: MAIL_FROM_NAME

@@ -9,7 +9,8 @@
         'Discover' => [
             'Kitchen & Recipes' => route('kitchen.index'),
             'Cook With What I Have' => route('kitchen.pantry'),
-            'Brand Updates' => '#',
+            'Food stories' => route('stories.index'),
+            'Brand updates' => route('updates.index'),
         ],
         'Help' => [
             'Delivery & pickup' => '#',

@@ -468,7 +468,7 @@
                                 <label class="block text-xs font-bold text-[#111111] mb-1">Email Address (Login Username) *</label>
                                 <input type="email"
                                        wire:model="create_email"
-                                       placeholder="e.g. bukola@isaleeeko.ca"
+                                       placeholder="e.g. bukola@isaaleeko.com"
                                        class="w-full px-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
                                 @error('create_email') <span class="text-xs text-[#DF2600] font-semibold mt-1 block">{{ $message }}</span> @enderror
                             </div>

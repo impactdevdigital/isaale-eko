@@ -51,7 +51,7 @@
                 <div class="mt-3 rounded-xl border border-grayscale-20 bg-grayscale-0 p-4 text-body-sm">
                     <p class="font-bold text-ink">Ìsàlèè Èkó Customer Support</p>
                     <p class="text-body-muted">Saint John, New Brunswick, Canada</p>
-                    <p class="mt-1 text-body-muted">Email: <a href="mailto:support@isaleeeko.ca" class="underline hover:text-ink">support@isaleeeko.ca</a></p>
+                    <p class="mt-1 text-body-muted">Email: <a href="mailto:support@isaaleeko.com" class="underline hover:text-ink">support@isaaleeko.com</a></p>
                 </div>
             </section>
         </article>

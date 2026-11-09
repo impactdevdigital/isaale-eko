@@ -118,11 +118,23 @@
                             @error('email')
                                 <p class="text-body-xs text-price-40">{{ $message }}</p>
                             @else
-                                <p class="text-[12px] leading-[18px] font-medium text-body-muted">We’ll send a code to confirm it and keep your order in your account.</p>
+                                <p class="text-[12px] leading-[18px] font-medium text-body-muted">We’ll send your receipt and order updates here.</p>
                             @enderror
                         @endif
                     </div>
                 </div>
+
+                @guest
+                    <div class="flex flex-col gap-2">
+                        <label for="name" class="text-[14px] leading-5">Full Name</label>
+                        <input id="name" type="text" wire:model.blur="name" autocomplete="name" placeholder="First and last name"
+                               @class(['h-12 w-full rounded-sm border bg-surface px-4 text-[14px] placeholder:text-body-muted focus:border-ink focus:outline-none', 'border-price-40' => $errors->has('name'), 'border-grayscale-40' => ! $errors->has('name')])>
+                        @error('name')
+                            <p class="text-body-xs text-price-40">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <x-store.check model="marketing" label="Email me offers and news (optional)" />
+                @endguest
 
                 {{-- Pickup slot or delivery address --}}
                 @if ($fulfilment === 'pickup')
@@ -326,36 +338,6 @@
             </div>
             <button type="button" wire:click="open('address')" class="mt-4 rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold hover:border-ink">Add new address</button>
             <p class="mt-4 text-body-sm text-body-muted">A different recipient or courier phone won’t change your verified sign-in contact.</p>
-        </x-store.modal>
-    @endif
-
-    @if ($modal === 'code')
-        <x-store.modal title="Confirm your email" :subtitle="'Enter the 6-digit code we sent to '.$codeDestination.'. This keeps your order in your account.'" width="max-w-[600px]">
-            <form wire:submit="verifyCode" class="flex flex-col gap-5"
-                  x-data="{ left: Math.max(0, {{ $resendAt }} - Math.floor(Date.now() / 1000)), tick() { this.left = Math.max(0, {{ $resendAt }} - Math.floor(Date.now() / 1000)) } }"
-                  x-init="setInterval(() => tick(), 1000)">
-                <p class="flex items-center gap-2 text-[15px] font-bold">
-                    <x-store.icon :name="$codeChannel === 'email' ? 'mail' : 'phone'" class="size-5" />
-                    {{ $codeDestination }}
-                </p>
-                <div>
-                    <label for="otp" class="sr-only">Six-digit code</label>
-                    <input id="otp" wire:model="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" autofocus
-                           @class(['h-14 w-full rounded-sm border text-center font-mono text-[28px] tracking-[0.6em] focus:outline-none', 'border-price-40' => $errors->has('code'), 'border-grayscale-40 focus:border-ink' => ! $errors->has('code')])>
-                    @error('code')
-                        <p class="mt-3 rounded-sm bg-sale-0 px-4 py-3 text-body-sm text-price-40" role="alert">{{ $message }}</p>
-                    @enderror
-                </div>
-                <x-store.field model="name" label="Your full name" autocomplete="name" />
-                <x-store.check model="marketing" label="Email me offers and news (optional)" />
-                <button type="submit" class="h-12 rounded-full bg-ink text-[15px] font-bold text-white">Verify and continue</button>
-                <div class="flex items-center justify-between gap-3">
-                    <button type="button" wire:click="changeContact" class="rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold">Change email</button>
-                    <span x-show="left > 0" class="text-body-sm text-body-muted">Resend code in <span x-text="`00:${String(left).padStart(2, '0')}`"></span></span>
-                    <button type="button" x-show="left === 0" x-cloak wire:click="resendCode" class="text-body-sm font-bold underline">Resend code</button>
-                </div>
-                <p class="text-body-sm text-body-muted">Contact isn’t verified yet. Closing keeps your details but won’t enable payment.</p>
-            </form>
         </x-store.modal>
     @endif
 

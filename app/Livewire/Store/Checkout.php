@@ -8,7 +8,6 @@ use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Services\Checkout\CheckoutProblem;
 use App\Services\Checkout\DeliveryCheck;
-use App\Services\Checkout\OneTimeCode;
 use App\Services\Checkout\OrderReceipt;
 use App\Services\Checkout\PickupWindows;
 use App\Services\Checkout\PlaceOrder;
@@ -18,7 +17,6 @@ use App\Support\Cart;
 use App\Support\CartTotals;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -27,8 +25,10 @@ use Livewire\Component;
 /**
  * One-page checkout (Figma 04 "Fulfilment & Order Review"): Pickup or
  * Delivery, email, slot or address, payment method and items on one page.
- * "Proceed to checkout" checks what's missing and verifies a guest's email
- * with a code; once signed in and complete, the summary shows Pay.
+ * "Proceed to checkout" checks what's missing; once complete, the summary
+ * shows Pay. Guests aren't asked for a code (client request): the order is
+ * filed under an account for their email but they are NOT signed in, so it
+ * shows in their history only after they sign in with a code later.
  * Entered details survive switching methods.
  */
 #[Layout('layouts::store')]
@@ -37,7 +37,7 @@ class Checkout extends Component
 {
     public string $fulfilment = 'pickup';
 
-    /** Open dialog: code, slot, address or addresses. */
+    /** Open dialog: slot, address or addresses. */
     public ?string $modal = null;
 
     // Contact (guest). Guests always check out with an email so the order can follow them to their account.
@@ -47,16 +47,9 @@ class Checkout extends Component
 
     public bool $marketing = false;
 
-    // One-time code: where the last code went. Locked so the browser can't redirect verification.
+    /** A guest's details passed "Proceed to checkout"; editing them hides Pay again. */
     #[Locked]
-    public ?string $codeDestination = null;
-
-    #[Locked]
-    public ?string $codeChannel = null;
-
-    public string $code = '';
-
-    public int $resendAt = 0;
+    public bool $guestReady = false;
 
     // Pickup
     public ?string $slotDay = null;
@@ -158,16 +151,27 @@ class Checkout extends Component
     // ----- Proceed and contact verification -------------------------------------
 
     /**
-     * "Proceed to checkout": flag anything missing, then send a guest the
-     * email code. Signed-in shoppers with everything chosen see Pay instead.
+     * "Proceed to checkout": flag anything missing. Once everything is in,
+     * the summary shows Pay (no email code for guests).
      */
     public function proceed(): void
     {
         $this->resetErrorBag();
         $this->problem = null;
+        $this->guestReady = false;
 
-        if (Auth::guest() && validator(['email' => $this->email], ['email' => ['required', 'email:rfc', 'max:255']])->fails()) {
-            $this->addError('email', 'Enter a valid email address.');
+        if (Auth::guest()) {
+            if ($this->fulfilment === 'delivery' && $this->address && trim($this->name) === '') {
+                $this->name = $this->address['recipient_name'];
+            }
+
+            if (validator(['email' => $this->email], ['email' => ['required', 'email:rfc', 'max:255']])->fails()) {
+                $this->addError('email', 'Enter a valid email address.');
+            }
+
+            if (trim($this->name) === '' || mb_strlen(trim($this->name)) > 120) {
+                $this->addError('name', 'Enter your full name.');
+            }
         }
 
         if ($this->fulfilment === 'pickup' && ! $this->pickupStart) {
@@ -191,95 +195,50 @@ class Checkout extends Component
         }
 
         if (Auth::guest()) {
-            $this->sendCode();
+            $this->guestReady = true;
         }
     }
 
-    public function sendCode(): void
+    /** Changing the email or name after Proceed hides Pay until Proceed is pressed again. */
+    public function updatedEmail(): void
     {
-        $this->validate(['email' => ['required', 'email:rfc', 'max:255']]);
-
-        if ($this->fulfilment === 'delivery' && $this->address && trim($this->name) === '') {
-            $this->name = $this->address['recipient_name'];
-        }
-
-        $destination = strtolower(trim($this->email));
-        $key = 'checkout-code:'.request()->ip();
-
-        if (RateLimiter::tooManyAttempts($key, 6)) {
-            $this->addError('email', 'Too many codes requested. Try again in a few minutes.');
-
-            return;
-        }
-
-        RateLimiter::hit($key, 600);
-
-        $otp = app(OneTimeCode::class);
-        $otp->send('email', $destination);
-
-        $this->codeChannel = 'email';
-        $this->codeDestination = $destination;
-        $this->resendAt = now()->addSeconds($otp->cooldown('email', $destination))->timestamp;
-        $this->code = '';
-        $this->modal = 'code';
+        $this->guestReady = false;
     }
 
-    public function resendCode(): void
+    public function updatedName(): void
     {
-        if (! $this->codeDestination) {
-            return;
-        }
-
-        $otp = app(OneTimeCode::class);
-        $otp->send($this->codeChannel, $this->codeDestination);
-        $this->resendAt = now()->addSeconds($otp->cooldown($this->codeChannel, $this->codeDestination))->timestamp;
-        $this->resetErrorBag('code');
-    }
-
-    public function changeContact(): void
-    {
-        // Back to the page to correct the email; the code is sent again on Proceed.
-        $this->modal = null;
-    }
-
-    public function verifyCode(): void
-    {
-        $this->validate(
-            ['code' => ['required', 'digits:6'], 'name' => ['required', 'string', 'max:120']],
-            ['code.digits' => 'Enter all six digits.', 'name.required' => 'Enter your full name.'],
-        );
-
-        if (! app(OneTimeCode::class)->verify($this->codeChannel, $this->codeDestination, $this->code)) {
-            $this->addError('code', 'This code is invalid or has expired. Check the latest code, or request a new one when the timer ends.');
-
-            return;
-        }
-
-        $user = $this->signIn();
-
-        if ($this->marketing) {
-            app(ConsentService::class)->grant($this->codeChannel === 'email' ? 'email' : 'sms', $user->id, $user->email, 'checkout');
-        }
-
-        $this->code = '';
-        $this->modal = null;
-        $this->email = $user->email ?? $this->email;
+        $this->guestReady = false;
     }
 
     /**
-     * Find or create the account for the verified contact and sign in.
-     * Accounts are matched only on the identifier that was just verified:
-     * an email account and a phone account are never merged.
+     * The account the order is filed under: the signed-in shopper, or for a
+     * guest the account for their email (created if new). Guests are never
+     * signed in here, since their email isn't verified; they see the order in
+     * their history once they sign in with a code.
      */
-    private function signIn(): User
+    private function customer(): ?User
     {
-        $column = $this->codeChannel === 'email' ? 'email' : 'phone';
+        if ($user = Auth::user()) {
+            return $user;
+        }
 
-        $user = User::firstOrCreate([$column => $this->codeDestination], ['name' => trim($this->name)]);
-        $user->forceFill([$column.'_verified_at' => $user->{$column.'_verified_at'} ?? now()])->save();
+        if (! $this->guestReady) {
+            return null;
+        }
 
-        Auth::login($user, remember: true);
-        session()->regenerate();
+        $email = strtolower(trim($this->email));
+
+        if (validator(['email' => $email], ['email' => ['required', 'email:rfc', 'max:255']])->fails() || trim($this->name) === '') {
+            $this->guestReady = false;
+
+            return null;
+        }
+
+        $user = User::firstOrCreate(['email' => $email], ['name' => trim($this->name)]);
+
+        if ($this->marketing) {
+            app(ConsentService::class)->grant('email', $user->id, $email, 'checkout');
+        }
 
         return $user;
     }
@@ -452,7 +411,7 @@ class Checkout extends Component
      */
     public function pay(?string $token = null, ?string $attempt = null): void
     {
-        if (! Auth::check() || ! $this->paymentMethod || $this->paymentMethod === 'etransfer' || ! $token) {
+        if ((Auth::guest() && ! $this->guestReady) || ! $this->paymentMethod || $this->paymentMethod === 'etransfer' || ! $token) {
             return;
         }
 
@@ -482,7 +441,7 @@ class Checkout extends Component
      */
     public function placeETransferOrder(): void
     {
-        if (! Auth::check() || $this->paymentMethod !== 'etransfer') {
+        if ((Auth::guest() && ! $this->guestReady) || $this->paymentMethod !== 'etransfer') {
             return;
         }
 
@@ -493,7 +452,13 @@ class Checkout extends Component
 
     private function placeOrder(): ?Order
     {
-        $user = Auth::user();
+        $guest = Auth::guest();
+
+        if (! $user = $this->customer()) {
+            $this->problem = 'Check your email and name, then press Proceed to checkout.';
+
+            return null;
+        }
 
         try {
             return app(PlaceOrder::class)->handle(
@@ -504,6 +469,7 @@ class Checkout extends Component
                 pickupStart: $this->pickupStart ? CarbonImmutable::parse($this->pickupStart) : null,
                 address: $this->fulfilment === 'delivery' ? $this->address : null,
                 clearCart: false,
+                guestEmail: $guest ? $user->email : null,
             );
         } catch (CheckoutProblem $problem) {
             // Keep the verified identity, address and slot; just explain what to fix.
@@ -521,7 +487,18 @@ class Checkout extends Component
     {
         app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
 
-        app(OrderReceipt::class)->send($order);
+        // The order is placed (and paid, for cards): a mail failure mustn't turn that into an error page.
+        try {
+            app(OrderReceipt::class)->send($order);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if (Auth::guest()) {
+            // Lets this browser open the confirmation page without signing in.
+            session()->push('guest_orders', $order->id);
+        }
+
         session()->flash('order_placed', $order->number);
 
         $this->dispatch('cart-updated', count: app(Cart::class)->count());
@@ -582,7 +559,7 @@ class Checkout extends Component
             'days' => $this->modal === 'slot' ? $windows->days() : collect(),
             'windows' => $this->modal === 'slot' && $this->slotDay ? $windows->windowsFor(CarbonImmutable::parse($this->slotDay, config('shop.timezone'))) : collect(),
             'savedAddresses' => $user ? $user->addresses : collect(),
-            'readyToPay' => $user && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
+            'readyToPay' => ($user || $this->guestReady) && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
             'fulfilmentReady' => $fulfilmentReady,
             'pickupLabel' => $this->pickupStart ? self::windowLabel(CarbonImmutable::parse($this->pickupStart)) : null,
             'etransfer' => config('payments.etransfer'),

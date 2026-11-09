@@ -19,7 +19,7 @@
         ],
         'Community' => [
             'About Ìsàlèè Èkó' => '#',
-            'Join our community' => '#',
+            'Join our community' => route('community'),
         ],
     ];
 @endphp

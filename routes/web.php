@@ -60,6 +60,9 @@ Route::get('/food-stories/{story:slug}', \App\Livewire\Store\Stories\StoryShow::
 Route::get('/brand-updates', \App\Livewire\Store\Stories\BrandUpdatesIndex::class)->name('updates.index');
 Route::get('/brand-updates/{story:slug}', \App\Livewire\Store\Stories\StoryShow::class)->name('updates.show');
 
+// Community Hub teaser (Figma 07.07)
+Route::get('/community', \App\Livewire\Store\CommunityHub::class)->name('community');
+
 // Policy Pages
 Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');
 Route::view('/refund-policy', 'store.refund-policy')->name('refund-policy');

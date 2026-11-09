@@ -66,7 +66,7 @@ class StoreNavigation
                 'sidebar' => [
                     'All Recipes' => route('kitchen.index'),
                     'Cook With What I Have' => route('kitchen.pantry'),
-                    'Food stories' => route('stories.index'),
+                    'Food Stories' => route('stories.index'),
                     'Brand Updates' => route('updates.index'),
                 ],
                 'eyebrow' => 'Discover Ìsàlèè Èkó',

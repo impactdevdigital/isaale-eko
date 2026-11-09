@@ -3,6 +3,7 @@
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
 use App\Livewire\Store\SignIn;
+use App\Mail\OrderConfirmedMail;
 use App\Mail\VerificationCodeMail;
 use App\Models\Address;
 use App\Models\Order;
@@ -87,7 +88,7 @@ test('checkout sends shoppers with an empty basket back to the basket', function
     Livewire::test(Checkout::class)->assertRedirect(route('cart'));
 });
 
-test('guest pickup: choose a slot, confirm the email on proceed and pay by card', function () {
+test('guest pickup: no email code, straight to Pay and the confirmation page', function () {
     addToCart('fresh-okra', 2);
     $start = CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String();
 
@@ -96,44 +97,64 @@ test('guest pickup: choose a slot, confirm the email on proceed and pay by card'
         ->assertSee('Pickup selected · No delivery address needed')
         ->assertSee('Proceed to checkout')
         ->call('proceed')
-        ->assertHasErrors(['email', 'pickupStart', 'paymentMethod'])
-        ->assertSet('modal', null)
+        ->assertHasErrors(['email', 'name', 'pickupStart', 'paymentMethod'])
+        ->assertDontSee('Pay '.money(498))
         ->call('pickDay', '2026-10-26')
         ->set('slotStart', $start)
         ->call('confirmSlot')
         ->assertSet('pickupStart', $start)
         ->set('email', 'Valentine@Example.com')
+        ->set('name', 'Valentine Akin')
         ->set('paymentMethod', 'card')
         ->call('proceed')
-        ->assertHasNoErrors()
-        ->assertSet('modal', 'code')
-        ->set('name', 'Valentine Akin')
-        ->set('code', '000000')
-        ->call('verifyCode')
-        ->assertHasErrors('code');
-
-    $component->set('code', sentCode())
-        ->call('verifyCode')
         ->assertHasNoErrors()
         ->assertSet('modal', null)
         ->assertSee('Pay '.money(498));
 
-    $user = User::where('email', 'valentine@example.com')->firstOrFail();
-    expect(Auth::id())->toBe($user->id)->and($user->email_verified_at)->not->toBeNull()->and($user->name)->toBe('Valentine Akin');
+    // No code is sent and the guest is not signed in.
+    Mail::assertNotSent(VerificationCodeMail::class);
+    expect(Auth::check())->toBeFalse();
 
     $component->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
 
     $order = Order::firstOrFail();
+    $user = User::where('email', 'valentine@example.com')->firstOrFail();
     $component->assertRedirect(route('orders.show', $order));
 
     expect($order->status)->toBe(Order::STATUS_PAID)
         ->and($order->user_id)->toBe($user->id)
+        ->and($user->name)->toBe('Valentine Akin')
+        ->and($user->email_verified_at)->toBeNull()
         ->and($order->contact_email)->toBe('valentine@example.com')
         ->and($order->total_cents)->toBe(498)
         ->and($order->items)->toHaveCount(1)
-        ->and(app(Cart::class)->count())->toBe(0);
+        ->and(app(Cart::class)->count())->toBe(0)
+        ->and(Auth::check())->toBeFalse();
 
+    Mail::assertSent(OrderConfirmedMail::class, fn ($mail) => $mail->hasTo('valentine@example.com'));
+
+    // This browser can open the confirmation page; nobody else can.
     $this->get(route('orders.show', $order))->assertOk()->assertSee($order->number);
+    $this->flushSession();
+    $this->get(route('orders.show', $order))->assertNotFound();
+});
+
+test('a guest who edits their email after Proceed has to press Proceed again', function () {
+    addToCart('fresh-okra');
+
+    Livewire::test(Checkout::class)
+        ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
+        ->call('confirmSlot')
+        ->set('email', 'valentine@example.com')
+        ->set('name', 'Valentine Akin')
+        ->set('paymentMethod', 'card')
+        ->call('proceed')
+        ->assertSet('guestReady', true)
+        ->set('email', 'other@example.com')
+        ->assertSet('guestReady', false)
+        ->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
+
+    expect(Order::count())->toBe(0);
 });
 
 test('guest delivery: an out-of-area address blocks proceeding; a Saint John address adds the fee', function () {
@@ -162,12 +183,11 @@ test('guest delivery: an out-of-area address blocks proceeding; a Saint John add
         ->assertSet('addressStatus', 'ok')
         ->assertSee('Delivering to E2L 4L1')
         ->call('proceed')
-        ->assertSet('modal', 'code')
+        ->assertHasNoErrors()
+        ->assertSet('modal', null)
         ->assertSet('name', 'Valentine Akin');
 
-    $component->set('code', sentCode())->call('verifyCode')
-        ->assertHasNoErrors()
-        ->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
+    $component->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
 
     $order = Order::firstOrFail();
     expect($order->status)->toBe(Order::STATUS_PAID)
@@ -239,13 +259,12 @@ test('a guest’s orders appear in their order history when they sign in later w
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->set('email', 'valentine@example.com')
+        ->set('name', 'Valentine Akin')
         ->set('paymentMethod', 'card')
         ->call('proceed');
-    $component->set('name', 'Valentine Akin')->set('code', sentCode())->call('verifyCode')
-        ->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
+    $component->call('pay', 'cnon:card-nonce-ok', 'attempt-1');
 
     $order = Order::firstOrFail();
-    Auth::logout();
     Mail::fake();
     $this->travel(1)->day();
 

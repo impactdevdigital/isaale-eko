@@ -28,6 +28,8 @@ class PlaceOrder
 
     /**
      * @param  array<string, string|null>|null  $address  delivery snapshot, for delivery orders
+     * @param  string|null  $guestEmail  set for a guest (not signed in) checkout: the email
+     *                                   they typed, unverified; it's where the receipt goes
      */
     public function handle(
         User $user,
@@ -37,6 +39,7 @@ class PlaceOrder
         ?CarbonInterface $pickupStart = null,
         ?array $address = null,
         bool $clearCart = true,
+        ?string $guestEmail = null,
     ): Order {
         $lines = $this->cart->lines();
         $checkoutLines = $this->cart->checkoutLines($lines);
@@ -69,14 +72,17 @@ class PlaceOrder
 
         $coupon = $this->cart->coupon();
 
-        if ($coupon && ! $coupon->usableBy($user)) {
+        // A guest only typed an email, so they can't use that account's personal reward codes.
+        if ($coupon && ! $coupon->usableBy($guestEmail === null ? $user : null)) {
             $this->cart->removeCoupon();
 
             throw new CheckoutProblem('That reward code belongs to another account, so we removed it. Check your order summary, then pay.');
         }
         $subtotal = $this->cart->subtotalCents($lines);
         $totals = CartTotals::for($checkoutLines, $coupon, $fulfilment === 'delivery' ? CartTotals::deliveryFeeFor($subtotal) : 0);
-        $contact = $user->signInContact();
+        $contact = $guestEmail !== null
+            ? ['channel' => 'email', 'value' => $guestEmail]
+            : ($user->signInContact() ?? ['channel' => 'email', 'value' => $user->email]);
 
         $order = DB::transaction(function () use ($user, $contactName, $fulfilment, $method, $window, $address, $totals, $checkoutLines, $contact) {
             $order = Order::create([

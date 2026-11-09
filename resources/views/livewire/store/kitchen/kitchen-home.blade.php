@@ -184,74 +184,48 @@
                     The history and meaning behind the ingredients on our shelves. Or try our <a href="{{ route('kitchen.pantry') }}" class="underline font-bold text-[#111111] hover:text-[#806500] transition-colors">Cook With What I Have</a> pantry matcher.
                 </p>
             </div>
-            <a href="#" class="inline-flex items-center gap-1.5 text-[12px] leading-[16px] font-extrabold text-[#111111] hover:text-brand-yellow-80 transition-colors shrink-0">
+            <a href="{{ route('stories.index') }}" class="inline-flex items-center gap-1.5 text-[12px] leading-[16px] font-extrabold text-[#111111] hover:text-brand-yellow-80 transition-colors shrink-0">
                 <span>View more food stories</span>
                 <x-store.icon name="arrow-right" class="size-[15px]" />
             </a>
         </div>
 
+        @if ($foodStories->isNotEmpty())
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Story Card 1 (Figma: width 640px, height 210px, border-radius 4px) -->
-            <article class="flex flex-col sm:flex-row rounded-[4px] overflow-hidden border border-[#DEDEDE] bg-white h-auto sm:h-[210px]">
-                <div class="sm:w-1/2 h-48 sm:h-[210px] relative overflow-hidden bg-grayscale-90 shrink-0">
-                    <img src="{{ asset('images/store/stories/story-jollof.png') }}" alt="Why Jollof Rice Is Never Just Rice"
-                         class="size-full object-cover">
-                </div>
-                <div class="sm:w-1/2 p-5 sm:p-6 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-[20px] sm:text-[28px] leading-[24px] sm:leading-[28px] font-bold tracking-[-1px] text-[#111111] capitalize">
-                            Why Jollof Rice Is Never Just Rice
-                        </h3>
-                        <p class="mt-2 text-[14px] leading-[22px] font-normal text-[#575042] line-clamp-2">
-                            Behind every pot is a family, a debate and a standard that can never quite be met.
-                        </p>
+            @foreach ($foodStories as $story)
+                <!-- Story Card (Figma: width 640px, height 210px, border-radius 4px) -->
+                <article wire:key="kitchen-story-{{ $story->id }}" class="flex flex-col sm:flex-row rounded-[4px] overflow-hidden border border-[#DEDEDE] bg-white h-auto sm:h-[210px]">
+                    <div class="sm:w-1/2 h-48 sm:h-[210px] relative overflow-hidden bg-grayscale-90 shrink-0">
+                        @if ($story->coverUrl())
+                            <img src="{{ $story->coverUrl() }}" alt="" loading="lazy" class="size-full object-cover">
+                        @endif
                     </div>
-                    <div class="pt-3">
-                        <a href="#" class="inline-flex items-center justify-center rounded-full bg-[#FFD21F] px-6 py-2.5 text-[14px] leading-[18px] font-extrabold text-[#111111] hover:bg-brand-yellow-40 transition-colors">
-                            Read story
-                        </a>
-                        <div class="mt-3 flex items-center gap-3 text-[14px] text-[#111111] border-t border-grayscale-20 pt-2.5">
-                            <span class="flex items-center gap-1.5 font-extrabold">
-                                <x-store.icon name="clock" class="size-4" />
-                                50 min
-                            </span>
-                            <span class="text-[#111111]">&vert;</span>
-                            <span class="font-medium">By Amina Yusuf</span>
+                    <div class="sm:w-1/2 p-5 sm:p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-[20px] sm:text-[28px] leading-[24px] sm:leading-[28px] font-bold tracking-[-1px] text-[#111111] capitalize line-clamp-2">
+                                {{ $story->title }}
+                            </h3>
+                            <p class="mt-2 text-[14px] leading-[22px] font-normal text-[#575042] line-clamp-2">
+                                {{ $story->excerpt }}
+                            </p>
+                        </div>
+                        <div class="pt-3">
+                            <a href="{{ $story->url() }}" class="inline-flex items-center justify-center rounded-full bg-[#FFD21F] px-6 py-2.5 text-[14px] leading-[18px] font-extrabold text-[#111111] hover:bg-brand-yellow-40 transition-colors">
+                                Read story<span class="sr-only">: {{ $story->title }}</span>
+                            </a>
+                            <div class="mt-3 flex items-center gap-3 text-[14px] text-[#111111] border-t border-grayscale-20 pt-2.5">
+                                <span class="flex items-center gap-1.5 font-extrabold">
+                                    <x-store.icon name="clock" class="size-4" />
+                                    {{ $story->readMinutes() }} min read
+                                </span>
+                                <span class="text-[#111111]">&vert;</span>
+                                <span class="font-medium">{{ $story->author_name ? 'By '.$story->author_name : $story->dateLabel() }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </article>
-
-            <!-- Story Card 2 (Figma: width 640px, height 210px, border-radius 4px) -->
-            <article class="flex flex-col sm:flex-row rounded-[4px] overflow-hidden border border-[#DEDEDE] bg-white h-auto sm:h-[210px]">
-                <div class="sm:w-1/2 h-48 sm:h-[210px] relative overflow-hidden bg-grayscale-90 shrink-0">
-                    <img src="{{ asset('images/store/stories/story-scotch-bonnet.png') }}" alt="The Scotch Bonnet: Heat With A Heart"
-                         class="size-full object-cover">
-                </div>
-                <div class="sm:w-1/2 p-5 sm:p-6 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-[20px] sm:text-[28px] leading-[24px] sm:leading-[28px] font-bold tracking-[-1px] text-[#111111] capitalize">
-                            The Scotch Bonnet: Heat With A Heart
-                        </h3>
-                        <p class="mt-2 text-[14px] leading-[22px] font-normal text-[#575042] line-clamp-2">
-                            It’s fruity, aromatic and the single ingredient that makes West African and Caribbean cooking taste like itself.
-                        </p>
-                    </div>
-                    <div class="pt-3">
-                        <a href="#" class="inline-flex items-center justify-center rounded-full bg-[#FFD21F] px-6 py-2.5 text-[14px] leading-[18px] font-extrabold text-[#111111] hover:bg-brand-yellow-40 transition-colors">
-                            Read story
-                        </a>
-                        <div class="mt-3 flex items-center gap-3 text-[14px] text-[#111111] border-t border-grayscale-20 pt-2.5">
-                            <span class="flex items-center gap-1.5 font-extrabold">
-                                <x-store.icon name="clock" class="size-4" />
-                                50 min
-                            </span>
-                            <span class="text-[#111111]">&vert;</span>
-                            <span class="font-medium">By Amina Yusuf</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
+                </article>
+            @endforeach
         </div>
+        @endif
     </section>
 </div>

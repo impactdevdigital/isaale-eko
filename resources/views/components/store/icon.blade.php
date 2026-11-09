@@ -157,4 +157,8 @@
         <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-5']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.5h2.6l1.3 4.2-2 1.4a12 12 0 0 0 6.4 6.4l1.4-2 4.2 1.3v2.6A2.1 2.1 0 0 1 18.4 20 15.4 15.4 0 0 1 4 5.6a2.1 2.1 0 0 1 2.6-2.1Z"/></svg>
         @break
 
+    @case('clock')
+        <svg {{ $attributes->merge(['class' => $sized ? '' : 'size-4']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M12 7v5l3.2 2"/></svg>
+        @break
+
 @endswitch

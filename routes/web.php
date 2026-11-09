@@ -13,6 +13,7 @@ use App\Livewire\Admin\OrdersQueue;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
 use App\Livewire\Admin\RecipesManager;
+use App\Livewire\Admin\StoriesManager;
 use App\Livewire\Admin\StaffManager;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
@@ -52,6 +53,12 @@ Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWit
 Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
 Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
 Route::get('/recipes/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('recipes.show');
+
+// Discover: Food Stories and Brand Updates (Figma 07.03–07.05)
+Route::get('/food-stories', \App\Livewire\Store\Stories\StoriesIndex::class)->name('stories.index');
+Route::get('/food-stories/{story:slug}', \App\Livewire\Store\Stories\StoryShow::class)->name('stories.show');
+Route::get('/brand-updates', \App\Livewire\Store\Stories\BrandUpdatesIndex::class)->name('updates.index');
+Route::get('/brand-updates/{story:slug}', \App\Livewire\Store\Stories\StoryShow::class)->name('updates.show');
 
 // Policy Pages
 Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');
@@ -94,6 +101,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/categories', CategoriesManager::class)->name('categories');
         Route::get('/recipes', RecipesManager::class)->name('recipes');
+        Route::get('/stories', StoriesManager::class)->name('stories');
         Route::get('/settings', StoreSettings::class)->name('settings');
         Route::get('/hours', StoreHoursEditor::class)->name('hours');
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');

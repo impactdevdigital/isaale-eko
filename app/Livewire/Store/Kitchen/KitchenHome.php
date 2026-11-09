@@ -4,6 +4,7 @@ namespace App\Livewire\Store\Kitchen;
 
 use App\Models\MealCombo;
 use App\Models\Recipe;
+use App\Models\Story;
 use App\Services\Kitchen\RecipeResolver;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -77,6 +78,7 @@ class KitchenHome extends Component
             'combos' => $combos,
             'cuisines' => $cuisines,
             'costPreviews' => $costPreviews,
+            'foodStories' => Story::published()->ofType(Story::TYPE_FOOD)->latest('published_at')->take(2)->get(),
         ]);
     }
 }

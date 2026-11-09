@@ -4,12 +4,14 @@ namespace App\Console\Commands;
 
 use App\Models\Country;
 use App\Models\Product;
+use App\Models\Story;
 use App\Models\StoreHour;
 use App\Models\User;
 use App\Services\Square\CatalogSync;
 use Database\Seeders\AdminUserSeeder;
 use Database\Seeders\DemoCatalogSeeder;
 use Database\Seeders\PaymentMethodSeeder;
+use Database\Seeders\StorySeeder;
 use Database\Seeders\StorefrontSeeder;
 use Database\Seeders\StoreHoursSeeder;
 use Illuminate\Console\Command;
@@ -23,7 +25,7 @@ class ShopInstall extends Command
 {
     protected $signature = 'shop:install';
 
-    protected $description = 'Add opening hours, payment methods, menu categories, countries and the first Square import if they are missing';
+    protected $description = 'Add opening hours, payment methods, menu categories, countries, demo stories and the first Square import if they are missing';
 
     public function handle(CatalogSync $sync): int
     {
@@ -42,6 +44,11 @@ class ShopInstall extends Command
         // Menu categories, home tiles and countries: ours, not Square's.
         if (Country::query()->doesntExist()) {
             $this->call('db:seed', ['--class' => StorefrontSeeder::class, '--force' => true]);
+        }
+
+        // Demo Food Stories and Brand Updates, until staff write their own.
+        if (Story::query()->doesntExist()) {
+            $this->call('db:seed', ['--class' => StorySeeder::class, '--force' => true]);
         }
 
         if (filled(config('services.square.token')) && Product::whereNotNull('square_id')->doesntExist()) {

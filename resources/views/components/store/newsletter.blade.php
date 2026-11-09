@@ -15,30 +15,30 @@
             </p>
         </div>
 
-        <!-- Form (Figma: max-width 520px, gap 16px, inputs height 42px rounded 4px border #DEDEDE) -->
+        <!-- Form (Figma: max-width 520px, gap 16px, inputs height 42px, square corners (client request), border #DEDEDE) -->
         <form action="#" method="POST" class="w-full lg:max-w-[520px] space-y-2">
             @csrf
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label for="newsletter-first-name" class="sr-only">First Name</label>
                     <input id="newsletter-first-name" type="text" name="first_name" required placeholder="First Name"
-                           class="h-[42px] w-full rounded-[4px] border border-[#DEDEDE] bg-white px-4 text-[14px] leading-[20px] text-[#111111] placeholder:text-[#111111] focus:outline-none focus:border-[#111111] transition-colors">
+                           class="h-[42px] w-full rounded-none border border-[#DEDEDE] bg-white px-4 text-[14px] leading-[20px] text-[#111111] placeholder:text-[#111111] focus:outline-none focus:border-[#111111] transition-colors">
                 </div>
                 <div>
                     <label for="newsletter-last-name" class="sr-only">Last Name</label>
                     <input id="newsletter-last-name" type="text" name="last_name" required placeholder="Last Name"
-                           class="h-[42px] w-full rounded-[4px] border border-[#DEDEDE] bg-white px-4 text-[14px] leading-[20px] text-[#111111] placeholder:text-[#111111] focus:outline-none focus:border-[#111111] transition-colors">
+                           class="h-[42px] w-full rounded-none border border-[#DEDEDE] bg-white px-4 text-[14px] leading-[20px] text-[#111111] placeholder:text-[#111111] focus:outline-none focus:border-[#111111] transition-colors">
                 </div>
             </div>
 
             <div>
                 <label for="newsletter-email" class="sr-only">Your email address</label>
                 <input id="newsletter-email" type="email" name="email" required placeholder="Your email address"
-                       class="h-[42px] w-full rounded-[4px] border border-[#DEDEDE] bg-white px-4 text-[14px] leading-[20px] text-[#111111] placeholder:text-[#111111] focus:outline-none focus:border-[#111111] transition-colors">
+                       class="h-[42px] w-full rounded-none border border-[#DEDEDE] bg-white px-4 text-[14px] leading-[20px] text-[#111111] placeholder:text-[#111111] focus:outline-none focus:border-[#111111] transition-colors">
             </div>
 
-            <!-- Submit Button (Figma: height 42px, rounded 99px, bg #111111, 14px/18px font-extrabold text-white) -->
-            <button type="submit" class="h-[42px] w-full rounded-full bg-[#111111] text-white font-extrabold text-[14px] leading-[18px] hover:bg-grayscale-90 transition-colors shadow-2xs">
+            <!-- Submit Button (Figma: height 42px, square corners (client request), bg #111111, 14px/18px font-extrabold text-white) -->
+            <button type="submit" class="h-[42px] w-full rounded-none bg-[#111111] text-white font-extrabold text-[14px] leading-[18px] hover:bg-grayscale-90 transition-colors shadow-2xs">
                 Join
             </button>
 

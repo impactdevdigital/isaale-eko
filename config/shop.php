@@ -23,6 +23,9 @@ return [
         'postal_prefixes' => array_filter(explode(',', env('SHOP_DELIVERY_POSTAL_PREFIXES', 'E2'))),
     ],
 
+    // WhatsApp community group invite link for the Community Hub page; empty until the client shares it.
+    'whatsapp_community_url' => env('SHOP_WHATSAPP_COMMUNITY_URL'),
+
     'verification' => [
         'code_ttl_minutes' => 10,
         'resend_after_seconds' => 30,

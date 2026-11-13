@@ -70,6 +70,8 @@ class ProductListing extends Component
 
     public function mount(?Country $countryPage = null): void
     {
+        abort_if($countryPage?->exists && ! $countryPage->is_listed, 404);
+
         if ($countryPage?->exists) {
             $this->countryPageId = $countryPage->id;
             $this->country = $countryPage->slug;
@@ -116,7 +118,7 @@ class ProductListing extends Component
             'categoryTree' => Category::roots()
                 ->where(fn ($query) => $query->has('children')->orWhereHas('products', fn ($p) => $p->active()))
                 ->with('children')->orderBy('name')->get(),
-            'countries' => Country::whereHas('products', fn ($p) => $p->active())->orderBy('sort_order')->get(),
+            'countries' => Country::listed()->whereHas('products', fn ($p) => $p->active())->orderBy('sort_order')->get(),
             'noSearchResults' => $this->q !== '' && $products->total() === 0 && ! $this->hasFilters(),
         ])->title($this->pageTitle($category, $countryPage));
     }

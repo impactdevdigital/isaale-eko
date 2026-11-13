@@ -60,7 +60,11 @@
                         'bg-[#288129] text-white' => $country->theme === 'green',
                         'bg-[#F7C200] text-[#242424]' => $country->theme === 'yellow',
                     ])>
-                        <img src="{{ asset($country->image) }}" alt="" loading="lazy" class="absolute left-1 top-[85px] -z-10 w-[162px] md:left-1.5 md:top-[130px] md:w-[248px]">
+                        <img src="{{ asset($country->image) }}" alt="" loading="lazy" @class([
+                            'absolute left-1 -z-10 w-[162px] md:left-1.5 md:w-[248px]',
+                            'bottom-0' => $country->image_position === 'bottom',
+                            'top-[85px] md:top-[130px]' => $country->image_position !== 'bottom',
+                        ])>
                         <h3 class="text-[18px]/6 font-bold tracking-[-0.5px] md:text-h3 md:tracking-[-1px]">{{ $country->name }}</h3>
                         <p @class(['text-[13px] leading-5 md:text-[14px]', 'text-[#F9FAFB]' => $country->theme === 'green'])>{{ $country->tagline }}</p>
                     </a>

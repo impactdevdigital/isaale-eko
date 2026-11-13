@@ -19,6 +19,26 @@ test('shop, country and product pages render', function (string $url, string $te
     'product' => ['/products/dried-hibiscus-petals', 'Cook With Dried Hibiscus Petals'],
 ]);
 
+test('the home page lists the client’s five countries, with Sudan last', function () {
+    Country::create(['name' => 'Kenya', 'slug' => 'kenya', 'image' => 'images/store/countries/kenya.webp', 'is_listed' => false]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSeeInOrder(['Nigeria', 'Ghana', 'Jamaica', 'Cameroon', 'Sudan', 'Home has never been closer.'])
+        ->assertSee('images/store/countries/sudan.webp')
+        ->assertDontSee('/shop/country/kenya')
+        ->assertDontSee('Trinidad');
+});
+
+test('a hidden country’s page is a 404 and it drops out of the shop filters', function () {
+    $ghana = Country::where('slug', 'ghana')->firstOrFail();
+    $ghana->update(['is_listed' => false]);
+
+    $this->get('/shop/country/ghana')->assertNotFound();
+    Livewire::test(ProductListing::class)
+        ->assertViewHas('countries', fn ($countries) => ! $countries->contains('slug', 'ghana'));
+});
+
 test('unknown products are a 404', function () {
     $this->get('/products/not-a-real-thing')->assertNotFound();
 });

@@ -4,6 +4,7 @@ namespace App\Livewire\Store;
 
 use App\Models\Product;
 use App\Models\SavedBasket;
+use App\Services\Baskets\BudgetBuilder;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,31 @@ class CartPage extends Component
     public ?string $couponResult = null;
 
     public string $basketName = '';
+
+    /** The budget the shopper types, in dollars. */
+    public string $budgetInput = '';
+
+    public function setBudget(): void
+    {
+        $this->validate(['budgetInput' => ['required', 'numeric', 'min:1', 'max:1000']], [], ['budgetInput' => 'budget']);
+        app(BudgetBuilder::class)->setBudget((int) round((float) $this->budgetInput * 100));
+    }
+
+    public function clearBudget(): void
+    {
+        app(BudgetBuilder::class)->setBudget(null);
+        $this->reset('budgetInput');
+    }
+
+    /**
+     * Apply one "stay within my budget" change the shopper tapped.
+     */
+    public function applySuggestion(string $key): void
+    {
+        if (app(BudgetBuilder::class)->apply($key)) {
+            $this->changed();
+        }
+    }
 
     /**
      * Keep everything in the basket as a named list to rebuild later at
@@ -70,6 +96,10 @@ class CartPage extends Component
     public function mount(): void
     {
         $this->couponCode = $this->cart()->coupon()?->code ?? '';
+
+        if ($budget = app(BudgetBuilder::class)->budget()) {
+            $this->budgetInput = number_format($budget / 100, 2, '.', '');
+        }
     }
 
     public function increment(int $variation): void
@@ -157,6 +187,8 @@ class CartPage extends Component
             'checkoutLines' => $checkoutLines,
             'allSelected' => $lines->isNotEmpty() && $lines->every->selected,
             'totals' => CartTotals::for($checkoutLines, $cart->coupon(), deliveryFee: null),
+            'budget' => app(BudgetBuilder::class)->status(),
+            'budgetSuggestions' => app(BudgetBuilder::class)->suggestions(),
             'popular' => Product::forCard()
                 ->available()
                 ->orderByRaw('bestseller_rank is null')

@@ -66,6 +66,7 @@ class StoreNavigation
                 'sidebar' => [
                     'All Recipes' => route('kitchen.index'),
                     'Cook With What I Have' => route('kitchen.pantry'),
+                    'Cook on a Budget' => route('kitchen.budget'),
                     'Food Stories' => route('stories.index'),
                     'Brand Updates' => route('updates.index'),
                 ],

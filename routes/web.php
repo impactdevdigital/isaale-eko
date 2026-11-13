@@ -24,7 +24,10 @@ use App\Livewire\Store\Account\BuyAgain;
 use App\Livewire\Store\Account\OrderDetail;
 use App\Livewire\Store\Account\OrderHistory;
 use App\Livewire\Store\Account\Preferences;
+use App\Livewire\Store\Account\RebuildBasket;
 use App\Livewire\Store\Account\Rewards;
+use App\Livewire\Store\Account\SavedBaskets;
+use App\Livewire\Store\Account\SavedMeals;
 use App\Livewire\Store\Account\Wishlist;
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
@@ -81,6 +84,10 @@ Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/rewards', Rewards::class)->name('account.rewards');
     Route::get('/wishlist', Wishlist::class)->name('account.wishlist');
     Route::get('/buy-again', BuyAgain::class)->name('account.buy-again');
+    Route::get('/orders/{order}/rebuild', RebuildBasket::class)->name('account.orders.rebuild');
+    Route::get('/saved-baskets', SavedBaskets::class)->name('account.saved-baskets');
+    Route::get('/saved-baskets/{basket}', RebuildBasket::class)->name('account.saved-baskets.show');
+    Route::get('/saved-meals', SavedMeals::class)->name('account.saved-meals');
     Route::get('/preferences', Preferences::class)->name('account.preferences');
 });
 

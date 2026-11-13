@@ -11,6 +11,10 @@
         </ol>
     </nav>
 
+    @if (session('rebuilt'))
+        <p class="mt-6 rounded-sm bg-stock-10 px-4 py-3 text-body-sm text-stock-50" role="status">{{ session('rebuilt') }} Check it over, then head to checkout.</p>
+    @endif
+
     <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_400px] lg:gap-8">
         <section aria-labelledby="basket-title">
             <div class="flex items-center gap-3 border-b border-grayscale-40 pb-5">
@@ -115,9 +119,37 @@
                     </section>
                 @endif
 
-                <a href="{{ route('shop') }}" wire:navigate class="mt-6 inline-flex items-center gap-2 text-[14px] font-bold underline">
-                    <x-store.icon name="arrow-left" class="size-4" /> Continue shopping
-                </a>
+                <div class="mt-6 flex flex-wrap items-start justify-between gap-4">
+                    <a href="{{ route('shop') }}" wire:navigate class="inline-flex items-center gap-2 text-[14px] font-bold underline">
+                        <x-store.icon name="arrow-left" class="size-4" /> Continue shopping
+                    </a>
+
+                    {{-- Save this basket (account holders); guests get a gentle nudge, never a wall. --}}
+                    @auth
+                        <form wire:submit="saveBasket" x-data="{ open: @js($errors->has('basketName')) }" class="flex flex-col items-end gap-2">
+                            <button type="button" x-show="! open" @click="open = true; $nextTick(() => $refs.name.focus())" class="inline-flex items-center gap-2 text-[14px] font-bold underline">
+                                <x-store.icon name="shopping-bag" class="size-4" /> Save this basket
+                            </button>
+                            <div x-show="open" x-cloak class="flex items-center gap-2">
+                                <label for="basket-name" class="sr-only">Basket name</label>
+                                <input id="basket-name" x-ref="name" type="text" wire:model="basketName" maxlength="60" placeholder="Name it, e.g. Weekly shop"
+                                       class="h-10 w-[220px] rounded-full border border-grayscale-40 px-4 text-[14px] focus:border-ink focus:outline-none">
+                                <button type="submit" class="h-10 rounded-full bg-ink px-5 text-[14px] font-bold text-white">Save</button>
+                            </div>
+                            @error('basketName')
+                                <p class="text-body-xs text-price-40">{{ $message }}</p>
+                            @enderror
+                        </form>
+                    @else
+                        <p class="max-w-[300px] text-right text-body-xs text-body-muted">
+                            <button type="button" x-data @click="$dispatch('sign-in-open')" class="font-bold text-ink underline">Create an account</button> to save this basket and rebuild it later.
+                        </p>
+                    @endauth
+                </div>
+
+                @if (session('basket-saved'))
+                    <p class="mt-4 rounded-sm bg-stock-10 px-4 py-3 text-body-sm text-stock-50" role="status">{{ session('basket-saved') }}</p>
+                @endif
             @endif
         </section>
 

@@ -5,8 +5,9 @@ namespace App\Livewire\Store\Kitchen;
 use App\Actions\Kitchen\AddRecipeToCart;
 use App\Models\Recipe;
 use App\Services\Kitchen\RecipeResolver;
+use App\Support\Cart;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.store')]
@@ -45,6 +46,20 @@ class RecipeDetail extends Component
             ->filter(fn ($ri) => $ri->ingredient && ! $ri->ingredient->is_pantry_staple)
             ->pluck('ingredient_id')
             ->toArray();
+    }
+
+    /**
+     * Save or unsave this recipe as a favourite meal; guests are asked to sign in.
+     */
+    public function toggleSaved(): void
+    {
+        if (! $user = Auth::user()) {
+            $this->dispatch('sign-in-open');
+
+            return;
+        }
+
+        $user->savedRecipes()->toggle($this->recipe->id);
     }
 
     public function incrementPeople(): void
@@ -115,7 +130,7 @@ class RecipeDetail extends Component
 
     public function addSingleVariation(int $variationId): void
     {
-        app(\App\Support\Cart::class)->add($variationId, 1);
+        app(Cart::class)->add($variationId, 1);
         $this->dispatch('cart-updated');
         session()->flash('cart_success', 'Ingredient added to your basket!');
     }
@@ -134,6 +149,7 @@ class RecipeDetail extends Component
         return view('livewire.store.kitchen.recipe-detail', [
             'resolved' => $resolved,
             'cookNext' => $cookNext,
+            'isSaved' => Auth::check() && Auth::user()->savedRecipes()->whereKey($this->recipe->id)->exists(),
             'cuisines' => config('kitchen.cuisines', []),
         ])->title("{$this->recipe->title} — Ìsalèè Kitchen");
     }

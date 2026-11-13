@@ -23,7 +23,9 @@
         ],
         'Favourites' => [
             ['wishlist', 'heart', 'Wishlist', $link('account.wishlist')],
-            ['buy-again', 'bag', 'Buy again', $link('account.buy-again')],
+            ['buy-again', 'bag', 'Buy again & usuals', $link('account.buy-again')],
+            ['saved-baskets', 'shopping-bag', 'Saved baskets', $link('account.saved-baskets')],
+            ['saved-meals', 'receipt', 'Saved meals', $link('account.saved-meals')],
         ],
         '' => [
             ['preferences', 'mail', 'Updates & preferences', $link('account.preferences')],

@@ -3,8 +3,10 @@
 namespace App\Livewire\Store;
 
 use App\Models\Product;
+use App\Models\SavedBasket;
 use App\Support\Cart;
 use App\Support\CartTotals;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -20,6 +22,50 @@ class CartPage extends Component
      * applied, invalid, expired or minimum, after the shopper presses Apply.
      */
     public ?string $couponResult = null;
+
+    public string $basketName = '';
+
+    /**
+     * Keep everything in the basket as a named list to rebuild later at
+     * that day's prices. Guests are asked to sign in (accounts stay optional).
+     */
+    public function saveBasket(): void
+    {
+        if (! $user = Auth::user()) {
+            $this->dispatch('sign-in-open');
+
+            return;
+        }
+
+        $this->validate(['basketName' => ['required', 'string', 'max:60']], [], ['basketName' => 'basket name']);
+
+        $lines = $this->cart()->lines();
+
+        if ($lines->isEmpty()) {
+            return;
+        }
+
+        if ($user->savedBaskets()->count() >= SavedBasket::MAX_PER_USER) {
+            $this->addError('basketName', 'You can keep up to '.SavedBasket::MAX_PER_USER.' saved baskets. Delete one in your account first.');
+
+            return;
+        }
+
+        $basket = $user->savedBaskets()->create(['name' => trim($this->basketName)]);
+
+        foreach ($lines as $line) {
+            $basket->items()->create([
+                'product_variation_id' => $line->variation->id,
+                'name' => $line->variation->product->name,
+                'variation_name' => $line->variation->name,
+                'quantity' => $line->quantity,
+                'unit_price_cents' => $line->variation->price_cents,
+            ]);
+        }
+
+        $this->reset('basketName');
+        session()->flash('basket-saved', "Saved “{$basket->name}”. Find it under Saved baskets in your account.");
+    }
 
     public function mount(): void
     {

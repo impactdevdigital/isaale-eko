@@ -8,7 +8,9 @@ use App\Models\Category;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\SettingChange;
 use App\Models\StoreClosure;
+use App\Support\Delivery;
 use Database\Seeders\PaymentMethodSeeder;
 use Database\Seeders\StoreHoursSeeder;
 use Livewire\Livewire;
@@ -54,6 +56,31 @@ test('admin payment methods component toggles and guards last method', function 
         ->assertHasNoErrors();
 
     expect($card->fresh()->is_enabled)->toBeFalse();
+});
+
+test('staff can switch delivery off and on from the payment methods page', function () {
+    $this->seed(PaymentMethodSeeder::class);
+    expect(Delivery::enabled())->toBeTrue();
+
+    Livewire::test(PaymentMethods::class)
+        ->assertSee('Let customers choose Delivery at checkout')
+        ->call('toggleDelivery')
+        ->assertSee('Delivery is off. Checkout now offers Pickup only.');
+
+    expect(Delivery::enabled())->toBeFalse()
+        ->and(SettingChange::where('key', Delivery::SETTING)->latest('id')->value('new_value'))->toBeFalse();
+
+    Livewire::test(PaymentMethods::class)->call('toggleDelivery');
+
+    expect(Delivery::enabled())->toBeTrue();
+});
+
+test('delivery falls back to the SHOP_DELIVERY_ENABLED config until staff set it', function () {
+    config(['shop.delivery.enabled' => false]);
+    expect(Delivery::enabled())->toBeFalse();
+
+    Delivery::setEnabled(true);
+    expect(Delivery::enabled())->toBeTrue();
 });
 
 test('admin products list component renders, searches, and updates product attributes', function () {

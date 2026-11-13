@@ -154,7 +154,10 @@
         </section>
 
         <div class="flex flex-col gap-4 lg:self-start">
-        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult" show-free-delivery-hint >
+        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
+                               :show-free-delivery-hint="\App\Support\Delivery::enabled()"
+                               :fee-label="\App\Support\Delivery::enabled() ? 'Estimated delivery' : 'Pickup fee'"
+                               :fee-value="\App\Support\Delivery::enabled() ? 'Calculated at checkout' : 'Free'">
             @if ($checkoutLines->isNotEmpty())
                 <a href="{{ route('checkout') }}" class="flex h-[50px] items-center justify-center gap-2 rounded-full bg-ink text-[15px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
                     Proceed to checkout <x-store.icon name="arrow-right" />

@@ -7,7 +7,7 @@ return [
     'timezone' => env('SHOP_TIMEZONE', 'America/Moncton'),
 
     'pickup' => [
-        'location' => 'Saint John',
+        'location' => 'Saint John, NB, Canada',
 
         // Customers pick a window of this many hours; capacity is per window.
         'window_hours' => 2,
@@ -15,6 +15,9 @@ return [
     ],
 
     'delivery' => [
+        // Fallback for the Delivery switch in Admin > Payment Methods (off for launch).
+        'enabled' => (bool) env('SHOP_DELIVERY_ENABLED', false),
+
         'fee_cents' => (int) env('SHOP_DELIVERY_FEE_CENTS', 799),
         'free_over_cents' => (int) env('SHOP_FREE_DELIVERY_OVER_CENTS', 4000),
 

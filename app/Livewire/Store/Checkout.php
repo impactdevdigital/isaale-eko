@@ -16,6 +16,7 @@ use App\Services\ConsentService;
 use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
 use App\Support\CartTotals;
+use App\Support\Delivery;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -119,7 +120,7 @@ class Checkout extends Component
 
     public function choose(string $fulfilment): void
     {
-        $this->fulfilment = $fulfilment === 'delivery' ? 'delivery' : 'pickup';
+        $this->fulfilment = $fulfilment === 'delivery' && Delivery::enabled() ? 'delivery' : 'pickup';
         $this->problem = null;
 
         if ($this->paymentMethod && ! $this->paymentMethods()->contains('code', $this->paymentMethod)) {
@@ -540,6 +541,11 @@ class Checkout extends Component
         $user = Auth::user();
         $windows = app(PickupWindows::class);
 
+        // Staff switched Delivery off while this checkout was open.
+        if ($this->fulfilment === 'delivery' && ! Delivery::enabled()) {
+            $this->choose('pickup');
+        }
+
         $deliveryReady = $this->fulfilment === 'delivery' && $this->address && $this->addressStatus === 'ok';
         $fee = match (true) {
             $this->fulfilment === 'pickup' => 0,
@@ -563,6 +569,7 @@ class Checkout extends Component
             'savedAddresses' => $user ? $user->addresses : collect(),
             'readyToPay' => ($user || $this->guestReady) && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
             'fulfilmentReady' => $fulfilmentReady,
+            'deliveryEnabled' => Delivery::enabled(),
             'pickupLabel' => $this->pickupStart ? self::windowLabel(CarbonImmutable::parse($this->pickupStart)) : null,
             'etransfer' => config('payments.etransfer'),
             'square' => [

@@ -199,7 +199,7 @@ class ProductsList extends Component
         return view('livewire.admin.products-list', [
             'products' => $query->orderBy('name')->paginate(20),
             'categories' => Category::roots()->with('children')->get(),
-            'countries' => Country::orderBy('name')->get(),
+            'countries' => Country::listed()->orderBy('name')->get(),
             'counts' => $counts,
             'low' => $low,
             'lastSync' => cache(CatalogSync::STATE_KEY),

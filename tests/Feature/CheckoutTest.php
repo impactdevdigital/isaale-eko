@@ -9,7 +9,10 @@ use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Checkout\CheckoutProblem;
+use App\Services\Checkout\PlaceOrder;
 use App\Support\Cart;
+use App\Support\Delivery;
 use Carbon\CarbonImmutable;
 use Database\Seeders\DemoCatalogSeeder;
 use Database\Seeders\PaymentMethodSeeder;
@@ -196,6 +199,33 @@ test('guest delivery: an out-of-area address blocks proceeding; a Saint John add
         ->and($order->delivery_address['postal_code'])->toBe('E2L 4L1')
         ->and($order->delivery_fee_cents)->toBe(799)
         ->and($order->total_cents)->toBe(249 + 799);
+});
+
+test('with delivery switched off, checkout and the basket offer pickup only', function () {
+    Delivery::setEnabled(false);
+    addToCart('fresh-okra');
+
+    Livewire::test(CartPage::class)
+        ->assertDontSee('more for FREE delivery')
+        ->assertDontSee('Estimated delivery')
+        ->assertSee('Pickup fee');
+
+    Livewire::test(Checkout::class)
+        ->assertDontSee('<option value="delivery"', false)
+        ->call('choose', 'delivery')
+        ->assertSet('fulfilment', 'pickup');
+
+    // A delivery order sent straight to the service is refused too.
+    expect(fn () => app(PlaceOrder::class)->handle(
+        user: User::factory()->create(),
+        contactName: 'Valentine Akin',
+        fulfilment: 'delivery',
+        paymentMethod: 'card',
+        pickupStart: null,
+        address: ['postal_code' => 'E2L 4L1'],
+    ))->toThrow(CheckoutProblem::class, 'Delivery isn’t available right now');
+
+    expect(Order::count())->toBe(0);
 });
 
 test('item quantities can be changed from the checkout page', function () {

@@ -683,7 +683,7 @@ class RecipesManager extends Component
             'variationSearchResults' => $variationSearchResults,
             'managingIngredient' => $managingIngredient,
             'allIngredients' => $allIngredients,
-            'countries' => Country::orderBy('name')->get(),
+            'countries' => Country::listed()->orderBy('name')->get(),
             'cuisines' => config('kitchen.cuisines', []),
             'counts' => $counts,
             'presets' => self::PRESET_RECIPES,

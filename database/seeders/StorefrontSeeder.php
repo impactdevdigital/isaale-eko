@@ -42,16 +42,16 @@ class StorefrontSeeder extends Seeder
     ];
 
     /**
-     * [name, ISO code, demonym, tile tagline, tile theme, has tile artwork]
+     * The client's list, in Figma's landing page order (1440w, November 2026).
+     *
+     * [name, ISO code, demonym, tile tagline, tile theme, tile artwork position]
      */
     private const COUNTRIES = [
-        ['Nigeria', 'NG', 'Nigerian', 'Naija, your favourites are here.', 'green', true],
-        ['Ghana', 'GH', 'Ghanaian', 'Chale, home is closer than you think.', 'yellow', true],
-        ['Jamaica', 'JM', 'Jamaican', 'Straight from yard to your kitchen.', 'green', true],
-        ['Cameroon', 'CM', 'Cameroonian', 'Chale, home is closer than you think.', 'yellow', true],
-        ['Trinidad & Tobago', 'TT', 'Trinidadian', 'Chale, home is closer than you think.', 'green', true],
-        ['Ethiopia', 'ET', 'Ethiopian', 'Chale, home is closer than you think.', 'green', true],
-        ['Kenya', 'KE', 'Kenyan', 'Karibu, a taste of home.', 'green', false],
+        ['Nigeria', 'NG', 'Nigerian', 'Naija, your favourites are here.', 'green', null],
+        ['Ghana', 'GH', 'Ghanaian', 'Chale, home is closer than you think.', 'yellow', null],
+        ['Jamaica', 'JM', 'Jamaican', 'Straight from yard to your kitchen.', 'green', null],
+        ['Cameroon', 'CM', 'Cameroonian', 'Chale, home is closer than you think.', 'yellow', null],
+        ['Sudan', 'SD', 'Sudanese', 'Home has never been closer.', 'green', 'bottom'],
     ];
 
     /**
@@ -88,14 +88,16 @@ class StorefrontSeeder extends Seeder
             ], fn ($value) => $value !== null));
         }
 
-        foreach (self::COUNTRIES as $i => [$name, $code, $demonym, $tagline, $theme, $hasTile]) {
+        foreach (self::COUNTRIES as $i => [$name, $code, $demonym, $tagline, $theme, $imagePosition]) {
             Country::updateOrCreate(['slug' => $this->slug($name)], [
                 'name' => $name,
                 'code' => $code,
                 'demonym' => $demonym,
                 'tagline' => $tagline,
                 'theme' => $theme,
-                'image' => $hasTile ? 'images/store/countries/'.$this->slug($name).'.webp' : null,
+                'image' => 'images/store/countries/'.$this->slug($name).'.webp',
+                'image_position' => $imagePosition,
+                'is_listed' => true,
                 'banner_image' => self::COUNTRY_BANNERS[$name] ?? null,
                 'banner_description' => "Find familiar {$demonym} staples, pantry favourites and flavours from home — all in one place.",
                 'sort_order' => $i,

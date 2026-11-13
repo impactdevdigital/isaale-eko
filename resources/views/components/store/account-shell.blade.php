@@ -13,7 +13,7 @@
             ['addresses', 'shield', 'Address book', $link('account.addresses')],
         ],
         'Loyalty' => [
-            ['rewards', 'magic-star', 'Rewards & points', $link('account.rewards')],
+            ['rewards', 'magic-star', 'Rewards', $link('account.rewards')],
         ],
         'Orders' => [
             ['orders', 'receipt', 'All orders', $link('account.orders')],

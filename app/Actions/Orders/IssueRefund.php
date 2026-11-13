@@ -5,6 +5,7 @@ namespace App\Actions\Orders;
 use App\Models\Order;
 use App\Models\Refund;
 use App\Notifications\RefundNotice;
+use App\Services\Loyalty\LoyaltyProvider;
 use App\Services\Square\SquareGateway;
 use Illuminate\Support\Facades\Notification;
 
@@ -28,7 +29,7 @@ class IssueRefund
         abort_if(
             $amountCents < 1 || $amountCents > $refundable,
             422,
-            'Requested refund amount (' . money($amountCents) . ') exceeds maximum refundable amount (' . money($refundable) . ') on this order.'
+            'Requested refund amount ('.money($amountCents).') exceeds maximum refundable amount ('.money($refundable).') on this order.'
         );
 
         // 1. Write ledger entry BEFORE calling payment gateway
@@ -62,7 +63,7 @@ class IssueRefund
             } catch (\Throwable $e) {
                 if (app()->environment('local')) {
                     $done = true;
-                    $squareRefundId = 'local_sandbox_ref_' . uniqid();
+                    $squareRefundId = 'local_sandbox_ref_'.uniqid();
                 } else {
                     $refund->update([
                         'status' => Refund::STATUS_FAILED,
@@ -74,7 +75,7 @@ class IssueRefund
         } else {
             // Pay at pickup / in-store cash till refund
             $done = true;
-            $squareRefundId = 'store_register_ref_' . uniqid();
+            $squareRefundId = 'store_register_ref_'.uniqid();
         }
 
         // 3. Update ledger entry
@@ -90,6 +91,9 @@ class IssueRefund
         if ($order->refunded_cents >= $order->total_cents) {
             $order->update(['status' => 'refunded']);
         }
+
+        // A refund takes back the loyalty progress the order earned.
+        app(LoyaltyProvider::class)->reversePurchase($order, $order->refunded_cents);
 
         // 5. Send transaction notice to customer
         if ($order->contact_email) {

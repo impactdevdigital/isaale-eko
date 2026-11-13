@@ -13,6 +13,9 @@ class PointTransaction extends Model
 
     public const TYPE_EXPIRED = 'expired';
 
+    /** Progress taken back by a refund. */
+    public const TYPE_REVERSED = 'reversed';
+
     protected $guarded = [];
 
     protected $casts = [

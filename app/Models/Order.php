@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\Loyalty\LoyaltyPoints;
+use App\Services\Loyalty\LoyaltyProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,7 +68,7 @@ class Order extends Model
         // Points are earned once the order is paid for, online or at the counter.
         static::updated(function (Order $order) {
             if ($order->wasChanged(['status', 'fulfilment_status'])) {
-                app(LoyaltyPoints::class)->earnFor($order);
+                app(LoyaltyProvider::class)->recordPurchase($order);
             }
         });
     }

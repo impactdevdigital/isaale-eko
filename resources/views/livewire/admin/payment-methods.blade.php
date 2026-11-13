@@ -22,6 +22,33 @@
         </div>
     @enderror
 
+    <!-- Delivery switch -->
+    <div class="bg-white rounded-2xl border border-[#EEEEEE] shadow-xs p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-base sm:text-lg font-extrabold text-[#111111]">Delivery</h3>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#E0F1FF] text-[#007FE8]">delivery</span>
+            </div>
+            <p class="mt-0.5 text-xs text-[#686868]">
+                Let customers choose Delivery at checkout. When it's off, checkout offers Pickup only and the basket stops showing delivery fees. Orders already placed for delivery are not affected.
+            </p>
+        </div>
+        <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t border-[#F6F6F6] sm:border-0">
+            <span class="sm:hidden text-xs font-bold text-[#686868]">Status:</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox"
+                       wire:click="toggleDelivery"
+                       {{ $deliveryEnabled ? 'checked' : '' }}
+                       aria-label="Offer delivery at checkout"
+                       class="sr-only peer">
+                <div class="w-11 h-6 bg-[#DEDEDE] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#007D49]"></div>
+                <span class="ml-2.5 text-xs font-bold {{ $deliveryEnabled ? 'text-[#007D49]' : 'text-[#686868]' }}">
+                    {{ $deliveryEnabled ? 'Enabled' : 'Disabled' }}
+                </span>
+            </label>
+        </div>
+    </div>
+
     <!-- Methods Table Card -->
     <div class="bg-white rounded-2xl border border-[#EEEEEE] shadow-xs overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-[#EEEEEE] bg-[#FAFAFA]/50">

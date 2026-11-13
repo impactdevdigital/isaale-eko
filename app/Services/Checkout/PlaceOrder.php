@@ -8,6 +8,7 @@ use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Support\Cart;
 use App\Support\CartTotals;
+use App\Support\Delivery;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -50,6 +51,10 @@ class PlaceOrder
 
         if ($lines->contains(fn ($line) => $line->notice)) {
             throw new CheckoutProblem('Some quantities changed because stock ran low. Check your order summary, then pay.');
+        }
+
+        if ($fulfilment === 'delivery' && ! Delivery::enabled()) {
+            throw new CheckoutProblem('Delivery isn’t available right now. Choose Pickup to place your order.');
         }
 
         $method = PaymentMethod::available($fulfilment)->where('code', $paymentMethod)->first();

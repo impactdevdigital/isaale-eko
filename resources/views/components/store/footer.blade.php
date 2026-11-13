@@ -53,7 +53,7 @@
                 <span>·</span>
                 <a href="{{ route('refund-policy') }}" class="transition-colors hover:text-[#111111]">Refund Policy</a>
                 <span>·</span>
-                <span>Saint John · CAD · English</span>
+                <span>Saint John, NB, Canada · CAD · English</span>
             </div>
         </div>
     </div>

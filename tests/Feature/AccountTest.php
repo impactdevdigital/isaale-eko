@@ -116,12 +116,13 @@ test('the details step cannot be skipped without a verified code', function () {
 test('the overview shows balances and recent orders', function () {
     $user = User::create(['name' => 'Valentine Akin', 'email' => 'val@example.com']);
     $order = accountOrder($user);
-    $user->pointTransactions()->create(['type' => 'earned', 'points' => 582, 'description' => 'Purchase']);
+    $user->pointTransactions()->create(['type' => 'earned', 'points' => 76, 'description' => 'Purchase']);
 
     $this->actingAs($user)->get('/account')
         ->assertOk()
         ->assertSee('Hi, Valentine.')
-        ->assertSee('582 pts')
+        ->assertSee('$76.00')
+        ->assertSee('/ $100.00')
         ->assertSee($order->number);
 });
 

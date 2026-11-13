@@ -53,6 +53,7 @@ Route::get('/orders/{number}/reschedule', \App\Livewire\Store\RescheduleOrder::c
 Route::get('/kitchen', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.index');
 Route::get('/recipes', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('recipes.index');
 Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWithWhatIHave::class)->name('kitchen.pantry');
+Route::get('/kitchen/cook-on-a-budget', \App\Livewire\Store\Kitchen\CookOnABudget::class)->name('kitchen.budget');
 Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
 Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
 Route::get('/recipes/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('recipes.show');

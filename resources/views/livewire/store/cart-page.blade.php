@@ -153,7 +153,8 @@
             @endif
         </section>
 
-        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult" show-free-delivery-hint class="lg:self-start">
+        <div class="flex flex-col gap-4 lg:self-start">
+        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult" show-free-delivery-hint >
             @if ($checkoutLines->isNotEmpty())
                 <a href="{{ route('checkout') }}" class="flex h-[50px] items-center justify-center gap-2 rounded-full bg-ink text-[15px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
                     Proceed to checkout <x-store.icon name="arrow-right" />
@@ -164,6 +165,9 @@
                 </span>
             @endif
         </x-store.order-summary>
+
+            <x-store.budget-panel :budget="$budget" :suggestions="$budgetSuggestions" />
+        </div>
     </div>
 
     @if ($popular->isNotEmpty())

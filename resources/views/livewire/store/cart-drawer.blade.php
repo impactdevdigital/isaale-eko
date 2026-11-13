@@ -93,6 +93,12 @@
                 <strong class="text-[28px] leading-[30px] font-bold tracking-[-1.25px]">{{ money($subtotal) }}</strong>
             </div>
 
+            @if ($budget)
+                <p @class(['-mt-4 text-right text-body-sm font-bold', 'text-price-40' => $budget->over, 'text-stock-50' => ! $budget->over])>
+                    {{ $budget->over ? money($budget->over).' over your '.money($budget->budget).' budget' : 'You have '.money($budget->left).' left of '.money($budget->budget) }}
+                </p>
+            @endif
+
             @if ($canCheckout)
                 <a href="{{ route('checkout') }}" class="flex h-[50px] items-center justify-center gap-2 rounded-full bg-ink text-[14px] leading-[18px] font-extrabold text-white transition-colors hover:bg-grayscale-90">
                     Checkout securely <x-store.icon name="arrow-right" />

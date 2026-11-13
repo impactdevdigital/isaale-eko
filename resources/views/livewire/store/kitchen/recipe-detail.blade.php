@@ -93,10 +93,16 @@
                     {{ $recipe->country ? strtoupper($recipe->country->name) . ' RECIPE' : 'AUTHENTIC RECIPE' }}
                 </span>
 
-                <!-- Recipe Title -->
-                <h1 class="text-h2-mobile md:text-[34px] lg:text-[40px] font-bold text-ink tracking-tight mt-1 leading-tight">
-                    {{ $recipe->title }}
-                </h1>
+                <!-- Recipe Title + Save meal -->
+                <div class="mt-1 flex items-start justify-between gap-4">
+                    <h1 class="text-h2-mobile md:text-[34px] lg:text-[40px] font-bold text-ink tracking-tight leading-tight">
+                        {{ $recipe->title }}
+                    </h1>
+                    <button type="button" wire:click="toggleSaved" aria-pressed="{{ $isSaved ? 'true' : 'false' }}"
+                            @class(['mt-1 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-bold transition-colors', 'border-price-40 bg-sale-10 text-price-40' => $isSaved, 'border-grayscale-40 hover:border-ink' => ! $isSaved])>
+                        <x-store.icon name="heart" class="size-4" /> {{ $isSaved ? 'Saved' : 'Save meal' }}
+                    </button>
+                </div>
 
                 <!-- Description -->
                 <p class="mt-3 text-body-sm sm:text-body text-ink/80 leading-relaxed">

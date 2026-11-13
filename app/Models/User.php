@@ -76,6 +76,19 @@ class User extends Authenticatable
         return $this->belongsToMany(Product::class, 'wishlist_items')->withTimestamps()->orderByPivot('created_at', 'desc');
     }
 
+    public function savedBaskets(): HasMany
+    {
+        return $this->hasMany(SavedBasket::class)->latest()->latest('id');
+    }
+
+    /**
+     * Saved meals: the customer's favourite recipes, newest first.
+     */
+    public function savedRecipes(): BelongsToMany
+    {
+        return $this->belongsToMany(Recipe::class, 'saved_recipes')->withTimestamps()->orderByPivot('created_at', 'desc');
+    }
+
     public function pointTransactions(): HasMany
     {
         return $this->hasMany(PointTransaction::class)->latest()->latest('id');

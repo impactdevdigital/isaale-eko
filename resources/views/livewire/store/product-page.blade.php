@@ -182,7 +182,7 @@
             </div>
 
             <div class="flex flex-col gap-5 rounded-sm border border-grayscale-40 p-6">
-                <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="location" class="size-[22px] text-stock-50" /><span><strong>Shipping to</strong> <span class="text-body-muted">Saint John NB, Canada</span></span></p>
+                <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="location" class="size-[22px] text-stock-50" /><span><strong>Shipping to</strong> <span class="text-body-muted">Saint John, NB, Canada</span></span></p>
                 <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="returns" class="size-[22px] text-stock-50" />30-Day Returns</p>
                 <div>
                     <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="shield" class="size-[22px] text-stock-50" />Shopping Security</p>

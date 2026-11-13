@@ -65,7 +65,7 @@
                     <x-store.icon name="location" class="transition-transform group-hover:scale-110" />
                     <span class="flex flex-col">
                         <span class="text-body-xs font-normal text-body-muted">Locate the Store</span>
-                        <strong class="text-body-xs font-extrabold capitalize text-ink">Saint John NB, Canada</strong>
+                        <strong class="text-body-xs font-extrabold capitalize text-ink">Saint John, NB, Canada</strong>
                     </span>
                 </a>
 

@@ -91,12 +91,14 @@
                 {{-- Pickup or Delivery + email --}}
                 <div class="flex flex-col gap-5 sm:flex-row">
                     <div class="flex flex-col gap-2 sm:w-[150px] sm:shrink-0">
-                        <label for="fulfilment" class="text-[14px] leading-5">Pickup or Delivery</label>
+                        <label for="fulfilment" class="text-[14px] leading-5">{{ $deliveryEnabled ? 'Pickup or Delivery' : 'Fulfilment' }}</label>
                         <div class="relative">
                             <select id="fulfilment" wire:change="choose($event.target.value)"
                                     class="h-12 w-full appearance-none rounded-sm border border-grayscale-40 bg-surface pr-10 pl-4 text-[14px] font-medium focus:border-ink focus:outline-none">
                                 <option value="pickup" @selected($fulfilment === 'pickup')>Pickup</option>
-                                <option value="delivery" @selected($fulfilment === 'delivery')>Delivery</option>
+                                @if ($deliveryEnabled)
+                                    <option value="delivery" @selected($fulfilment === 'delivery')>Delivery</option>
+                                @endif
                             </select>
                             <x-store.icon name="arrow-down" class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" />
                         </div>

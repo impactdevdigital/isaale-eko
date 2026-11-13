@@ -88,7 +88,7 @@ class BudgetBuilder
      */
     public function spent(): int
     {
-        return CartTotals::for($this->cart->checkoutLines(), $this->cart->coupon(), 0)->total();
+        return CartTotals::for($this->cart->checkoutLines(), $this->cart->coupon(), 0, auth()->user())->total();
     }
 
     // ----- Mode 2: what can I cook with $X? ---------------------------------

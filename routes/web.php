@@ -12,6 +12,7 @@ use App\Livewire\Admin\OrdersQueue;
 
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
+use App\Livewire\Admin\PromotionsManager;
 use App\Livewire\Admin\RecipesManager;
 use App\Livewire\Admin\StoriesManager;
 use App\Livewire\Admin\StaffManager;
@@ -116,6 +117,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', StoreSettings::class)->name('settings');
         Route::get('/hours', StoreHoursEditor::class)->name('hours');
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
+        Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');
         Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
     });
 });

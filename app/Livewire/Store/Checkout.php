@@ -13,6 +13,7 @@ use App\Services\Checkout\PickupWindows;
 use App\Services\Checkout\PlaceOrder;
 use App\Services\Checkout\TakePayment;
 use App\Services\ConsentService;
+use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use Carbon\CarbonImmutable;
@@ -548,7 +549,8 @@ class Checkout extends Component
 
         $fulfilmentReady = $this->fulfilment === 'pickup' ? $this->pickupStart !== null : $deliveryReady;
 
-        $totals = CartTotals::for($checkoutLines, $cart->coupon(), $fee);
+        $totals = CartTotals::for($checkoutLines, $cart->coupon(), $fee, $user, $user ? null : (filter_var($this->email, FILTER_VALIDATE_EMAIL) ?: null));
+        app(PromotionEngine::class)->recordExposure($totals->promotion, 'checkout');
 
         return view('livewire.store.checkout', [
             'user' => $user,

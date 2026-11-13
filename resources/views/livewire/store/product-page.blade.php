@@ -67,6 +67,12 @@
                         <x-store.discount-tag :percent="$product->discount_estimate" />
                     @endif
                 </div>
+
+                @if ($promotion)
+                    <p class="rounded-sm bg-stock-10 px-3 py-2 text-body-sm text-stock-50">
+                        <strong>{{ $promotion->offerLabel() }}</strong> with {{ $promotion->name }}{{ $promotion->audience !== 'everyone' ? ' ('.str(\App\Models\Promotion::AUDIENCES[$promotion->audience])->lower()->before(' (').')' : '' }}, until {{ $promotion->ends_at->timezone(config('shop.timezone'))->format('j M') }}. Taken off in your basket.
+                    </p>
+                @endif
             @endif
 
             @if ($product->bestseller_rank)

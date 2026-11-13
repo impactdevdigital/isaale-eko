@@ -19,6 +19,13 @@ test('shop, country and product pages render', function (string $url, string $te
     'product' => ['/products/dried-hibiscus-petals', 'Cook With Dried Hibiscus Petals'],
 ]);
 
+test('a product with no category still opens (related products fall back to bestsellers)', function () {
+    $product = Product::create(['name' => 'Uncategorised Square Item', 'slug' => 'uncategorised-square-item', 'item_class' => 'grocery']);
+    $product->variations()->create(['name' => 'Each', 'price_cents' => 199, 'stock_quantity' => 5]);
+
+    $this->get('/products/uncategorised-square-item')->assertOk()->assertSee('Uncategorised Square Item');
+});
+
 test('unknown products are a 404', function () {
     $this->get('/products/not-a-real-thing')->assertNotFound();
 });

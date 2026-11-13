@@ -5,7 +5,10 @@ namespace App\Services\Checkout;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\PaymentMethod;
+use App\Models\Promotion;
+use App\Models\PromotionRedemption;
 use App\Models\User;
+use App\Services\Analytics;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use Carbon\CarbonInterface;
@@ -79,7 +82,7 @@ class PlaceOrder
             throw new CheckoutProblem('That reward code belongs to another account, so we removed it. Check your order summary, then pay.');
         }
         $subtotal = $this->cart->subtotalCents($lines);
-        $totals = CartTotals::for($checkoutLines, $coupon, $fulfilment === 'delivery' ? CartTotals::deliveryFeeFor($subtotal) : 0);
+        $totals = CartTotals::for($checkoutLines, $coupon, $fulfilment === 'delivery' ? CartTotals::deliveryFeeFor($subtotal) : 0, $user, $guestEmail);
         $contact = $guestEmail !== null
             ? ['channel' => 'email', 'value' => $guestEmail]
             : ($user->signInContact() ?? ['channel' => 'email', 'value' => $user->email]);
@@ -102,6 +105,7 @@ class PlaceOrder
                 'delivery_fee_cents' => $totals->deliveryFee ?? 0,
                 'total_cents' => $totals->total(),
                 'coupon_code' => $totals->coupon?->code,
+                'promotion_id' => $totals->promotion?->promotion->id,
                 'payment_method' => $method->code,
                 'placed_at' => now(),
             ]);
@@ -121,6 +125,24 @@ class PlaceOrder
 
             if ($totals->coupon) {
                 Coupon::whereKey($totals->coupon->id)->increment('times_used');
+            }
+
+            if ($applied = $totals->promotion) {
+                // Re-check the cap under a lock so two last-minute orders can't both take the final redemption.
+                $promotion = Promotion::whereKey($applied->promotion->id)->lockForUpdate()->first();
+
+                if (! $promotion?->hasRoom()) {
+                    throw new CheckoutProblem('The '.$applied->promotion->name.' offer has just run out. Check your order summary, then pay.');
+                }
+
+                PromotionRedemption::create([
+                    'promotion_id' => $promotion->id,
+                    'order_id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'discount_cents' => $applied->discount,
+                ]);
+
+                Analytics::track('promotion_redeemed', ['promotion_id' => $promotion->id, 'order_id' => $order->id, 'discount_cents' => $applied->discount]);
             }
 
             return $order;

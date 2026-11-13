@@ -5,6 +5,7 @@ namespace App\Livewire\Store;
 use App\Models\Product;
 use App\Models\SavedBasket;
 use App\Services\Baskets\BudgetBuilder;
+use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use Illuminate\Support\Facades\Auth;
@@ -180,13 +181,15 @@ class CartPage extends Component
         $cart = $this->cart();
         $lines = $cart->lines();
         $checkoutLines = $cart->checkoutLines($lines);
+        $totals = CartTotals::for($checkoutLines, $cart->coupon(), deliveryFee: null, customer: Auth::user());
+        app(PromotionEngine::class)->recordExposure($totals->promotion, 'basket');
 
         return view('livewire.store.cart-page', [
             'available' => $lines->filter->available,
             'unavailable' => $lines->reject->available,
             'checkoutLines' => $checkoutLines,
             'allSelected' => $lines->isNotEmpty() && $lines->every->selected,
-            'totals' => CartTotals::for($checkoutLines, $cart->coupon(), deliveryFee: null),
+            'totals' => $totals,
             'budget' => app(BudgetBuilder::class)->status(),
             'budgetSuggestions' => app(BudgetBuilder::class)->suggestions(),
             'popular' => Product::forCard()

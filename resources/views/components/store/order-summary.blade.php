@@ -77,9 +77,14 @@
             <dd class="text-right text-[12px] font-bold">{{ $feeValue }}</dd>
         </div>
         @if ($totals->discount)
-            <div class="flex justify-between">
-                <dt class="text-grayscale-80">Coupon discount</dt>
+            <div class="flex justify-between gap-4">
+                <dt class="text-grayscale-80">{{ $totals->promotion ? $totals->promotion->promotion->name : 'Coupon discount' }}</dt>
                 <dd class="font-bold text-stock-50">&minus;{{ money($totals->discount) }}</dd>
+            </div>
+        @endif
+        @if ($totals->setAsideCoupon)
+            <div class="rounded-sm bg-brand-yellow-10 px-3 py-1.5 text-[11px] font-medium text-brand-yellow-90" role="status">
+                Your code {{ $totals->setAsideCoupon->code }} isn’t used: {{ $totals->promotion->promotion->name }} saves you more. One discount per order.
             </div>
         @endif
         @if ($showFreeDeliveryHint && $totals->subtotal > 0)

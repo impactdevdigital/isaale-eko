@@ -12,6 +12,7 @@ use App\Livewire\Admin\OrdersQueue;
 
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
+use App\Livewire\Admin\PromotionsManager;
 use App\Livewire\Admin\RecipesManager;
 use App\Livewire\Admin\StoriesManager;
 use App\Livewire\Admin\StaffManager;
@@ -53,6 +54,7 @@ Route::get('/orders/{number}/reschedule', \App\Livewire\Store\RescheduleOrder::c
 Route::get('/kitchen', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.index');
 Route::get('/recipes', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('recipes.index');
 Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWithWhatIHave::class)->name('kitchen.pantry');
+Route::get('/kitchen/cook-on-a-budget', \App\Livewire\Store\Kitchen\CookOnABudget::class)->name('kitchen.budget');
 Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
 Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
 Route::get('/recipes/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('recipes.show');
@@ -115,6 +117,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', StoreSettings::class)->name('settings');
         Route::get('/hours', StoreHoursEditor::class)->name('hours');
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
+        Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');
         Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
     });
 });

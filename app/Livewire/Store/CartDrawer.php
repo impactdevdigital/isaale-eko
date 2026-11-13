@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Services\Baskets\BudgetBuilder;
 use App\Support\Cart;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -77,6 +78,7 @@ class CartDrawer extends Component
             'lines' => $lines,
             'subtotal' => $cart->subtotalCents($lines),
             'canCheckout' => $cart->checkoutLines($lines)->isNotEmpty(),
+            'budget' => app(BudgetBuilder::class)->status(),
         ]);
     }
 }

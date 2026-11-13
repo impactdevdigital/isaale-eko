@@ -3,11 +3,17 @@
 namespace App\Support;
 
 use App\Models\Coupon;
+use App\Models\User;
+use App\Services\Promotions\AppliedPromotion;
+use App\Services\Promotions\PromotionEngine;
 use Illuminate\Support\Collection;
 
 /**
  * Money breakdown shown in every Order Summary. All amounts are cents.
  * A null delivery fee means "not known yet" (no address checked).
+ *
+ * One discount per order: a promo/reward code or the best live promotion,
+ * whichever saves the shopper more. They never stack.
  */
 final class CartTotals
 {
@@ -18,12 +24,17 @@ final class CartTotals
         public readonly int $discount,
         public readonly ?int $deliveryFee,
         public readonly ?Coupon $coupon,
+        public readonly ?AppliedPromotion $promotion = null,
+        // A valid code the shopper entered that lost out to a better promotion.
+        public readonly ?Coupon $setAsideCoupon = null,
     ) {}
 
     /**
      * @param  Collection<int, object>  $checkoutLines  ticked, available lines
+     * @param  ?User  $customer  the shopper, when known, for promotion eligibility
+     * @param  ?string  $email  a guest's email at checkout, for promotion eligibility
      */
-    public static function for(Collection $checkoutLines, ?Coupon $coupon = null, ?int $deliveryFee = 0): self
+    public static function for(Collection $checkoutLines, ?Coupon $coupon = null, ?int $deliveryFee = 0, ?User $customer = null, ?string $email = null): self
     {
         $subtotal = $checkoutLines->sum(fn ($line) => $line->variation->price_cents * $line->quantity);
 
@@ -32,14 +43,20 @@ final class CartTotals
         // A code that has lapsed since it was applied simply stops counting.
         $usable = $coupon && $coupon->isLive() && ! $coupon->isExpired()
             && (! $coupon->min_subtotal_cents || $subtotal >= $coupon->min_subtotal_cents);
+        $couponDiscount = $usable ? $coupon->discountFor($subtotal) : 0;
+
+        $promotion = app(PromotionEngine::class)->best($checkoutLines, $customer, $email);
+        $promotionWins = $promotion && $promotion->discount > $couponDiscount;
 
         return new self(
             itemCount: (int) $checkoutLines->sum('quantity'),
             subtotal: $subtotal,
             savings: $savings,
-            discount: $usable ? $coupon->discountFor($subtotal) : 0,
+            discount: $promotionWins ? $promotion->discount : $couponDiscount,
             deliveryFee: $deliveryFee,
-            coupon: $usable ? $coupon : null,
+            coupon: $usable && ! $promotionWins ? $coupon : null,
+            promotion: $promotionWins ? $promotion : null,
+            setAsideCoupon: $usable && $promotionWins ? $coupon : null,
         );
     }
 

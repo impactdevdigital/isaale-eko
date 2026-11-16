@@ -23,7 +23,7 @@ envVarGroups:
       - key: APP_KEY
         sync: false          # run `php artisan key:generate --show` and paste the result
       - key: APP_URL
-        sync: false          # e.g. https://isaaleeko.ca (or the onrender.com address at first)
+        sync: false          # e.g. https://isaleeko.com (or the onrender.com address at first)
       - key: APP_LOCALE
         value: en
       - key: LOG_CHANNEL

@@ -4,7 +4,6 @@
             'All products' => route('shop'),
             'New arrivals' => route('shop', ['sort' => 'new']),
             'Best sellers' => route('shop', ['sort' => 'bestsellers']),
-            'Deals' => route('shop', ['sort' => 'discounted']),
         ],
         'Discover' => [
             'Kitchen & Recipes' => route('kitchen.index'),

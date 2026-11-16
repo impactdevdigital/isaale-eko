@@ -21,7 +21,14 @@
                 <x-store.icon name="shopping-bag" class="size-6" />
                 <h1 id="basket-title" class="text-h2-mobile md:text-h2">Your Basket</h1>
                 <span class="rounded-full bg-grayscale-30 px-2.5 py-1 text-[13px] font-bold text-body-muted">{{ $count }} {{ str('item')->plural($count) }}</span>
+                @if ($count > 0)
+                    <a href="#save-basket" class="ml-auto inline-flex h-9 items-center gap-2 rounded-full border border-ink px-4 text-[13px] font-bold transition-colors hover:bg-ink hover:text-white">
+                        <x-store.icon name="bookmark" class="size-4" /> Save basket
+                    </a>
+                @endif
             </div>
+
+            <x-store.budget-panel :budget="$budget" :suggestions="$budgetSuggestions" class="mt-6" />
 
             @if ($available->isEmpty() && $unavailable->isEmpty())
                 <div class="flex flex-col items-center py-16 text-center">
@@ -74,9 +81,6 @@
                                     <div class="flex flex-row items-end justify-between gap-2 sm:flex-col">
                                         <p class="text-right">
                                             <span class="block text-[18px] font-extrabold text-price-40">{{ money($line->variation->price_cents * $line->quantity) }}</span>
-                                            @if ($line->variation->previous_price_cents)
-                                                <s class="text-body-xs text-muted">{{ money($line->variation->previous_price_cents * $line->quantity) }}</s>
-                                            @endif
                                         </p>
                                         <div class="flex items-center gap-4 text-[12px] font-bold">
                                             <button type="button" wire:click="remove({{ $id }})" class="flex items-center gap-1 underline">Remove <x-store.icon name="card-remove" /></button>
@@ -123,33 +127,7 @@
                     <a href="{{ route('shop') }}" wire:navigate class="inline-flex items-center gap-2 text-[14px] font-bold underline">
                         <x-store.icon name="arrow-left" class="size-4" /> Continue shopping
                     </a>
-
-                    {{-- Save this basket (account holders); guests get a gentle nudge, never a wall. --}}
-                    @auth
-                        <form wire:submit="saveBasket" x-data="{ open: @js($errors->has('basketName')) }" class="flex flex-col items-end gap-2">
-                            <button type="button" x-show="! open" @click="open = true; $nextTick(() => $refs.name.focus())" class="inline-flex items-center gap-2 text-[14px] font-bold underline">
-                                <x-store.icon name="shopping-bag" class="size-4" /> Save this basket
-                            </button>
-                            <div x-show="open" x-cloak class="flex items-center gap-2">
-                                <label for="basket-name" class="sr-only">Basket name</label>
-                                <input id="basket-name" x-ref="name" type="text" wire:model="basketName" maxlength="60" placeholder="Name it, e.g. Weekly shop"
-                                       class="h-10 w-[220px] rounded-full border border-grayscale-40 px-4 text-[14px] focus:border-ink focus:outline-none">
-                                <button type="submit" class="h-10 rounded-full bg-ink px-5 text-[14px] font-bold text-white">Save</button>
-                            </div>
-                            @error('basketName')
-                                <p class="text-body-xs text-price-40">{{ $message }}</p>
-                            @enderror
-                        </form>
-                    @else
-                        <p class="max-w-[300px] text-right text-body-xs text-body-muted">
-                            <button type="button" x-data @click="$dispatch('sign-in-open')" class="font-bold text-ink underline">Create an account</button> to save this basket and rebuild it later.
-                        </p>
-                    @endauth
                 </div>
-
-                @if (session('basket-saved'))
-                    <p class="mt-4 rounded-sm bg-stock-10 px-4 py-3 text-body-sm text-stock-50" role="status">{{ session('basket-saved') }}</p>
-                @endif
             @endif
         </section>
 
@@ -169,7 +147,8 @@
             @endif
         </x-store.order-summary>
 
-            <x-store.budget-panel :budget="$budget" :suggestions="$budgetSuggestions" />
+            <livewire:store.save-basket-button />
+
         </div>
     </div>
 

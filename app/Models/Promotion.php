@@ -14,12 +14,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Promotion extends Model
 {
+    /** Retired: the shop doesn't run product discounts. Old rows keep this value but never apply. */
     public const TEMPLATE_ITEM_DISCOUNT = 'item_discount';
 
     public const TEMPLATE_FIRST_ORDER = 'first_order';
 
     public const TEMPLATES = [
-        self::TEMPLATE_ITEM_DISCOUNT => 'Item discount',
         self::TEMPLATE_FIRST_ORDER => 'First online order offer',
     ];
 
@@ -107,32 +107,6 @@ class Promotion extends Model
     }
 
     /**
-     * The ids of the products this item discount covers.
-     *
-     * @return array<int, int>
-     */
-    public function productIds(): array
-    {
-        $ids = $this->products->pluck('id')->all();
-
-        if ($this->collection) {
-            $ids = array_merge($ids, $this->collection->products->pluck('id')->all());
-        }
-
-        return array_values(array_unique($ids));
-    }
-
-    /**
-     * Cents off one unit priced $unitCents (item discounts).
-     */
-    public function unitDiscount(int $unitCents): int
-    {
-        return min($unitCents, $this->discount_type === 'percent'
-            ? (int) round($unitCents * $this->discount_value / 100)
-            : $this->discount_value);
-    }
-
-    /**
      * Cents off a whole basket (order-level offers), never more than it.
      */
     public function basketDiscount(int $subtotalCents): int
@@ -140,6 +114,14 @@ class Promotion extends Model
         return min($subtotalCents, $this->discount_type === 'percent'
             ? (int) round($subtotalCents * $this->discount_value / 100)
             : $this->discount_value);
+    }
+
+    /**
+     * The template's name, including retired ones still in the history.
+     */
+    public function templateLabel(): string
+    {
+        return self::TEMPLATES[$this->template] ?? ($this->template === self::TEMPLATE_ITEM_DISCOUNT ? 'Item discount (retired)' : $this->template);
     }
 
     /**

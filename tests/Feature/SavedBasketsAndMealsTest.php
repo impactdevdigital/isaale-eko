@@ -5,8 +5,11 @@ use App\Livewire\Store\Account\RebuildBasket;
 use App\Livewire\Store\Account\SavedBaskets;
 use App\Livewire\Store\Account\SavedMeals;
 use App\Livewire\Store\CartPage;
+use App\Livewire\Store\HomeUsuals;
 use App\Livewire\Store\Kitchen\RecipeDetail;
+use App\Livewire\Store\SaveBasketButton;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Recipe;
@@ -17,6 +20,7 @@ use App\Services\Baskets\BasketRepricer;
 use App\Services\Baskets\Usuals;
 use App\Support\Cart;
 use Carbon\CarbonInterface;
+use Database\Seeders\DemoCatalogSeeder;
 use Livewire\Livewire;
 
 function basketVariation(string $name, int $priceCents, ?int $stock = 20, string $size = '1kg'): ProductVariation
@@ -88,11 +92,14 @@ test('done when: a customer with two orders sees their usuals, saves a basket, c
     $cart->add($rice->id, 2);
     $cart->add($plantain->id, 3);
 
-    Livewire::test(CartPage::class)
+    Livewire::test(CartPage::class)->assertSee('Save this basket')->assertSee('Save basket');
+
+    Livewire::test(SaveBasketButton::class)
         ->set('basketName', 'Weekly shop')
-        ->call('saveBasket')
+        ->call('save')
         ->assertHasNoErrors()
-        ->assertSee('Saved “Weekly shop”');
+        ->assertSee('Saved “Weekly shop”')
+        ->assertSee('View saved baskets');
 
     $basket = SavedBasket::where('user_id', $user->id)->sole();
     expect($basket->items)->toHaveCount(2)
@@ -194,10 +201,14 @@ test('guests are nudged to create an account to save a basket, never forced', fu
     app(Cart::class)->add(basketVariation('Green Plantain', 349)->id);
 
     Livewire::test(CartPage::class)
-        ->assertSee('to save this basket and rebuild it later')
-        ->assertSee('Proceed to checkout')
+        ->assertSee('Save this basket')
+        ->assertSee('Proceed to checkout');
+
+    Livewire::test(SaveBasketButton::class)
+        ->assertSee('Sign in to save this basket')
+        ->assertSee('You can still check out as a guest')
         ->set('basketName', 'Weekly shop')
-        ->call('saveBasket')
+        ->call('save')
         ->assertDispatched('sign-in-open');
 
     expect(SavedBasket::count())->toBe(0);
@@ -243,4 +254,67 @@ test('recipes can be saved as favourite meals and listed in the account', functi
         ->assertSee('No saved meals yet');
 
     expect($user->savedRecipes()->count())->toBe(0);
+});
+
+test('returning customers see their usuals on the home page, straight after the banner, and can reorder them', function () {
+    $this->seed(DemoCatalogSeeder::class);
+
+    $user = User::factory()->create(['name' => 'Ada Obi']);
+    $rice = basketVariation('Golden Sella Rice', 2499);
+    $plantain = basketVariation('Green Plantain', 349);
+    $garri = basketVariation('Ijebu Garri', 699, stock: 0);
+
+    basketOrder($user, [[$plantain, 2], [$garri, 1]], now()->subMonth());
+    basketOrder($user, [[$plantain, 2], [$rice, 1]], now()->subWeek());
+
+    // Guests and customers with no orders don't get the section.
+    $this->get('/')->assertOk()->assertDontSee('Your Usuals');
+    $this->actingAs(User::factory()->create())->get('/')->assertDontSee('Your Usuals');
+
+    $this->actingAs($user)->get('/')
+        ->assertOk()
+        ->assertSeeInOrder(['Welcome back, Ada', 'Your Usuals', 'Green Plantain', 'Golden Sella Rice', 'Fresh This Week'])
+        ->assertSee('Reorder your usuals · '.money(2 * 349 + 2499));
+
+    Livewire::test(HomeUsuals::class)
+        ->call('reorderUsuals')
+        ->assertDispatched('cart-open');
+
+    $cart = app(Cart::class);
+    expect($cart->quantity($plantain->id))->toBe(2)
+        ->and($cart->quantity($rice->id))->toBe(1)
+        ->and($cart->quantity($garri->id))->toBe(0);
+});
+
+test('a past order can be saved as a basket from the confirmation and order pages, by its owner only', function () {
+    $user = User::factory()->create();
+    $rice = basketVariation('Golden Sella Rice', 2499);
+    $plantain = basketVariation('Green Plantain', 349);
+    $order = basketOrder($user, [[$rice, 1], [$plantain, 4]]);
+    $order->items()->where('product_variation_id', $plantain->id)->first()->update(['quantity' => 3]);
+    $order->items()->create(['product_id' => $rice->product_id, 'product_variation_id' => $rice->id, 'name' => 'Removed line', 'unit_price_cents' => 100, 'quantity' => 1, 'line_total_cents' => 100, 'line_status' => OrderItem::STATUS_REMOVED]);
+
+    $this->actingAs($user);
+    $this->get(route('orders.show', $order))->assertOk()->assertSee('Save as a basket');
+    $this->get(route('account.orders.show', $order))->assertOk()->assertSee('Save as a basket');
+
+    Livewire::test(SaveBasketButton::class, ['orderId' => $order->id, 'variant' => 'inline'])
+        ->assertSet('basketName', 'Order '.$order->number)
+        ->call('save')
+        ->assertSee('Saved “Order '.$order->number.'”');
+
+    $basket = SavedBasket::sole();
+    expect($basket->user_id)->toBe($user->id)
+        ->and($basket->items->pluck('quantity', 'name')->all())->toBe(['Golden Sella Rice' => 1, 'Green Plantain' => 3]);
+
+    // Someone else's order can't be saved, even with things in their own basket.
+    $this->actingAs(User::factory()->create());
+    app(Cart::class)->add($rice->id);
+    Livewire::test(SaveBasketButton::class, ['orderId' => $order->id, 'variant' => 'inline'])
+        ->assertDontSee('Save as a basket')
+        ->set('basketName', 'Stolen')
+        ->call('save')
+        ->assertHasErrors('basketName');
+
+    expect(SavedBasket::count())->toBe(1);
 });

@@ -140,11 +140,6 @@ class Product extends Model
         return $query->where(fn ($query) => $query->where('is_trending', true)->orWhereNotNull('badge_label'));
     }
 
-    public function scopeDiscounted(Builder $query): Builder
-    {
-        return $query->whereHas('defaultVariation', fn ($query) => $query->whereColumn('previous_price_cents', '>', 'price_cents'));
-    }
-
     public function inStock(): bool
     {
         return $this->isAvailable() && (bool) $this->defaultVariation?->inStock();

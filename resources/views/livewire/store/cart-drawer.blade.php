@@ -26,6 +26,8 @@
             <p class="pb-3 text-caption font-extrabold uppercase text-body-muted">Your basket</p>
             <h2 id="cart-title" class="pb-6 text-h2-mobile capitalize md:text-h2">{{ $lines->isNotEmpty() ? 'Good food is on the way.' : 'Your basket is hungry' }}</h2>
 
+            <x-store.budget-panel variant="drawer" :budget="$budget" :suggestions="$budgetSuggestions" class="mb-6" />
+
             @forelse ($lines as $id => $line)
                 @php($product = $line->variation->product)
                 <div wire:key="line-{{ $id }}" @class(['flex flex-col gap-3 py-4', 'border-t border-grayscale-40' => ! $loop->first, 'pt-0' => $loop->first])>
@@ -44,13 +46,7 @@
                                 <p class="text-h5 capitalize">{{ $product->name }}</p>
                                 <p class="flex items-baseline gap-[7px]">
                                     <span class="text-price text-price-40">{{ money($line->variation->price_cents) }}</span>
-                                    @if ($line->variation->previous_price_cents)
-                                        <s class="text-body-xs font-normal text-muted">{{ money($line->variation->previous_price_cents) }}</s>
-                                    @endif
                                 </p>
-                                @if ($product->discount_estimate)
-                                    <x-store.discount-tag :percent="$product->discount_estimate" compact />
-                                @endif
                             </div>
 
                             @if ($line->available)
@@ -110,7 +106,10 @@
             @endif
 
             @if ($lines->isNotEmpty())
-                <a href="{{ route('cart') }}" class="-mt-2 text-center text-button-sm underline">View basket</a>
+                <div class="-mt-2 flex items-center justify-center gap-6 text-button-sm">
+                    <a href="{{ route('cart') }}" class="underline">View basket</a>
+                    <a href="{{ route('cart') }}#save-basket" class="inline-flex items-center gap-1.5 underline"><x-store.icon name="bookmark" class="size-4" /> Save basket</a>
+                </div>
             @endif
         </div>
     </aside>

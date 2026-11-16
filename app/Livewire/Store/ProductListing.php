@@ -30,7 +30,6 @@ class ProductListing extends Component
         'trending' => 'Trending',
         'new' => 'New Arrivals',
         'bestsellers' => 'Best Sellers',
-        'discounted' => 'Discounted',
         'hot' => 'Hot',
     ];
 
@@ -158,7 +157,6 @@ class ProductListing extends Component
             'trending' => $query->trending()->orderByDesc('is_trending')->orderBy('name'),
             'new' => $query->where('first_seen_at', '>=', now()->subDays((int) Setting::get('new_arrival_days', 21)))->latest('first_seen_at')->orderBy('id'),
             'bestsellers' => $query->whereNotNull('bestseller_rank')->orderBy('bestseller_rank'),
-            'discounted' => $query->discounted()->orderByDesc('discount_estimate')->orderBy('name'),
             'hot' => $query->where('is_hot', true)->orderBy('name'),
             // Ranked bestsellers first, then everything else by name.
             default => $query->orderByRaw('bestseller_rank is null')->orderBy('bestseller_rank')->orderBy('name'),

@@ -54,9 +54,6 @@
         @if ($variation)
             <p @class(['mt-auto flex items-baseline gap-[7px]', 'pt-1' => ! $compact])>
                 <strong @class(['text-price-40', 'text-price-sm' => $compact, 'text-price-mobile md:text-price' => ! $compact])>{{ money($variation->price_cents) }}</strong>
-                @if ($variation->previous_price_cents)
-                    <s class="text-body-xs font-normal text-muted">{{ money($variation->previous_price_cents) }}</s>
-                @endif
             </p>
         @endif
 

@@ -54,6 +54,13 @@
                 <a href="{{ route('shop') }}" class="flex h-[42px] items-center justify-center rounded-full border border-ink text-[15px] font-bold">Keep shopping</a>
             </div>
 
+            @if (auth()->id() && $order->user_id === auth()->id() && $order->status !== Order::STATUS_PAYMENT_FAILED)
+                <div class="mt-4 flex flex-col items-center gap-1">
+                    <livewire:store.save-basket-button :order-id="$order->id" variant="inline" />
+                    <p class="text-body-xs text-body-muted">Keep this order as a basket to rebuild next time.</p>
+                </div>
+            @endif
+
             @if ($order->isConfirmed())
                 <div class="mt-8 w-full rounded-lg border border-grayscale-30 p-6 text-left">
                     <p class="text-[15px] font-bold">Order status</p>
@@ -122,9 +129,6 @@
 
             <dl class="flex flex-col gap-2 px-6 py-4 text-[14px]">
                 <div class="flex justify-between"><dt class="text-body-muted">Subtotal</dt><dd>{{ money($order->subtotal_cents) }}</dd></div>
-                @if ($order->savings_cents)
-                    <div class="flex justify-between"><dt class="text-body-muted">Product savings (included)</dt><dd class="text-stock-50">&minus;{{ money($order->savings_cents) }}</dd></div>
-                @endif
                 @if ($order->discount_cents)
                     <div class="flex justify-between"><dt class="text-body-muted">Coupon {{ $order->coupon_code }}</dt><dd class="text-stock-50">&minus;{{ money($order->discount_cents) }}</dd></div>
                 @endif

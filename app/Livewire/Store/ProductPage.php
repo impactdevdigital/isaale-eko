@@ -4,7 +4,6 @@ namespace App\Livewire\Store;
 
 use App\Models\Product;
 use App\Models\StockNotification;
-use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -121,7 +120,6 @@ class ProductPage extends Component
         return view('livewire.store.product-page', [
             'variation' => $product->defaultVariation,
             'state' => $product->stockState(),
-            'promotion' => app(PromotionEngine::class)->forProduct($product),
             'recipes' => $product->recipes()
                 ->with(['products' => fn ($query) => $query->forCard()])
                 ->orderBy('sort_order')

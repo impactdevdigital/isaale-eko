@@ -6,7 +6,6 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\Baskets\BasketLine;
-use App\Services\Baskets\BasketRepricer;
 use App\Services\Baskets\Usuals;
 use App\Support\Cart;
 use Illuminate\Support\Facades\Auth;
@@ -27,25 +26,13 @@ class BuyAgain extends Component
      */
     public function reorderUsuals(): void
     {
-        $cart = app(Cart::class);
-        $added = 0;
+        $added = app(Usuals::class)->addToCart(Auth::user());
 
-        foreach ($this->usuals() as $line) {
-            if ($line->available() && $cart->add($line->variation->id, $line->quantity)) {
-                $added++;
-            }
-        }
-
-        $this->dispatch('cart-updated', count: $cart->count());
+        $this->dispatch('cart-updated', count: app(Cart::class)->count());
 
         if ($added > 0) {
             $this->dispatch('cart-open');
         }
-    }
-
-    private function usuals()
-    {
-        return app(BasketRepricer::class)->reprice(app(Usuals::class)->linesFor(Auth::user()));
     }
 
     public function render()
@@ -64,7 +51,7 @@ class BuyAgain extends Component
             ->sortBy(fn (Product $product) => $ids->search($product->id))
             ->values();
 
-        $usuals = $this->usuals();
+        $usuals = app(Usuals::class)->repricedFor(Auth::user());
 
         return view('livewire.store.account.buy-again', [
             'products' => $products,

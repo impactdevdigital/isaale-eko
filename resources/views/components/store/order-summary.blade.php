@@ -10,7 +10,6 @@
     'feeValue' => 'Calculated at checkout',
     'totalLabel' => null,
     'showFreeDeliveryHint' => false,
-    'savingsLabel' => 'Product savings (included)',
     'note' => null,
     'noteTone' => 'ok',
 ])
@@ -66,12 +65,6 @@
             <dt class="text-grayscale-80">Subtotal ({{ $totals->itemCount }} {{ str('item')->plural($totals->itemCount) }})</dt>
             <dd class="font-bold">{{ money($totals->subtotal) }}</dd>
         </div>
-        @if ($totals->savings)
-            <div class="flex justify-between">
-                <dt class="text-grayscale-80">{{ $savingsLabel }}</dt>
-                <dd class="font-bold text-stock-50">&minus;{{ money($totals->savings) }}</dd>
-            </div>
-        @endif
         <div class="flex justify-between gap-4">
             <dt class="text-grayscale-80">{{ $feeLabel }}</dt>
             <dd class="text-right text-[12px] font-bold">{{ $feeValue }}</dd>

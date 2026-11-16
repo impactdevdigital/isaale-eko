@@ -5,6 +5,7 @@ namespace App\Services\Baskets;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Support\Cart;
 use Illuminate\Support\Collection;
 
 /**
@@ -48,5 +49,33 @@ class Usuals
                 'variation_name' => $row->variation_name,
             ])
             ->values();
+    }
+
+    /**
+     * The usuals at today's prices and stock.
+     *
+     * @return Collection<string, BasketLine>
+     */
+    public function repricedFor(User $user): Collection
+    {
+        return app(BasketRepricer::class)->reprice($this->linesFor($user));
+    }
+
+    /**
+     * Put every usual that can be bought today in the basket, at its usual
+     * quantity. Returns how many lines were added.
+     */
+    public function addToCart(User $user): int
+    {
+        $cart = app(Cart::class);
+        $added = 0;
+
+        foreach ($this->repricedFor($user) as $line) {
+            if ($line->available() && $cart->add($line->variation->id, $line->quantity)) {
+                $added++;
+            }
+        }
+
+        return $added;
     }
 }

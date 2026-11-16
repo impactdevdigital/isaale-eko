@@ -17,6 +17,7 @@ use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use Carbon\CarbonImmutable;
+use Database\Seeders\DemoCatalogSeeder;
 use Database\Seeders\PaymentMethodSeeder;
 use Database\Seeders\StoreHoursSeeder;
 use Illuminate\Support\Collection;
@@ -38,13 +39,13 @@ function promoVariation(string $name, int $priceCents): ProductVariation
     return $product->variations()->create(['name' => '1kg', 'price_cents' => $priceCents, 'stock_quantity' => 50]);
 }
 
-function promotion(array $attributes = [], array $productIds = []): Promotion
+function promotion(array $attributes = []): Promotion
 {
-    $promotion = Promotion::create([
-        'name' => 'Rice week',
-        'template' => Promotion::TEMPLATE_ITEM_DISCOUNT,
-        'objective' => 'discovery',
-        'audience' => 'everyone',
+    return Promotion::create([
+        'name' => 'Welcome 10% off',
+        'template' => Promotion::TEMPLATE_FIRST_ORDER,
+        'objective' => 'acquisition',
+        'audience' => 'first_time',
         'discount_type' => 'percent',
         'discount_value' => 10,
         'status' => 'active',
@@ -52,10 +53,6 @@ function promotion(array $attributes = [], array $productIds = []): Promotion
         'ends_at' => now()->addWeek(),
         ...$attributes,
     ]);
-
-    $promotion->products()->sync($productIds);
-
-    return $promotion;
 }
 
 function promoOrder(User $user, string $email = 'valentine@example.com'): Order
@@ -77,29 +74,36 @@ function lines(): Collection
     return app(Cart::class)->checkoutLines();
 }
 
-test('an item discount takes money off the chosen products in the basket and shows on the product page', function () {
-    promotion([], [$this->rice->product_id]);
+test('item discounts are retired: old ones never apply and nothing shows on the product page', function () {
+    $old = Promotion::create([
+        'name' => 'Rice week',
+        'template' => Promotion::TEMPLATE_ITEM_DISCOUNT,
+        'objective' => 'discovery',
+        'audience' => 'everyone',
+        'discount_type' => 'percent',
+        'discount_value' => 10,
+        'status' => 'active',
+        'starts_at' => now()->subDay(),
+        'ends_at' => now()->addWeek(),
+    ]);
+    $old->products()->sync([$this->rice->product_id]);
     app(Cart::class)->add($this->rice->id, 2);
-    app(Cart::class)->add($this->okra->id);
 
     $totals = CartTotals::for(lines());
-    expect($totals->discount)->toBe(400)        // 10% of 2 × $20, okra untouched
-        ->and($totals->total())->toBe(4500 - 400)
-        ->and($totals->promotion->promotion->name)->toBe('Rice week');
+    expect($totals->discount)->toBe(0)->and($totals->promotion)->toBeNull();
 
-    Livewire::test(CartPage::class)->assertSee('Rice week')->assertSeeHtml('&minus;'.money(400));
+    Livewire::test(CartPage::class)->assertDontSee('Rice week');
+    $this->get(route('product', $this->rice->product))->assertOk()->assertDontSee('10% off')->assertDontSee('Taken off in your basket');
 
-    $this->get(route('product', $this->rice->product))->assertSee('10% off')->assertSee('Taken off in your basket');
-    $this->get(route('product', $this->okra->product))->assertDontSee('Taken off in your basket');
-
-    expect(AnalyticsEvent::where('name', 'promotion_exposed')->count())->toBe(1);
+    // Still listed in the admin history, marked retired, and can't be edited.
+    Livewire::test(PromotionsManager::class)->assertSee('Item discount (retired)')->assertDontSee('wire:click="edit('.$old->id.')"', false);
 });
 
 test('drafts, paused, scheduled and ended promotions do nothing', function (array $attributes) {
-    promotion($attributes, [$this->rice->product_id]);
+    promotion($attributes);
     app(Cart::class)->add($this->rice->id);
 
-    expect(CartTotals::for(lines())->discount)->toBe(0);
+    expect(CartTotals::for(lines(), customer: User::factory()->create())->discount)->toBe(0);
 })->with([
     'draft' => fn () => ['status' => 'draft'],
     'paused' => fn () => ['status' => 'paused'],
@@ -164,7 +168,8 @@ test('guests get the first order offer at checkout once they type an email with 
 });
 
 test('one discount per order: the better of a promotion and a code wins, and the shopper is told', function () {
-    promotion(['discount_type' => 'fixed', 'discount_value' => 300], [$this->rice->product_id]); // $3 off each rice
+    $newcomer = User::factory()->create();
+    promotion(['name' => 'Welcome 10% off']);
     Coupon::create(['code' => 'TENOFF', 'type' => 'fixed', 'value' => 400, 'is_active' => true]);
     $cart = app(Cart::class);
     $cart->add($this->rice->id);
@@ -172,34 +177,33 @@ test('one discount per order: the better of a promotion and a code wins, and the
 
     $cart->applyCoupon('TENOFF', $cart->subtotalCents());
 
-    // Code: $4 off; promotion: $3. The code wins.
-    $totals = CartTotals::for(lines(), $cart->coupon());
+    // Code: $4 off; promotion: 10% = $4. A tie keeps the code.
+    $totals = CartTotals::for(lines(), $cart->coupon(), customer: $newcomer);
     expect($totals->discount)->toBe(400)->and($totals->coupon?->code)->toBe('TENOFF')->and($totals->promotion)->toBeNull();
 
-    // With two rice the promotion ($6) beats the code ($4): no stacking, the code is set aside.
+    // At $60 the promotion ($6) beats the code ($4): no stacking, the code is set aside.
     $cart->add($this->rice->id);
-    $totals = CartTotals::for(lines(), $cart->coupon());
+    $totals = CartTotals::for(lines(), $cart->coupon(), customer: $newcomer);
     expect($totals->discount)->toBe(600)->and($totals->promotion)->not->toBeNull()->and($totals->setAsideCoupon?->code)->toBe('TENOFF');
 
-    Livewire::test(CartPage::class)->assertSee('Your code TENOFF isn’t used: Rice week saves you more. One discount per order.');
+    $this->actingAs($newcomer);
+    Livewire::test(CartPage::class)->assertSee('Your code TENOFF isn’t used: Welcome 10% off saves you more. One discount per order.');
 });
 
 test('a budget cap stops the promotion once reached, and the last redemption is re-checked when the order is placed', function () {
-    $promotion = promotion(['max_redemptions' => 1], [$this->rice->product_id]);
+    $promotion = promotion(['max_redemptions' => 1]);
 
     app(Cart::class)->add($this->rice->id);
-    promoOrder(User::factory()->create());
+    promoOrder(User::factory()->create(), 'first@example.com');
 
     expect($promotion->fresh()->state())->toBe('capped');
 
     app(Cart::class)->add($this->rice->id);
-    expect(CartTotals::for(lines())->discount)->toBe(0);
+    expect(CartTotals::for(lines(), customer: User::factory()->create())->discount)->toBe(0);
 });
 
-test('audiences: lapsed customers and loyalty members', function () {
+test('audience sizes for the admin preview: lapsed customers and loyalty members', function () {
     $engine = new PromotionEngine;
-    $lapsedPromo = promotion(['audience' => 'lapsed']);
-    $loyaltyPromo = promotion(['audience' => 'loyalty_members']);
 
     $lapsed = User::factory()->create();
     Order::create(['number' => 'ISA-OLD001', 'user_id' => $lapsed->id, 'status' => Order::STATUS_PAID, 'fulfilment' => 'pickup', 'contact_name' => 'A', 'subtotal_cents' => 100, 'total_cents' => 100, 'payment_method' => 'card', 'placed_at' => now()->subDays(120)]);
@@ -207,43 +211,43 @@ test('audiences: lapsed customers and loyalty members', function () {
     Order::create(['number' => 'ISA-NEW001', 'user_id' => $recent->id, 'status' => Order::STATUS_PAID, 'fulfilment' => 'pickup', 'contact_name' => 'B', 'subtotal_cents' => 100, 'total_cents' => 100, 'payment_method' => 'card', 'placed_at' => now()->subDays(10)]);
     PointTransaction::create(['user_id' => $recent->id, 'type' => PointTransaction::TYPE_EARNED, 'points' => 10, 'description' => 'test']);
 
-    expect($engine->eligible($lapsedPromo, $lapsed))->toBeTrue()
-        ->and($engine->eligible($lapsedPromo, $recent))->toBeFalse()
-        ->and($engine->eligible($loyaltyPromo, $recent))->toBeTrue()
-        ->and($engine->eligible($loyaltyPromo, $lapsed))->toBeFalse()
-        ->and($engine->audienceSize('lapsed'))->toBe(1)
-        ->and($engine->audienceSize('loyalty_members'))->toBe(1);
+    expect($engine->audienceSize('lapsed'))->toBe(1)
+        ->and($engine->audienceSize('loyalty_members'))->toBe(1)
+        ->and($engine->audienceSize('first_time'))->toBe(0);
 });
 
-test('admin: choose a template, fill the required fields, preview who is eligible and the price, then activate', function () {
+test('admin: item discount is no longer offered; a first order offer is filled in, previewed, activated, paused and ended', function () {
     User::factory()->count(2)->create(); // customers with no orders yet
 
     Livewire::test(PromotionsManager::class)
         ->call('create')
         ->assertSee('First online order offer')
+        ->assertDontSee('Item discount')
         ->call('chooseTemplate', Promotion::TEMPLATE_ITEM_DISCOUNT)
-        ->set('name', 'Rice week')
-        ->set('discountValue', '15')
+        ->assertNotFound();
+
+    Livewire::test(PromotionsManager::class)
+        ->call('create')
+        ->call('chooseTemplate', Promotion::TEMPLATE_FIRST_ORDER)
+        ->set('name', 'Welcome $5 off')
+        ->set('discountValue', '5')
         ->set('endsAt', '')
         ->call('preview')
-        ->assertHasErrors(['endsAt', 'productIds'])
-        ->set('productSearch', 'golden')
-        ->assertSee('+ Golden Sella Rice')
-        ->call('addProduct', $this->rice->product_id)
+        ->assertHasErrors(['endsAt'])
         ->set('endsAt', now()->addDays(7)->timezone(config('shop.timezone'))->format('Y-m-d\TH:i'))
         ->call('preview')
         ->assertHasNoErrors()
         ->assertSet('step', 'preview')
         ->assertSee('Who is eligible')
-        ->assertSee(money(2000))
-        ->assertSee(money(1700))
+        ->assertSee(money(5000))
+        ->assertSee(money(4500))
         ->call('save', true)
         ->assertSee('is active');
 
     $promotion = Promotion::sole();
     expect($promotion->state())->toBe('live')
-        ->and($promotion->discount_value)->toBe(15)
-        ->and($promotion->products->pluck('id')->all())->toBe([$this->rice->product_id]);
+        ->and($promotion->template)->toBe(Promotion::TEMPLATE_FIRST_ORDER)
+        ->and($promotion->discount_value)->toBe(500);
 
     Livewire::test(PromotionsManager::class)->call('pause', $promotion->id);
     expect($promotion->fresh()->state())->toBe('paused');
@@ -277,4 +281,21 @@ test('only managers can open the promotions page', function () {
 
     $this->actingAs(User::factory()->create(['is_admin' => true, 'role' => User::ROLE_MANAGER]))
         ->get(route('admin.promotions'))->assertOk()->assertSee('Promotions');
+});
+
+test('products show no discount markers: no crossed-out price, no estimate tag, no deals links or sort', function () {
+    $this->seed(DemoCatalogSeeder::class);
+    $this->rice->update(['previous_price_cents' => 2500]);
+    $this->rice->product->update(['discount_estimate' => 20]);
+    app(Cart::class)->add($this->rice->id);
+
+    $this->get(route('product', $this->rice->product))->assertOk()
+        ->assertSee(money(2000))
+        ->assertDontSee(money(2500))
+        ->assertDontSee('Estimate');
+
+    $this->get(route('shop'))->assertOk()->assertDontSee('Special deals')->assertDontSee('Discounted');
+
+    Livewire::test(CartPage::class)->assertDontSee(money(2500))->assertDontSee('Product savings');
+    expect(CartTotals::for(lines())->savings)->toBe(0);
 });

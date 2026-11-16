@@ -4,7 +4,6 @@ namespace App\Services\Promotions;
 
 use App\Models\Order;
 use App\Models\PointTransaction;
-use App\Models\Product;
 use App\Models\Promotion;
 use App\Models\User;
 use App\Services\Analytics;
@@ -40,18 +39,6 @@ class PromotionEngine
                 : null)
             ->filter(fn (?AppliedPromotion $applied) => $applied && $applied->discount > 0)
             ->sortByDesc('discount')
-            ->first();
-    }
-
-    /**
-     * A live item discount covering this product, for the product page badge.
-     */
-    public function forProduct(Product $product): ?Promotion
-    {
-        return $this->live()
-            ->filter(fn (Promotion $promotion) => $promotion->template === Promotion::TEMPLATE_ITEM_DISCOUNT
-                && in_array($product->id, $promotion->productIds(), true))
-            ->sortByDesc(fn (Promotion $promotion) => $promotion->unitDiscount($product->defaultVariation?->price_cents ?? 0))
             ->first();
     }
 
@@ -144,16 +131,7 @@ class PromotionEngine
             return null;
         }
 
-        if ($promotion->template === Promotion::TEMPLATE_FIRST_ORDER) {
-            return new AppliedPromotion($promotion, $promotion->basketDiscount($subtotal));
-        }
-
-        $ids = $promotion->productIds();
-        $discount = $checkoutLines
-            ->filter(fn ($line) => in_array($line->variation->product_id, $ids, true))
-            ->sum(fn ($line) => $promotion->unitDiscount($line->variation->price_cents) * $line->quantity);
-
-        return new AppliedPromotion($promotion, (int) $discount);
+        return new AppliedPromotion($promotion, $promotion->basketDiscount($subtotal));
     }
 
     /**
@@ -161,8 +139,9 @@ class PromotionEngine
      */
     private function live(): Collection
     {
+        // Only templates we still offer: old item discounts never apply.
         return $this->live ??= Promotion::live()
-            ->with(['products:id', 'collection.products:id'])
+            ->whereIn('template', array_keys(Promotion::TEMPLATES))
             ->get()
             ->filter->hasRoom()
             ->values();

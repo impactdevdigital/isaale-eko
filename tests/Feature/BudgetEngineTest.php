@@ -217,3 +217,34 @@ test('the cook on a budget page starts from what is left in the basket budget', 
 
     $this->get(route('kitchen.budget'))->assertOk()->assertSee('What can I cook with');
 });
+
+test('build my basket works from the cart drawer and keeps the cart page in step', function () {
+    $cart = app(Cart::class);
+    $cart->add($this->premiumRice->id, 2); // 2998
+    $cart->add($this->tomato->id);        // 399
+
+    Livewire::test(CartDrawer::class)
+        ->assertSee('Build My Basket')
+        ->set('budgetInput', '0')
+        ->call('setBudget')
+        ->assertHasErrors('budgetInput')
+        ->set('budgetInput', '30')
+        ->call('setBudget')
+        ->assertDispatched('budget-updated')
+        ->assertSee(money(397).' over budget')
+        ->assertSee('Ways to get back under budget')
+        ->call('applySuggestion', 'swap:'.$this->premiumRice->id.':'.$this->budgetRice->id)
+        ->assertDispatched('cart-updated')
+        ->assertSee('You have '.money(3000 - 2 * 899 - 399).' left');
+
+    Livewire::test(CartPage::class)
+        ->assertSet('budgetInput', '30.00')
+        ->assertSee('Build My Basket')
+        ->call('clearBudget')
+        ->assertSet('budgetInput', '');
+
+    Livewire::test(CartDrawer::class)
+        ->dispatch('budget-updated')
+        ->assertSet('budgetInput', '')
+        ->assertDontSee('over budget');
+});

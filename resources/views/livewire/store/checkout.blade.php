@@ -269,7 +269,7 @@
         </div>
 
         <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
-                               :fee-label="$feeLabel" :fee-value="$feeValue" savings-label="Savings" :note="$note" :note-tone="$noteTone" class="lg:self-start">
+                               :fee-label="$feeLabel" :fee-value="$feeValue" :note="$note" :note-tone="$noteTone" class="lg:self-start">
             @if ($readyToPay && $paymentMethod === 'etransfer')
                 <button type="button" wire:click="placeETransferOrder" wire:loading.attr="disabled" wire:target="placeETransferOrder"
                         class="flex h-[42px] items-center justify-center rounded-full bg-ink text-[14px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">

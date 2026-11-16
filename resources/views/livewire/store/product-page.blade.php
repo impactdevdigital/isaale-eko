@@ -60,19 +60,7 @@
             @if ($variation)
                 <div class="flex flex-wrap items-center gap-3">
                     <strong class="text-[28px] leading-[30px] font-extrabold tracking-[-1px] text-price-40">{{ money($variation->price_cents) }}</strong>
-                    @if ($variation->previous_price_cents)
-                        <s class="text-body text-body-muted">{{ money($variation->previous_price_cents) }}</s>
-                    @endif
-                    @if ($product->discount_estimate)
-                        <x-store.discount-tag :percent="$product->discount_estimate" />
-                    @endif
                 </div>
-
-                @if ($promotion)
-                    <p class="rounded-sm bg-stock-10 px-3 py-2 text-body-sm text-stock-50">
-                        <strong>{{ $promotion->offerLabel() }}</strong> with {{ $promotion->name }}{{ $promotion->audience !== 'everyone' ? ' ('.str(\App\Models\Promotion::AUDIENCES[$promotion->audience])->lower()->before(' (').')' : '' }}, until {{ $promotion->ends_at->timezone(config('shop.timezone'))->format('j M') }}. Taken off in your basket.
-                    </p>
-                @endif
             @endif
 
             @if ($product->bestseller_rank)

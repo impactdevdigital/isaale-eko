@@ -17,7 +17,7 @@ function makeAdminUser(array $attributes = []): User
 {
     return User::factory()->create(array_merge([
         'name' => 'Store Operations Admin',
-        'email' => 'admin-test-'.uniqid().'@isaleeeko.ca',
+        'email' => 'admin-test-'.uniqid().'@isaleeko.com',
         'password' => Hash::make('secret123'),
         'is_admin' => true,
         'role' => User::ROLE_MANAGER,

@@ -57,7 +57,7 @@
                                autocomplete="email"
                                autofocus
                                required
-                               placeholder="e.g. admin@isaaleeko.com"
+                               placeholder="e.g. admin@isaleeko.com"
                                class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[#EEEEEE] bg-[#FAFAFA] text-sm text-[#111111] placeholder:text-[#686868]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
                         <svg class="w-4 h-4 text-[#686868] absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -128,10 +128,10 @@
                 <div class="p-3 rounded-xl bg-[#FAFAFA] border border-[#EEEEEE] text-[11px] text-[#686868] flex items-center justify-between gap-2">
                     <div class="truncate">
                         <span class="font-bold text-[#111111]">Dev Credential:</span>
-                        <span class="font-mono ml-1">admin@isaleeeko.ca</span> / <span class="font-mono">password123</span>
+                        <span class="font-mono ml-1">admin@isaleeko.com</span> / <span class="font-mono">password123</span>
                     </div>
                     <button type="button"
-                            wire:click="$set('email', 'admin@isaleeeko.ca'); $set('password', 'password123');"
+                            wire:click="$set('email', 'admin@isaleeko.com'); $set('password', 'password123');"
                             class="px-2 py-0.5 rounded bg-white border border-[#EEEEEE] font-bold text-[#111111] hover:bg-[#F6F6F6] text-[10px] shrink-0">
                         Auto-Fill
                     </button>

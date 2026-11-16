@@ -50,6 +50,7 @@
                     @endif
                     @if ($order->status !== Order::STATUS_AWAITING_PAYMENT)
                         <button type="button" wire:click="buyAgain" class="rounded-full border border-ink px-4 py-1.5 text-[13px] font-bold">Buy again</button>
+                        <livewire:store.save-basket-button :order-id="$order->id" variant="inline" />
                     @endif
                 </div>
             </div>
@@ -166,9 +167,6 @@
             <section class="rounded-sm border border-grayscale-40" aria-labelledby="payment-title">
                 <h2 id="payment-title" class="border-b border-grayscale-30 px-5 py-5 text-[18px] font-bold">Payment information</h2>
                 <dl class="flex flex-col divide-y divide-grayscale-30 px-5 py-2 text-[14px]">
-                    @if ($order->savings_cents)
-                        <div class="flex justify-between py-3"><dt class="text-body-muted">Retail price ({{ $count }} {{ str('item')->plural($count) }})</dt><dd class="text-body-muted line-through">{{ money($order->subtotal_cents + $order->savings_cents) }}</dd></div>
-                    @endif
                     <div class="flex justify-between py-3"><dt class="text-body-muted">Subtotal</dt><dd>{{ money($order->subtotal_cents) }}</dd></div>
                     <div class="flex justify-between py-3"><dt class="text-body-muted">{{ $order->fulfilment === 'pickup' ? 'Pickup fee' : 'Delivery fee' }}</dt><dd>{{ money($order->delivery_fee_cents) }}</dd></div>
                     @if ($order->discount_cents)

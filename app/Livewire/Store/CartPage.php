@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Store;
 
+use App\Livewire\Store\Concerns\BuildsBasketToBudget;
 use App\Models\Product;
-use App\Models\SavedBasket;
 use App\Services\Baskets\BudgetBuilder;
 use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
@@ -18,6 +18,8 @@ use Livewire\Component;
 #[Title('Your basket')]
 class CartPage extends Component
 {
+    use BuildsBasketToBudget;
+
     public string $couponCode = '';
 
     /**
@@ -25,82 +27,9 @@ class CartPage extends Component
      */
     public ?string $couponResult = null;
 
-    public string $basketName = '';
-
-    /** The budget the shopper types, in dollars. */
-    public string $budgetInput = '';
-
-    public function setBudget(): void
-    {
-        $this->validate(['budgetInput' => ['required', 'numeric', 'min:1', 'max:1000']], [], ['budgetInput' => 'budget']);
-        app(BudgetBuilder::class)->setBudget((int) round((float) $this->budgetInput * 100));
-    }
-
-    public function clearBudget(): void
-    {
-        app(BudgetBuilder::class)->setBudget(null);
-        $this->reset('budgetInput');
-    }
-
-    /**
-     * Apply one "stay within my budget" change the shopper tapped.
-     */
-    public function applySuggestion(string $key): void
-    {
-        if (app(BudgetBuilder::class)->apply($key)) {
-            $this->changed();
-        }
-    }
-
-    /**
-     * Keep everything in the basket as a named list to rebuild later at
-     * that day's prices. Guests are asked to sign in (accounts stay optional).
-     */
-    public function saveBasket(): void
-    {
-        if (! $user = Auth::user()) {
-            $this->dispatch('sign-in-open');
-
-            return;
-        }
-
-        $this->validate(['basketName' => ['required', 'string', 'max:60']], [], ['basketName' => 'basket name']);
-
-        $lines = $this->cart()->lines();
-
-        if ($lines->isEmpty()) {
-            return;
-        }
-
-        if ($user->savedBaskets()->count() >= SavedBasket::MAX_PER_USER) {
-            $this->addError('basketName', 'You can keep up to '.SavedBasket::MAX_PER_USER.' saved baskets. Delete one in your account first.');
-
-            return;
-        }
-
-        $basket = $user->savedBaskets()->create(['name' => trim($this->basketName)]);
-
-        foreach ($lines as $line) {
-            $basket->items()->create([
-                'product_variation_id' => $line->variation->id,
-                'name' => $line->variation->product->name,
-                'variation_name' => $line->variation->name,
-                'quantity' => $line->quantity,
-                'unit_price_cents' => $line->variation->price_cents,
-            ]);
-        }
-
-        $this->reset('basketName');
-        session()->flash('basket-saved', "Saved “{$basket->name}”. Find it under Saved baskets in your account.");
-    }
-
     public function mount(): void
     {
         $this->couponCode = $this->cart()->coupon()?->code ?? '';
-
-        if ($budget = app(BudgetBuilder::class)->budget()) {
-            $this->budgetInput = number_format($budget / 100, 2, '.', '');
-        }
     }
 
     public function increment(int $variation): void
@@ -169,6 +98,11 @@ class CartPage extends Component
     public function refresh(): void
     {
         // Re-render when the drawer or another tab changes the basket.
+    }
+
+    protected function budgetPeer(): string
+    {
+        return CartDrawer::class;
     }
 
     private function cart(): Cart

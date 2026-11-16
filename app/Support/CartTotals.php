@@ -38,7 +38,8 @@ final class CartTotals
     {
         $subtotal = $checkoutLines->sum(fn ($line) => $line->variation->price_cents * $line->quantity);
 
-        $savings = $checkoutLines->sum(fn ($line) => max(0, ($line->variation->previous_price_cents ?? 0) - $line->variation->price_cents) * $line->quantity);
+        // No "was" prices or product savings: the shop doesn't run product discounts.
+        $savings = 0;
 
         // A code that has lapsed since it was applied simply stops counting.
         $usable = $coupon && $coupon->isLive() && ! $coupon->isExpired()

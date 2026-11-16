@@ -13,7 +13,7 @@ function makeManagerUser(array $attributes = []): User
 {
     return User::factory()->create(array_merge([
         'name' => 'Manager User',
-        'email' => 'manager-'.uniqid().'@isaleeeko.ca',
+        'email' => 'manager-'.uniqid().'@isaleeko.com',
         'password' => Hash::make('password123'),
         'is_admin' => true,
         'role' => User::ROLE_MANAGER,
@@ -26,7 +26,7 @@ function makeAssociateUser(array $attributes = []): User
 {
     return User::factory()->create(array_merge([
         'name' => 'Associate User',
-        'email' => 'associate-'.uniqid().'@isaleeeko.ca',
+        'email' => 'associate-'.uniqid().'@isaleeko.com',
         'password' => Hash::make('password123'),
         'is_admin' => true,
         'role' => User::ROLE_ASSOCIATE,
@@ -75,7 +75,7 @@ test('manager can create a new staff associate with temporary password', functio
     $manager = makeManagerUser();
     $this->actingAs($manager);
 
-    $email = 'newbie-'.uniqid().'@isaleeeko.ca';
+    $email = 'newbie-'.uniqid().'@isaleeko.com';
 
     Livewire::test(StaffManager::class)
         ->call('openCreateModal')
@@ -183,7 +183,7 @@ test('deleting a staff associate with order history revokes admin rights without
         'status' => Order::STATUS_PAID,
         'fulfilment' => 'pickup',
         'contact_name' => 'Associate Buyer',
-        'contact_email' => 'buyer@isaleeeko.ca',
+        'contact_email' => 'buyer@isaleeko.com',
         'subtotal_cents' => 1000,
         'total_cents' => 1000,
         'payment_method' => 'card',
@@ -235,7 +235,7 @@ test('ChangePasswordModal rejects incorrect current password', function () {
 });
 
 test('artisan command staff:create registers an emergency staff user', function () {
-    $email = 'artisan-'.uniqid().'@isaleeeko.ca';
+    $email = 'artisan-'.uniqid().'@isaleeko.com';
 
     $this->artisan("staff:create {$email} --name=\"Terminal Admin\" --password=\"ArtisanPass123!\" --role=manager")
         ->expectsOutputToContain('Staff account [Terminal Admin] successfully configured!')

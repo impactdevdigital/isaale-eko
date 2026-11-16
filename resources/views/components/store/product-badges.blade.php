@@ -1,4 +1,4 @@
-{{-- Commerce signal tags stacked on a product image: trending, bestseller, hot, estimated discount. --}}
+{{-- Commerce signal tags stacked on a product image: trending, bestseller, hot. --}}
 @props(['product', 'compact' => false])
 
 @php

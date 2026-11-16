@@ -23,7 +23,6 @@ class StoreNavigation
             ['label' => 'Country', 'url' => route('home').'#shop-by-country'],
             ['label' => 'New arrivals', 'url' => route('shop', ['sort' => 'new'])],
             ['label' => 'Best sellers', 'url' => route('shop', ['sort' => 'bestsellers'])],
-            ['label' => 'Special deals', 'url' => route('shop', ['sort' => 'discounted'])],
             ['label' => 'Community', 'url' => route('community')],
             ['label' => 'About', 'url' => '#'],
         ];

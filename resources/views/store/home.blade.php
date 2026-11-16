@@ -2,6 +2,9 @@
     <div class="page-container flex flex-col pt-6 md:pt-6">
         <x-store.banner-carousel :slides="$heroSlides" tall />
 
+        {{-- Your usuals: returning customers only --}}
+        <livewire:store.home-usuals />
+
         {{-- Fresh this week --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
             <x-store.section-heading title="Fresh This Week" subtitle="Popular picks. Great prices. Real flavour." link="View all" :href="route('shop')" />

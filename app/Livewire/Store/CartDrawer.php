@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Livewire\Store\Concerns\BuildsBasketToBudget;
 use App\Services\Baskets\BudgetBuilder;
 use App\Support\Cart;
 use Livewire\Attributes\On;
@@ -9,6 +10,8 @@ use Livewire\Component;
 
 class CartDrawer extends Component
 {
+    use BuildsBasketToBudget;
+
     #[On('cart-add')]
     public function add(int $variation, int $quantity = 1): void
     {
@@ -64,6 +67,11 @@ class CartDrawer extends Component
         $this->broadcastCount();
     }
 
+    protected function budgetPeer(): string
+    {
+        return CartPage::class;
+    }
+
     private function broadcastCount(): void
     {
         $this->dispatch('cart-updated', count: app(Cart::class)->count());
@@ -79,6 +87,7 @@ class CartDrawer extends Component
             'subtotal' => $cart->subtotalCents($lines),
             'canCheckout' => $cart->checkoutLines($lines)->isNotEmpty(),
             'budget' => app(BudgetBuilder::class)->status(),
+            'budgetSuggestions' => app(BudgetBuilder::class)->suggestions(),
         ]);
     }
 }

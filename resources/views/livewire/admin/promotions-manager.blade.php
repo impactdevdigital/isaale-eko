@@ -13,7 +13,6 @@
         'capped' => 'bg-[#FFF8E6] text-[#B76E00]',
         'ended' => 'bg-[#F6F6F6] text-[#686868]',
     ];
-    $firstOrder = $template === Promotion::TEMPLATE_FIRST_ORDER;
 @endphp
 
 <div class="space-y-6 sm:space-y-8">
@@ -49,7 +48,7 @@
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $stateStyles[$state] }}">{{ $state }}</span>
                         </div>
                         <p class="mt-1 text-xs text-[#686868]">
-                            {{ Promotion::TEMPLATES[$promotion->template] }} · {{ $promotion->offerLabel() }} · {{ Promotion::AUDIENCES[$promotion->audience] }} · {{ Promotion::OBJECTIVES[$promotion->objective] }}
+                            {{ $promotion->templateLabel() }} · {{ $promotion->offerLabel() }} · {{ Promotion::AUDIENCES[$promotion->audience] }} · {{ Promotion::OBJECTIVES[$promotion->objective] }}
                         </p>
                         <p class="mt-0.5 text-xs text-[#686868]">
                             {{ $promotion->starts_at->timezone(config('shop.timezone'))->format('j M, g:i A') }} → {{ $promotion->ends_at->timezone(config('shop.timezone'))->format('j M, g:i A') }}
@@ -58,7 +57,7 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        @if ($state === 'draft')
+                        @if ($state === 'draft' && isset(Promotion::TEMPLATES[$promotion->template]))
                             <button type="button" wire:click="edit({{ $promotion->id }})" class="px-3 py-1.5 rounded-lg border border-[#EEEEEE] text-xs font-bold hover:bg-[#F6F6F6]">Edit</button>
                             <button type="button" wire:click="delete({{ $promotion->id }})" wire:confirm="Delete this draft?" class="px-3 py-1.5 rounded-lg text-xs font-bold text-[#DF2600] hover:bg-[#FFF0EC]">Delete</button>
                         @elseif (in_array($state, ['live', 'scheduled', 'capped'], true))
@@ -73,7 +72,7 @@
             @empty
                 <div class="p-10 text-center">
                     <p class="text-sm font-bold text-[#111111]">No promotions yet</p>
-                    <p class="mt-1 text-xs text-[#686868]">Start with an item discount or a first online order offer.</p>
+                    <p class="mt-1 text-xs text-[#686868]">Start with a first online order offer.</p>
                 </div>
             @endforelse
         </div>
@@ -82,15 +81,10 @@
     {{-- Step: choose a template --}}
     @if ($step === 'template')
         <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" wire:click="chooseTemplate('{{ Promotion::TEMPLATE_ITEM_DISCOUNT }}')" class="text-left p-6 rounded-2xl border border-[#EEEEEE] bg-white hover:border-[#DF2600] shadow-xs">
-                <p class="text-base font-extrabold text-[#111111]">Item discount</p>
-                <p class="mt-1 text-xs text-[#686868]">Percent or dollar off chosen products or a collection, between two dates. Shown on the product page and taken off in the basket.</p>
-            </button>
             <button type="button" wire:click="chooseTemplate('{{ Promotion::TEMPLATE_FIRST_ORDER }}')" class="text-left p-6 rounded-2xl border border-[#EEEEEE] bg-white hover:border-[#DF2600] shadow-xs">
                 <p class="text-base font-extrabold text-[#111111]">First online order offer</p>
                 <p class="mt-1 text-xs text-[#686868]">Money off a customer’s first order. Only customers with no previous order qualify; we check by account and email at checkout.</p>
             </button>
-            <p class="md:col-span-2 text-[11px] text-[#686868]">Coming next: spend $X get $Y off, bundles and win-back codes for lapsed customers.</p>
             <div><button type="button" wire:click="back" class="text-xs font-bold underline">Cancel</button></div>
         </div>
     @endif
@@ -103,7 +97,7 @@
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
                     <label for="p-name" class="{{ $label }}">Name</label>
-                    <input id="p-name" type="text" wire:model="name" class="{{ $input }}" placeholder="{{ $firstOrder ? 'Welcome $5 off' : 'Jollof week' }}">
+                    <input id="p-name" type="text" wire:model="name" class="{{ $input }}" placeholder="Welcome $5 off">
                     @error('name') <p class="{{ $error }}">{{ $message }}</p> @enderror
                     <p class="{{ $help }}">Shoppers see this name in their order summary.</p>
                 </div>
@@ -126,57 +120,16 @@
                     </select>
                 </div>
                 <div>
-                    <label for="p-value" class="{{ $label }}">{{ $discountType === 'percent' ? 'Percent (1–90)' : 'Dollars off' }}{{ $firstOrder ? '' : ' per item' }}</label>
+                    <label for="p-value" class="{{ $label }}">{{ $discountType === 'percent' ? 'Percent (1–90)' : 'Dollars off' }}</label>
                     <input id="p-value" type="text" inputmode="decimal" wire:model="discountValue" class="{{ $input }}" placeholder="{{ $discountType === 'percent' ? '10' : '5.00' }}">
                     @error('discountValue') <p class="{{ $error }}">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="p-audience" class="{{ $label }}">Audience</label>
-                    @if ($firstOrder)
-                        <p class="px-3 py-2.5 rounded-xl bg-[#F6F6F6] text-sm">First-time customers</p>
-                    @else
-                        <select id="p-audience" wire:model="audience" class="{{ $input }}">
-                            @foreach (Promotion::AUDIENCES as $value => $text)
-                                <option value="{{ $value }}">{{ $text }}</option>
-                            @endforeach
-                        </select>
-                    @endif
+                    <p id="p-audience" class="px-3 py-2.5 rounded-xl bg-[#F6F6F6] text-sm">First-time customers</p>
                 </div>
             </div>
 
-            @unless ($firstOrder)
-                <div class="grid gap-4 md:grid-cols-2">
-                    <div>
-                        <label for="p-search" class="{{ $label }}">Products</label>
-                        <input id="p-search" type="search" wire:model.live.debounce.300ms="productSearch" class="{{ $input }}" placeholder="Search products to add">
-                        @if ($searchResults->isNotEmpty())
-                            <ul class="mt-1 rounded-xl border border-[#EEEEEE] divide-y divide-[#EEEEEE]">
-                                @foreach ($searchResults as $product)
-                                    <li><button type="button" wire:click="addProduct({{ $product->id }})" class="w-full text-left px-3 py-2 text-sm hover:bg-[#F6F6F6]">+ {{ $product->name }}</button></li>
-                                @endforeach
-                            </ul>
-                        @endif
-                        <div class="mt-2 flex flex-wrap gap-1.5">
-                            @foreach ($chosenProducts as $product)
-                                <span wire:key="chosen-{{ $product->id }}" class="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-[#F6F6F6] text-xs font-bold">
-                                    {{ $product->name }}
-                                    <button type="button" wire:click="removeProduct({{ $product->id }})" class="size-5 rounded-full hover:bg-[#EEEEEE]" aria-label="Remove {{ $product->name }}">×</button>
-                                </span>
-                            @endforeach
-                        </div>
-                        @error('productIds') <p class="{{ $error }}">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="p-collection" class="{{ $label }}">Or a whole collection</label>
-                        <select id="p-collection" wire:model="collectionId" class="{{ $input }}">
-                            <option value="">No collection</option>
-                            @foreach ($collections as $collection)
-                                <option value="{{ $collection->id }}">{{ $collection->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            @endunless
 
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
@@ -231,10 +184,7 @@
                 <div class="p-4 rounded-xl bg-[#F6F6F6]">
                     <p class="text-xs font-bold text-[#686868]">Who is eligible</p>
                     <p class="mt-1 text-2xl font-extrabold text-[#111111]">{{ number_format($preview['eligible']) }}</p>
-                    <p class="text-xs text-[#686868]">{{ $preview['audienceLabel'] }} with an account today{{ $audience === 'everyone' && ! $firstOrder ? ', plus guests' : '' }}.</p>
-                    @if ($preview['productCount'] !== null)
-                        <p class="mt-1 text-xs text-[#686868]">Covers {{ $preview['productCount'] }} {{ str('product')->plural($preview['productCount']) }}.</p>
-                    @endif
+                    <p class="text-xs text-[#686868]">{{ $preview['audienceLabel'] }} with an account today.</p>
                 </div>
                 @if ($preview['example'])
                     <div class="p-4 rounded-xl bg-[#DAF4E7]">

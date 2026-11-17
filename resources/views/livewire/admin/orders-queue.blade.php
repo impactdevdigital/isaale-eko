@@ -932,6 +932,18 @@
                                 <span>Payment Method:</span>
                                 <strong class="text-[#111111] capitalize">{{ str_replace('_', ' ', $selectedOrder->payment_method) }}</strong>
                             </div>
+                            <div class="pt-1 text-xs text-[#686868] flex items-center justify-between gap-3">
+                                <span>Square:</span>
+                                @if ($selectedOrder->square_synced_at)
+                                    <strong class="text-[#008A3E]">In Square orders</strong>
+                                @elseif ($selectedOrder->square_sync_error)
+                                    <strong class="text-[#DF2600] text-right truncate" title="{{ $selectedOrder->square_sync_error }}">Not sent: {{ \Illuminate\Support\Str::limit($selectedOrder->square_sync_error, 60) }}</strong>
+                                @elseif ($selectedOrder->isAwaitingETransfer())
+                                    <strong class="text-[#111111]">Sent once the e-Transfer is confirmed</strong>
+                                @else
+                                    <strong class="text-[#111111]">Not in Square</strong>
+                                @endif
+                            </div>
                         </div>
                     </div>
 

@@ -3,6 +3,7 @@
 namespace App\Services\Checkout;
 
 use App\Models\Order;
+use App\Services\Square\OrderSync;
 use App\Services\Square\SquareGateway;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -12,27 +13,48 @@ use Illuminate\Support\Facades\Log;
  * Charges an order with a Square Web Payments token. The amount always
  * comes from the order, never from the browser. One idempotency key per
  * attempt means a double-click or retry can't charge twice.
+ *
+ * The order is first created in Square (items, customer, pickup or
+ * delivery) and the payment is taken against it, so it shows on Square's
+ * Orders page. If Square won't take the order, the card is charged on its
+ * own as before rather than turning the shopper away.
  */
 class TakePayment
 {
-    public function __construct(private SquareGateway $square) {}
+    public function __construct(private SquareGateway $square, private OrderSync $orders) {}
 
     /**
      * Returns null on success, or a shopper-facing reason it failed.
      */
     public function charge(Order $order, string $token, string $attemptKey): ?string
     {
+        $squareOrderId = $this->orders->create($order, $attemptKey);
+        $idempotencyKey = substr($order->number.'-'.$attemptKey, 0, 45);
+        $note = 'Ìsàlèè Èkó order '.$order->number;
+
         try {
-            $payment = $this->square->chargeToken(
-                sourceToken: $token,
-                cents: $order->total_cents,
-                currency: config('shop.currency'),
-                idempotencyKey: substr($order->number.'-'.$attemptKey, 0, 45),
-                referenceId: $order->number,
-                note: 'Ìsàlèè Èkó order '.$order->number,
-                buyerEmail: $order->contact_email,
-            );
+            $payment = $squareOrderId
+                ? $this->square->takePayment(
+                    sourceToken: $token,
+                    squareOrderId: $squareOrderId,
+                    cents: $order->total_cents,
+                    currency: config('shop.currency'),
+                    idempotencyKey: $idempotencyKey,
+                    referenceId: $order->number,
+                    note: $note,
+                    buyerEmail: $order->contact_email,
+                )
+                : $this->square->chargeToken(
+                    sourceToken: $token,
+                    cents: $order->total_cents,
+                    currency: config('shop.currency'),
+                    idempotencyKey: $idempotencyKey,
+                    referenceId: $order->number,
+                    note: $note,
+                    buyerEmail: $order->contact_email,
+                );
         } catch (RequestException $e) {
+            $this->orders->abandon($order);
             $reason = $this->reasonFrom($e->response?->json('errors.0.code'));
             $order->update(['status' => Order::STATUS_PAYMENT_FAILED, 'payment_error' => $e->response?->json('errors.0.code')]);
 
@@ -46,6 +68,7 @@ class TakePayment
         }
 
         if (! in_array($payment['status'] ?? null, ['COMPLETED', 'APPROVED'], true)) {
+            $this->orders->abandon($order);
             $order->update(['status' => Order::STATUS_PAYMENT_FAILED, 'payment_error' => $payment['status'] ?? 'UNKNOWN']);
 
             return $this->reasonFrom(null);
@@ -64,6 +87,11 @@ class TakePayment
             'payment_error' => null,
             'paid_at' => now(),
         ]);
+
+        // Paid against its Square order (here, or later via the webhook after a timeout).
+        if ($order->square_order_id) {
+            $this->orders->markSynced($order);
+        }
     }
 
     private function reasonFrom(?string $code): string

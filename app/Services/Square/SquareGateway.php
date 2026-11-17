@@ -158,15 +158,51 @@ class SquareGateway
         ])->throw()->json('order');
     }
 
-    public function takePayment(string $sourceToken, string $squareOrderId, int $cents, string $currency, string $idempotencyKey): array
+    /**
+     * Pay a Square order. $sourceToken is a Web Payments SDK token, or
+     * 'EXTERNAL' with $external details for money taken outside Square
+     * (an Interac e-Transfer).
+     */
+    public function takePayment(string $sourceToken, string $squareOrderId, int $cents, string $currency, string $idempotencyKey, ?string $referenceId = null, ?string $note = null, ?string $buyerEmail = null, ?array $external = null): array
     {
-        return $this->http()->post('/v2/payments', [
+        return $this->http()->post('/v2/payments', array_filter([
             'idempotency_key' => $idempotencyKey,
             'source_id' => $sourceToken,
             'order_id' => $squareOrderId,
             'location_id' => config('services.square.location_id'),
             'amount_money' => ['amount' => $cents, 'currency' => $currency],
-        ])->throw()->json('payment');
+            'reference_id' => $referenceId,
+            'note' => $note,
+            'buyer_email_address' => $buyerEmail,
+            'external_details' => $external,
+            'autocomplete' => true,
+        ]))->throw()->json('payment');
+    }
+
+    /**
+     * Change an order, e.g. move its fulfilment along. $order needs the
+     * current version from getOrder().
+     */
+    public function updateOrder(string $orderId, array $order, string $idempotencyKey): array
+    {
+        return $this->http()->put("/v2/orders/{$orderId}", [
+            'idempotency_key' => $idempotencyKey, 'order' => $order,
+        ])->throw()->json('order');
+    }
+
+    // ---- customers ----
+    public function findCustomerByEmail(string $email): ?string
+    {
+        return $this->http()->post('/v2/customers/search', [
+            'limit' => 1,
+            'query' => ['filter' => ['email_address' => ['exact' => $email]]],
+        ])->throw()->json('customers.0.id');
+    }
+
+    public function createCustomer(array $customer, string $idempotencyKey): string
+    {
+        return $this->http()->post('/v2/customers', ['idempotency_key' => $idempotencyKey, ...$customer])
+            ->throw()->json('customer.id');
     }
 
     /**

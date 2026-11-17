@@ -43,6 +43,8 @@ return [
         'version'     => env('SQUARE_VERSION'),
         'webhook_key' => env('SQUARE_WEBHOOK_SIGNATURE_KEY'),
         'webhook_url' => env('SQUARE_WEBHOOK_URL'),
+        // Copy website orders into Square (items, customer, pickup/delivery). See OrderSync.
+        'sync_orders' => (bool) env('SQUARE_SYNC_ORDERS', true),
     ],
 
     'doordash' => [

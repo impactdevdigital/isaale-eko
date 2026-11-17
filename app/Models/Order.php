@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\Loyalty\LoyaltyProvider;
+use App\Services\Square\OrderSync;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -69,6 +70,13 @@ class Order extends Model
         static::updated(function (Order $order) {
             if ($order->wasChanged(['status', 'fulfilment_status'])) {
                 app(LoyaltyProvider::class)->recordPurchase($order);
+            }
+
+            // Keep the Square copy of the order in step (see OrderSync).
+            if ($order->wasChanged('status') && $order->status === self::STATUS_PAID && $order->payment_method === 'etransfer') {
+                app(OrderSync::class)->pushPaidOutsideSquare($order);
+            } elseif ($order->wasChanged(['status', 'fulfilment_status']) && $order->square_synced_at) {
+                app(OrderSync::class)->pushFulfilment($order);
             }
         });
     }

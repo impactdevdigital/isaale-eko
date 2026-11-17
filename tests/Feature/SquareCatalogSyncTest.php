@@ -280,3 +280,71 @@ test('the first import is not new arrivals, but later new items are', function (
 
     expect(Product::whereNotNull('first_seen_at')->pluck('square_id')->all())->toBe(['ITEM9']);
 });
+
+test('the catalogue check finds nothing to fix right after a sync', function () {
+    fakeSquare(catalogue());
+    app(CatalogSync::class)->full();
+
+    $report = app(\App\Services\Square\CatalogCheck::class)->run();
+
+    expect($report['summary'])->toMatchArray(['square_categories' => 1, 'square_items_for_sale' => 2])
+        ->and(collect($report['items'])->except('not_linked_to_square')->flatten()->all())->toBe([])
+        ->and(collect($report['categories'])->flatten()->all())->toBe([]);
+});
+
+test('the catalogue check lists what differs between Square and the site, and changes nothing', function () {
+    fakeSquare(catalogue());
+    app(CatalogSync::class)->full();
+
+    // Square moves on: a new sub-category and item, a rename, a new price; one item is deleted.
+    $objects = catalogue();
+    $objects[] = ['type' => 'CATEGORY', 'id' => 'CAT2', 'category_data' => ['name' => 'Basmati', 'parent_category' => ['id' => 'CAT1']]];
+    $objects[2]['item_data']['name'] = 'Jollof Rice Seasoning';
+    $objects[2]['item_data']['variations'][0]['item_variation_data']['price_money']['amount'] = 549;
+    unset($objects[3]);
+    $objects[] = squareItem('ITEM3', 'Ofada Rice', [squareVariation('VAR9', '2kg', 1299)]);
+    fakeSquare(array_values($objects));
+
+    $before = Product::orderBy('id')->get(['id', 'name', 'is_active'])->toArray();
+    $report = app(\App\Services\Square\CatalogCheck::class)->run();
+
+    expect($report['summary']['square_subcategories'])->toBe(1)
+        ->and($report['categories']['missing_on_site'])->toBe(['Rice & Grains › Basmati'])
+        ->and($report['items']['missing_on_site'])->toBe(['Ofada Rice'])
+        ->and($report['items']['renamed'])->toBe(['Square “Jollof Rice Seasoning” is “Jollof Rice Mix” on the site'])
+        ->and($report['items']['price_differs'][0])->toContain('Jollof Rice Seasoning / 500g')
+        ->and($report['items']['still_for_sale_on_site'])->toBe(['Plantain Chips (deleted from Square)'])
+        ->and(Product::orderBy('id')->get(['id', 'name', 'is_active'])->toArray())->toBe($before);
+
+    Http::assertNotSent(fn ($request) => $request->method() !== 'GET' && ! str_contains($request->url(), 'batch-retrieve'));
+});
+
+test('the catalogue check command can use a separate credentials file without printing the token', function () {
+    fakeSquare(catalogue());
+    $file = tempnam(sys_get_temp_dir(), 'sq');
+    file_put_contents($file, "SQUARE_ENV=production\nSQUARE_ACCESS_TOKEN=live-secret-token\nSQUARE_LOCATION_ID=LOC1\n");
+
+    $this->artisan('square:check-catalog', ['--credentials' => $file])
+        ->expectsOutputToContain('Checking Square production')
+        ->doesntExpectOutputToContain('live-secret-token')
+        ->assertSuccessful();
+
+    Http::assertSent(fn ($request) => str_starts_with($request->url(), 'https://connect.squareup.com/')
+        && $request->header('Authorization')[0] === 'Bearer live-secret-token');
+    unlink($file);
+});
+
+test('managers can run the catalogue check from the staff portal; associates cannot open it', function () {
+    fakeSquare(catalogue());
+    app(CatalogSync::class)->full();
+
+    $this->actingAs(\App\Models\User::factory()->create(['is_admin' => true, 'role' => \App\Models\User::ROLE_ASSOCIATE, 'is_active' => true]))
+        ->get(route('admin.square-check'))->assertForbidden();
+
+    $this->actingAs(\App\Models\User::factory()->create(['is_admin' => true, 'role' => \App\Models\User::ROLE_MANAGER, 'is_active' => true]))
+        ->get(route('admin.square-check'))->assertOk()->assertSee('Run check');
+
+    \Livewire\Livewire::test(\App\Livewire\Admin\SquareCatalogCheck::class)
+        ->call('check')
+        ->assertSee('Square and the website are in step.');
+});

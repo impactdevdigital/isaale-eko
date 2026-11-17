@@ -79,3 +79,12 @@ Before announcing: the `/admin` pages have **no login yet** and must be protecte
 - **Logs:** each service → **Logs**. If `MAIL_MAILER=log`, sign-in codes appear there instead of being emailed.
 - **Health check:** `https://<your domain>/up` should say the app is up.
 - **Sync by hand:** Shell → `php artisan square:sync`.
+
+## Checking the catalogue against Square
+
+Read-only on both sides: nothing in Square or on the site is changed.
+
+- **On the live site:** sign in to `/admin` as a manager → **Square Check** → **Run check**. It uses the Square account the site is connected to (`SQUARE_ENV`, `SQUARE_ACCESS_TOKEN`, `SQUARE_LOCATION_ID` in Render).
+- **From a laptop, against another Square account** (e.g. live keys while `.env` stays on sandbox): put `SQUARE_ENV=production`, `SQUARE_ACCESS_TOKEN=…` and `SQUARE_LOCATION_ID=…` in `.env.square-live` (git-ignored), then run `php artisan square:check-catalog --credentials=.env.square-live`. The token is never printed. Note that this compares against the *local* database.
+
+Right after switching to live keys, expect differences until `php artisan square:sync --full --retire-demo` has run.

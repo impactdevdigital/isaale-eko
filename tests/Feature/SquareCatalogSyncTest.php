@@ -5,6 +5,7 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Services\Square\CatalogSync;
 use Database\Seeders\DemoCatalogSeeder;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -219,10 +220,10 @@ function signedWebhook(array $payload): array
     return [$body, ['X-Square-Hmacsha256-Signature' => $signature, 'Content-Type' => 'application/json']];
 }
 
-test('stock webhooks update counts and catalogue webhooks queue a sync', function () {
+test('stock webhooks update counts and catalogue webhooks sync right after the response', function () {
     fakeSquare(catalogue(), [['catalog_object_id' => 'VAR1', 'location_id' => 'LOC1', 'state' => 'IN_STOCK', 'quantity' => '12']]);
     app(CatalogSync::class)->full();
-    Queue::fake();
+    Bus::fake();
 
     [$body, $headers] = signedWebhook(['type' => 'inventory.count.updated', 'data' => ['object' => ['inventory_counts' => [
         ['catalog_object_id' => 'VAR1', 'location_id' => 'LOC1', 'state' => 'IN_STOCK', 'quantity' => '4'],
@@ -235,7 +236,7 @@ test('stock webhooks update counts and catalogue webhooks queue a sync', functio
     [$body, $headers] = signedWebhook(['type' => 'catalog.version.updated']);
     $this->call('POST', '/api/webhooks/square', [], [], [], collect($headers)->mapWithKeys(fn ($v, $k) => ['HTTP_'.strtoupper(str_replace('-', '_', $k)) => $v])->all(), $body)->assertNoContent();
 
-    Queue::assertPushed(SyncSquareCatalog::class);
+    Bus::assertDispatchedAfterResponse(SyncSquareCatalog::class);
 });
 
 test('webhooks without a valid signature are rejected', function () {
@@ -347,4 +348,56 @@ test('managers can run the catalogue check from the staff portal; associates can
     \Livewire\Livewire::test(\App\Livewire\Admin\SquareCatalogCheck::class)
         ->call('check')
         ->assertSee('Square and the website are in step.');
+});
+
+test('switching to another Square account (sandbox to live) relinks by name instead of duplicating', function () {
+    fakeSquare(catalogue());
+    app(CatalogSync::class)->full();
+    $rice = Product::where('square_id', 'ITEM1')->sole();
+    $rice->update(['is_trending' => true]);
+    $category = \App\Models\Category::where('square_id', 'CAT1')->sole();
+    $shopper = \App\Models\User::factory()->create();
+    $shopper->forceFill(['square_customer_id' => 'SANDBOX-CUST'])->save();
+
+    // The live account: same names, different ids, one new item.
+    fakeSquare([
+        ['type' => 'CATEGORY', 'id' => 'LIVE-CAT1', 'category_data' => ['name' => 'Rice & Grains']],
+        squareItem('LIVE-ITEM1', 'Jollof Rice Mix', [squareVariation('LIVE-VAR1', '500g', 529)], ['item_data' => ['categories' => [['id' => 'LIVE-CAT1']], 'image_ids' => []]]),
+        squareItem('LIVE-ITEM9', 'Egusi Soup Kit', [squareVariation('LIVE-VAR9', 'Kit', 1499)], ['item_data' => ['categories' => [['id' => 'LIVE-CAT1']], 'image_ids' => []]]),
+    ]);
+
+    $stats = app(CatalogSync::class)->full();
+
+    expect($stats['relinked'])->toBe(2)
+        ->and($rice->refresh()->square_id)->toBe('LIVE-ITEM1')
+        ->and($rice->is_trending)->toBeTrue()
+        ->and($rice->defaultVariation->price_cents)->toBe(529)
+        ->and($category->refresh()->square_id)->toBe('LIVE-CAT1')
+        ->and(\App\Models\Category::where('name', 'Rice & Grains')->count())->toBe(1)
+        ->and(Product::where('slug', 'plantain-chips')->value('square_id'))->toBeNull()   // not in the live account: unlinked
+        ->and(Product::where('square_id', 'LIVE-ITEM9')->exists())->toBeTrue()
+        ->and($shopper->refresh()->square_customer_id)->toBeNull();
+
+    // A normal sync on the same account relinks nothing.
+    expect(app(CatalogSync::class)->full()['relinked'])->toBe(0);
+
+    // ...and the pull's "hide demo products" step takes it off sale.
+    $this->artisan('square:sync', ['--full' => true, '--retire-demo' => true])->assertSuccessful();
+    expect(Product::where('slug', 'plantain-chips')->value('is_active'))->toBeFalse()
+        ->and($rice->refresh()->is_active)->toBeTrue();
+});
+
+test('managers can pull the whole catalogue from Square from the check page', function () {
+    fakeSquare(catalogue());
+    $this->actingAs(\App\Models\User::factory()->create(['is_admin' => true, 'role' => \App\Models\User::ROLE_MANAGER, 'is_active' => true]));
+
+    \Livewire\Livewire::test(\App\Livewire\Admin\SquareCatalogCheck::class)
+        ->assertSee('Pull from Square now')
+        ->call('pullFromSquare');
+
+    // Deferred work runs once the request is done.
+    app(\Illuminate\Support\Defer\DeferredCallbackCollection::class)->invoke();
+
+    expect(Product::where('square_id', 'ITEM1')->exists())->toBeTrue()
+        ->and(Cache::get(\App\Livewire\Admin\SquareCatalogCheck::PULL_KEY)['state'])->toBe('done');
 });

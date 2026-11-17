@@ -23,7 +23,8 @@ class SquareWebhookController extends Controller
         abort_unless($square->isValidWebhook($request), 403);
 
         if ($request->json('type') === 'catalog.version.updated') {
-            SyncSquareCatalog::dispatch();
+            // Run right after answering Square: Render's free plan has no queue worker.
+            SyncSquareCatalog::dispatchAfterResponse();
 
             return response()->noContent();
         }

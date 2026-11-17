@@ -5,6 +5,7 @@ namespace App\Services\Square;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Support\FrenchNames;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -152,6 +153,9 @@ class CatalogSync
                 ->each(fn ($category) => $this->applyCategory($category));
             $items->each(fn ($item) => $this->applyItem($item, $images));
         });
+
+        // New items and categories get the French names we know (never overwrites staff edits).
+        FrenchNames::fill();
     }
 
     private function applyCategory(array $object): void

@@ -3,7 +3,7 @@
 <div x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false" class="relative w-fit">
     <button type="button" @click="open = ! open" :aria-expanded="open" aria-haspopup="listbox"
             class="flex h-9 min-w-[205px] items-center justify-between gap-3 rounded-sm border border-grayscale-40 px-3.5 text-[14px] text-body-muted">
-        <span>Sort by: <strong class="font-bold text-ink">{{ $sorts[$current] }}</strong></span>
+        <span>{{ __('Sort by:') }} <strong class="font-bold text-ink">{{ __($sorts[$current]) }}</strong></span>
         <x-store.icon name="arrow-down" class="size-3 text-ink transition-transform" x-bind:class="open && 'rotate-180'" />
     </button>
 
@@ -14,7 +14,7 @@
                 <button type="button" role="option" aria-selected="{{ $value === $current ? 'true' : 'false' }}"
                         wire:click="$set('sort', '{{ $value }}')" @click="open = false"
                         @class(['w-full px-4 py-2 text-left text-[14px] hover:bg-grayscale-0', 'font-bold' => $value === $current])>
-                    {{ $label }}
+                    {{ __($label) }}
                 </button>
             </li>
         @endforeach

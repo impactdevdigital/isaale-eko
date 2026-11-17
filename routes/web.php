@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Store\AccountController;
 use App\Http\Controllers\Store\HomeController;
+use App\Http\Controllers\Store\LanguageController;
 use App\Http\Controllers\Store\OrderController;
 use App\Http\Controllers\Store\SessionController;
 use App\Livewire\Admin\AdminLogin;
@@ -37,6 +38,7 @@ use App\Livewire\Store\ProductListing;
 use App\Livewire\Store\ProductPage;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/language/{locale}', LanguageController::class)->name('language');
 Route::get('/', HomeController::class)->name('home');
 Route::get('/shop', ProductListing::class)->name('shop');
 Route::get('/shop/country/{countryPage:slug}', ProductListing::class)->name('shop.country');

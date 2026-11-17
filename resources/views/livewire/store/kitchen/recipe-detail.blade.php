@@ -208,7 +208,7 @@
                     <!-- Product Image -->
                     <a href="{{ $product ? route('product', $product) : '#' }}" class="block aspect-square w-full rounded-lg overflow-hidden bg-grayscale-0 mb-3">
                         @if ($variation->image || $product?->image)
-                            <img src="{{ asset($variation->image ?: $product->image) }}" alt="{{ $product?->name ?? $line->ingredient->name }}"
+                            <img src="{{ asset($variation->image ?: $product->image) }}" alt="{{ $product?->localized_name ?? $line->ingredient->name }}"
                                  class="size-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
                         @else
                             <div class="size-full flex items-center justify-center text-body-muted text-xs">No image</div>
@@ -217,8 +217,8 @@
 
                     <!-- Title & Details -->
                     <div class="space-y-1">
-                        <a href="{{ $product ? route('product', $product) : '#' }}" class="block text-xs font-bold text-ink truncate hover:underline" title="{{ $product?->name ?? $line->ingredient->name }}">
-                            {{ $product?->name ?? $line->ingredient->name }}
+                        <a href="{{ $product ? route('product', $product) : '#' }}" class="block text-xs font-bold text-ink truncate hover:underline" title="{{ $product?->localized_name ?? $line->ingredient->name }}">
+                            {{ $product?->localized_name ?? $line->ingredient->name }}
                         </a>
                         <p class="text-[11px] text-body-muted truncate">{{ $variation->name ?: '1 pack' }}</p>
 
@@ -238,7 +238,7 @@
                             </div>
 
                             <button type="button" wire:click="addSingleVariation({{ $variation->id }})"
-                                    aria-label="Add {{ $product?->name ?? $line->ingredient->name }} to cart"
+                                    aria-label="Add {{ $product?->localized_name ?? $line->ingredient->name }} to cart"
                                     class="size-8 rounded-lg border border-grayscale-30 bg-white flex items-center justify-center text-ink hover:bg-ink hover:text-white transition-colors shrink-0 shadow-2xs">
                                 <x-store.icon name="cart" class="size-4" />
                             </button>

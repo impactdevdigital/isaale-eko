@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @php($pageTitle = $title ?? (isset($attributes) ? $attributes->get('title') : null))
-    <title>{{ $pageTitle ? $pageTitle.' — ' : '' }}{{ config('app.name', 'Ìsàlèè Èkó') }}</title>
+    <title>{{ $pageTitle ? __($pageTitle).' — ' : '' }}{{ config('app.name', 'Ìsàlèè Èkó') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

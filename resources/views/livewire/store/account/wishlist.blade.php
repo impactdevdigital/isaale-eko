@@ -22,7 +22,7 @@
                 @foreach ($products as $product)
                     <div wire:key="wish-{{ $product->id }}" class="relative">
                         <x-store.product-card :product="$product" class="h-full" />
-                        <button type="button" wire:click="remove({{ $product->id }})" class="absolute right-2 top-2 z-10 flex size-8 items-center justify-center rounded-full bg-surface text-price-40 shadow-[0_0_8px_rgb(0_0_0/0.15)]" aria-label="Remove {{ $product->name }} from wishlist">
+                        <button type="button" wire:click="remove({{ $product->id }})" class="absolute right-2 top-2 z-10 flex size-8 items-center justify-center rounded-full bg-surface text-price-40 shadow-[0_0_8px_rgb(0_0_0/0.15)]" aria-label="Remove {{ $product->localized_name }} from wishlist">
                             <x-store.icon name="close" class="size-4" />
                         </button>
                     </div>

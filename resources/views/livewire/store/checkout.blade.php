@@ -254,12 +254,12 @@
                         @foreach ($checkoutLines as $line)
                             @php($variation = $line->variation)
                             <li class="flex w-[98px] flex-col gap-2" wire:key="item-{{ $variation->id }}">
-                                <img src="{{ asset($variation->product->image) }}" alt="{{ $variation->product->name }}" class="size-[98px] rounded-sm border border-grayscale-40 bg-surface object-cover">
+                                <img src="{{ asset($variation->product->image) }}" alt="{{ $variation->product->localized_name }}" class="size-[98px] rounded-sm border border-grayscale-40 bg-surface object-cover">
                                 <strong class="text-[16px] leading-[22px] font-extrabold text-price-40">{{ money($variation->price_cents * $line->quantity) }}</strong>
                                 <div class="flex h-[34px] items-center justify-between rounded-full border border-grayscale-40 bg-surface">
-                                    <button type="button" wire:click="decrement({{ $variation->id }})" @disabled($line->quantity <= 1) class="-m-px flex size-[34px] items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[14px] font-extrabold disabled:opacity-40" aria-label="Decrease quantity of {{ $variation->product->name }}">−</button>
+                                    <button type="button" wire:click="decrement({{ $variation->id }})" @disabled($line->quantity <= 1) class="-m-px flex size-[34px] items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[14px] font-extrabold disabled:opacity-40" aria-label="Decrease quantity of {{ $variation->product->localized_name }}">−</button>
                                     <span class="text-[13px] font-extrabold" aria-live="polite">{{ $line->quantity }}</span>
-                                    <button type="button" wire:click="increment({{ $variation->id }})" class="-m-px flex size-[34px] items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[14px] font-extrabold" aria-label="Increase quantity of {{ $variation->product->name }}">+</button>
+                                    <button type="button" wire:click="increment({{ $variation->id }})" class="-m-px flex size-[34px] items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[14px] font-extrabold" aria-label="Increase quantity of {{ $variation->product->localized_name }}">+</button>
                                 </div>
                             </li>
                         @endforeach

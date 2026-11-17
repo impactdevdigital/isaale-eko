@@ -54,9 +54,9 @@
                                     <button type="button" wire:click="toggleSubstitute('{{ $line->key }}')"
                                             @class(['mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[12px] font-bold', 'border-stock-50 bg-stock-10 text-stock-50' => $state['swap'], 'border-grayscale-40' => ! $state['swap']])>
                                         @if ($state['swap'])
-                                            <x-store.icon name="check" class="size-3" /> Using {{ $line->substitute->product->name }} {{ $line->substitute->name }} · {{ money($line->substitute->price_cents) }}
+                                            <x-store.icon name="check" class="size-3" /> Using {{ $line->substitute->product->localized_name }} {{ $line->substitute->name }} · {{ money($line->substitute->price_cents) }}
                                         @else
-                                            Swap for {{ $line->substitute->product->name }} {{ $line->substitute->name }} · {{ money($line->substitute->price_cents) }}
+                                            Swap for {{ $line->substitute->product->localized_name }} {{ $line->substitute->name }} · {{ money($line->substitute->price_cents) }}
                                         @endif
                                     </button>
                                 @endif

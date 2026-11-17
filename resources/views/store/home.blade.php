@@ -45,7 +45,7 @@
                     <a href="{{ route('shop', ['category' => $category->slug]) }}" @class(['group flex flex-col overflow-hidden rounded-sm border border-grayscale-40 bg-surface pb-3 transition-colors hover:border-ink', 'max-md:hidden' => $loop->index >= 6])>
                         <img src="{{ asset($category->image) }}" alt="" loading="lazy" class="aspect-[152/125] w-full object-cover">
                         <span class="flex items-center justify-between gap-2 px-2.5 pt-2.5">
-                            <span class="text-[11px] leading-[14px] font-bold">{{ $category->name }}</span>
+                            <span class="text-[11px] leading-[14px] font-bold">{{ $category->localized_name }}</span>
                             <x-store.icon name="arrow-right" class="size-[15px] shrink-0 transition-transform group-hover:translate-x-0.5" />
                         </span>
                     </a>
@@ -68,7 +68,7 @@
                             'bottom-0' => $country->image_position === 'bottom',
                             'top-[85px] md:top-[130px]' => $country->image_position !== 'bottom',
                         ])>
-                        <h3 class="text-[18px]/6 font-bold tracking-[-0.5px] md:text-h3 md:tracking-[-1px]">{{ $country->name }}</h3>
+                        <h3 class="text-[18px]/6 font-bold tracking-[-0.5px] md:text-h3 md:tracking-[-1px]">{{ $country->localized_name }}</h3>
                         <p @class(['text-[13px] leading-5 md:text-[14px]', 'text-[#F9FAFB]' => $country->theme === 'green'])>{{ $country->tagline }}</p>
                     </a>
                 @endforeach

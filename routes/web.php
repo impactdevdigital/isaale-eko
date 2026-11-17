@@ -15,6 +15,7 @@ use App\Livewire\Admin\ProductsList;
 use App\Livewire\Admin\PromotionsManager;
 use App\Livewire\Admin\RecipesManager;
 use App\Livewire\Admin\StoriesManager;
+use App\Livewire\Admin\SquareCatalogCheck;
 use App\Livewire\Admin\StaffManager;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
@@ -119,5 +120,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
         Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');
         Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
+        Route::get('/square-check', SquareCatalogCheck::class)->middleware('admin:manager')->name('square-check');
     });
 });

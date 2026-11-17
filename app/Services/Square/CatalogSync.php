@@ -5,6 +5,7 @@ namespace App\Services\Square;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Models\User;
 use App\Support\FrenchNames;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -27,8 +28,8 @@ class CatalogSync
     /** Shown when a Square item has no photo. */
     public const NO_IMAGE = 'images/store/no-image.svg';
 
-    /** @var array{items: int, deactivated: int, categories: int, stock: int} */
-    private array $stats = ['items' => 0, 'deactivated' => 0, 'categories' => 0, 'stock' => 0];
+    /** @var array{items: int, deactivated: int, categories: int, stock: int, relinked: int} */
+    private array $stats = ['items' => 0, 'deactivated' => 0, 'categories' => 0, 'stock' => 0, 'relinked' => 0];
 
     /** @var array<int, int> Products created during this run. */
     private array $created = [];
@@ -39,7 +40,7 @@ class CatalogSync
      * Read the whole catalogue. Products that are no longer in Square are
      * hidden, not deleted, so past orders and our links to them survive.
      *
-     * @return array{items: int, deactivated: int, categories: int, stock: int}
+     * @return array{items: int, deactivated: int, categories: int, stock: int, relinked: int}
      */
     public function full(): array
     {
@@ -54,6 +55,7 @@ class CatalogSync
             $cursor = $page['cursor'] ?? null;
         } while ($cursor);
 
+        $this->forgetOtherAccount($objects);
         $this->apply($objects);
 
         // The very first import brings in the whole range at once; that's not "new arrivals".
@@ -74,10 +76,40 @@ class CatalogSync
     }
 
     /**
+     * The shop moved to another Square account (sandbox to live): none of
+     * our linked items exist in this catalogue. Drop the old account's ids
+     * (products, sizes, categories, saved customers) so this sync matches
+     * by name instead: live items take over the product or category with
+     * the same name, keeping its badges, country and French name, rather
+     * than turning up as duplicates.
+     *
+     * @param  Collection<int, array<string, mixed>>  $objects
+     */
+    private function forgetOtherAccount(Collection $objects): void
+    {
+        $here = $objects->where('type', 'ITEM')->pluck('id');
+        $linked = Product::whereNotNull('square_id')->pluck('square_id');
+
+        if ($here->isEmpty() || $linked->isEmpty() || $linked->intersect($here)->isNotEmpty()) {
+            return;
+        }
+
+        Log::warning('Square catalogue belongs to a different account than the shop is linked to; relinking by name.');
+
+        DB::transaction(function () use ($linked) {
+            $this->stats['relinked'] = $linked->count();
+            ProductVariation::whereNotNull('square_id')->update(['square_id' => null]);
+            Product::whereNotNull('square_id')->update(['square_id' => null]);
+            Category::whereNotNull('square_id')->update(['square_id' => null]);
+            User::whereNotNull('square_customer_id')->update(['square_customer_id' => null]);
+        });
+    }
+
+    /**
      * Only what changed since the last sync; falls back to a full sync the
      * first time.
      *
-     * @return array{items: int, deactivated: int, categories: int, stock: int}
+     * @return array{items: int, deactivated: int, categories: int, stock: int, relinked: int}
      */
     public function changes(): array
     {

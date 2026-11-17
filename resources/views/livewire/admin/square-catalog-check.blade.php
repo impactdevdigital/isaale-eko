@@ -18,6 +18,43 @@
         <div class="p-4 rounded-xl bg-[#FFF0EC] border border-[#FFB79F] text-xs sm:text-sm font-bold text-[#DF2600]">{{ $error }}</div>
     @endif
 
+    {{-- Pull the whole catalogue from Square (no Shell on Render's free plan) --}}
+    <div class="bg-white rounded-2xl border border-[#EEEEEE] p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+         @if (($pull['state'] ?? null) === 'running') wire:poll.5s @endif>
+        <div class="min-w-0">
+            <h3 class="text-base sm:text-lg font-extrabold text-[#111111]">Pull everything from Square</h3>
+            <p class="mt-1 text-xs sm:text-sm text-[#686868] max-w-2xl">
+                Copies every item, category, price, photo and stock count from Square onto the website, and hides demo products that aren't in Square.
+                Use it after switching Square accounts (e.g. to live). Changes the website only, never Square.
+            </p>
+            @if ($pull)
+                <p @class([
+                    'mt-2 text-xs font-bold',
+                    'text-[#8A5800]' => $pull['state'] === 'running',
+                    'text-[#007D49]' => $pull['state'] === 'done',
+                    'text-[#DF2600]' => $pull['state'] === 'failed',
+                ])>
+                    @if ($pull['state'] === 'running')
+                        Pulling from Square… this page updates by itself.
+                    @elseif ($pull['state'] === 'done')
+                        Last pull finished {{ \Illuminate\Support\Carbon::parse($pull['at'])->timezone('America/Moncton')->format('j M Y, g:i a') }}.
+                    @else
+                        Last pull failed {{ \Illuminate\Support\Carbon::parse($pull['at'])->timezone('America/Moncton')->format('j M Y, g:i a') }}.
+                    @endif
+                </p>
+                @if (filled($pull['output'] ?? null))
+                    <pre class="mt-2 max-h-48 overflow-auto rounded-xl bg-[#F6F6F6] p-3 text-[11px] leading-4 text-[#444444] whitespace-pre-wrap">{{ $pull['output'] }}</pre>
+                @endif
+            @endif
+        </div>
+        <button type="button" wire:click="pullFromSquare" wire:loading.attr="disabled" @disabled(($pull['state'] ?? null) === 'running')
+                wire:confirm="Pull every item, category, price and stock count from Square {{ $squareEnv === 'production' ? 'LIVE' : 'sandbox' }} onto the website, and hide demo products? Square itself is not changed."
+                class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-2 border-[#111111] text-[#111111] text-sm font-bold hover:bg-[#111111] hover:text-white disabled:opacity-50 transition-colors">
+            <span wire:loading.remove wire:target="pullFromSquare">Pull from Square now</span>
+            <span wire:loading wire:target="pullFromSquare">Starting…</span>
+        </button>
+    </div>
+
     @if ($report)
         @php($summary = $report['summary'])
         <div @class([

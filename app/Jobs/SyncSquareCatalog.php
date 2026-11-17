@@ -6,6 +6,7 @@ use App\Services\Square\CatalogSync;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Pick up catalogue changes after Square says something changed. Unique,
@@ -19,6 +20,17 @@ class SyncSquareCatalog implements ShouldBeUnique, ShouldQueue
 
     public function handle(CatalogSync $sync): void
     {
-        $sync->changes();
+        // Same lock as square:sync, so a webhook never runs alongside a full pull.
+        $lock = Cache::lock('square-sync', 600);
+
+        if (! $lock->get()) {
+            return;
+        }
+
+        try {
+            $sync->changes();
+        } finally {
+            $lock->release();
+        }
     }
 }

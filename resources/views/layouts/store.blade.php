@@ -29,7 +29,10 @@
     @guest
         <livewire:store.sign-in />
     @endguest
-    <x-store.asha-launcher />
+    {{-- Asha isn't live yet: no floating button on the homepage (client request). --}}
+    @unless (request()->routeIs('home'))
+        <x-store.asha-launcher />
+    @endunless
 
     @livewireScripts
 </body>

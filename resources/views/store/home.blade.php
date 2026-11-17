@@ -92,7 +92,7 @@
                         @endforeach
                     </div>
                     <div>
-                        <a href="#" class="inline-flex rounded-full bg-brand-yellow py-3 pl-5 pr-[22px] text-[14px] leading-[18px] font-extrabold transition-colors hover:bg-brand-yellow-60">Ask Asha</a>
+                        <span aria-disabled="true" class="inline-flex cursor-default rounded-full bg-brand-yellow py-3 pl-5 pr-[22px] text-[14px] leading-[18px] font-extrabold">{{ __('Coming soon') }}</span>
                     </div>
                 </div>
             </section>

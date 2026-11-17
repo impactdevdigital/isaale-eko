@@ -149,3 +149,14 @@ test('shoppers can ask to be told when a product is back', function () {
 
     expect(StockNotification::where('product_id', $product->id)->pluck('email')->all())->toBe(['amara@example.com']);
 });
+
+test('Asha is not live yet: no floating button on the homepage, and Meet Asha says Coming soon', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Meet Asha.')
+        ->assertSee('Coming soon')
+        ->assertDontSee('Ask Asha, your grocery concierge');
+
+    // Other pages keep the launcher.
+    $this->get('/shop')->assertSee('Ask Asha, your grocery concierge');
+});

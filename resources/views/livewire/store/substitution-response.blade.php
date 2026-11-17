@@ -110,7 +110,7 @@
                 @if ($request->substitute)
                     <div class="p-4 rounded-2xl bg-[#DAF4E7]/40 border border-[#007D49]/20 flex items-center justify-between gap-4">
                         <div class="min-w-0">
-                            <h3 class="font-extrabold text-sm sm:text-base text-[#111111] truncate">{{ $request->substitute->product->name }}</h3>
+                            <h3 class="font-extrabold text-sm sm:text-base text-[#111111] truncate">{{ $request->substitute->product->localized_name }}</h3>
                             <div class="text-xs text-[#686868]">{{ $request->substitute->name }}</div>
                             <div class="text-xs text-[#686868] mt-1">
                                 Qty: <strong class="text-[#111111]">{{ $request->item->quantity }}</strong> × {{ money($request->substitute->price_cents) }}
@@ -152,7 +152,7 @@
                             wire:click="approve"
                             style="background-color: #DF2600;"
                             class="flex-1 py-3.5 px-6 rounded-2xl text-white font-extrabold text-sm hover:opacity-95 transition-opacity shadow-md text-center">
-                        Accept Replacement ({{ $request->substitute->product->name }})
+                        Accept Replacement ({{ $request->substitute->product->localized_name }})
                     </button>
                 @endif
 

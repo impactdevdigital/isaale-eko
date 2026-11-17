@@ -25,13 +25,13 @@
             <x-store.product-badges :product="$product" :compact="$compact" />
 
             @unless ($compact)
-                <a href="{{ route('product', $product) }}" wire:navigate class="absolute bottom-2 left-2 flex size-12 items-center justify-center rounded-full bg-surface md:hidden" aria-label="Quick view {{ $product->name }}">
+                <a href="{{ route('product', $product) }}" wire:navigate class="absolute bottom-2 left-2 flex size-12 items-center justify-center rounded-full bg-surface md:hidden" aria-label="{{ __('Quick view :name', ['name' => $product->localized_name]) }}">
                     <x-store.icon name="eye" />
                 </a>
             @endunless
         @else
             <div class="pointer-events-none absolute inset-0 bg-[#CCCCCC]/70"></div>
-            <span class="absolute bottom-[9px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[2px] bg-black px-4 py-1 text-badge-sm leading-[10px] uppercase text-white">Out of stock</span>
+            <span class="absolute bottom-[9px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[2px] bg-black px-4 py-1 text-badge-sm leading-[10px] uppercase text-white">{{ __('Out of stock') }}</span>
         @endif
     </div>
 
@@ -60,13 +60,13 @@
         @if (! $compact && $inStock)
             <p class="flex items-center gap-[5px] pt-1 text-[9px] leading-3 font-bold text-stock-50">
                 <span class="size-1.5 rounded-full bg-stock-50"></span>
-                In Stock
+                {{ __('In Stock') }}
             </p>
         @endif
     </div>
 
     @if ($inStock)
-        <button type="button" x-data @click="$dispatch('cart-add', { variation: {{ $variation->id }} })" aria-label="Add {{ $product->name }} to cart" @class([
+        <button type="button" x-data @click="$dispatch('cart-add', { variation: {{ $variation->id }} })" aria-label="{{ __('Add :name to cart', ['name' => $product->localized_name]) }}" @class([
             'absolute flex items-center justify-center rounded-sm border border-grayscale-40 bg-surface transition-colors hover:border-ink',
             'bottom-2.5 right-2.5 size-[25px]' => $compact,
             'bottom-[9px] right-[9px] size-[34px]' => ! $compact,

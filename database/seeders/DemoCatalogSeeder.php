@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\FrenchNames;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\Product;
@@ -118,6 +119,8 @@ class DemoCatalogSeeder extends Seeder
         $this->recipesAndCollections();
 
         $this->call(DemoCouponSeeder::class);
+
+        FrenchNames::fill();
     }
 
     /**

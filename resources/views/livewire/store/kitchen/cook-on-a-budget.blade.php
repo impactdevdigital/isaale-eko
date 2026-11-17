@@ -92,7 +92,7 @@
                                 <ul class="mt-2 flex flex-col gap-1 text-body-muted">
                                     @foreach ($option->lines as $line)
                                         <li class="flex justify-between gap-3">
-                                            <span>{{ $line['quantity'] }} × {{ $line['variation']->product->name }} <span class="text-body-xs">{{ $line['variation']->name }}</span></span>
+                                            <span>{{ $line['quantity'] }} × {{ $line['variation']->product->localized_name }} <span class="text-body-xs">{{ $line['variation']->name }}</span></span>
                                             <span class="shrink-0">{{ money($line['variation']->price_cents * $line['quantity']) }}</span>
                                         </li>
                                     @endforeach

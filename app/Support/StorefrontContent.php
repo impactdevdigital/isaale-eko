@@ -14,18 +14,18 @@ class StorefrontContent
     {
         return [
             [
-                'eyebrow' => 'Good food, on its way',
-                'title' => 'Free Delivery Over $40.',
-                'body' => 'From jollof to jerk, plantain to egusi — authentic favourites for your favourite dishes.',
-                'cta' => 'Fill your box',
+                'eyebrow' => __('Good food, on its way'),
+                'title' => __('Free Delivery Over $40.'),
+                'body' => __('From jollof to jerk, plantain to egusi — authentic favourites for your favourite dishes.'),
+                'cta' => __('Fill your box'),
                 'image' => 'images/store/banners/free-delivery.webp',
                 'tint' => 'bg-trend-60',
             ],
             [
-                'eyebrow' => 'This week only',
-                'title' => '20% Off Pantry Staples',
-                'body' => 'Stock up on everyday essentials.',
-                'cta' => 'Shop deals',
+                'eyebrow' => __('This week only'),
+                'title' => __('20% Off Pantry Staples'),
+                'body' => __('Stock up on everyday essentials.'),
+                'cta' => __('Shop deals'),
                 'image' => 'images/store/banners/pantry-staples.webp',
                 'tint' => 'bg-sale-50',
             ],

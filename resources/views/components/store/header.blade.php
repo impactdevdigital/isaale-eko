@@ -26,13 +26,13 @@
         <div class="page-container flex h-8 items-center justify-between">
             <p class="hidden items-center gap-1.5 text-white lg:flex">
                 <x-store.icon name="bus" />
-                Fresh African &amp; Caribbean groceries, delivered
+                {{ __('Fresh African & Caribbean groceries, delivered') }}
             </p>
             <p class="flex items-center gap-1.5 text-brand-yellow">
                 <x-store.icon name="magic-star" />
-                Ingredients for every table
+                {{ __('Ingredients for every table') }}
             </p>
-            <p class="text-white">Good food brings us closer.</p>
+            <p class="text-white">{{ __('Good food brings us closer.') }}</p>
         </div>
     </div>
 
@@ -47,12 +47,12 @@
                 <form action="{{ route('shop') }}" method="GET" role="search" class="order-last flex h-[46px] w-full items-center overflow-hidden rounded-xl border border-grayscale-20 bg-grayscale-0 md:order-none md:ml-2.5 md:max-w-[930px] md:flex-1">
                     <label for="site-search" class="flex flex-1 items-center gap-2.5 pl-5 md:pl-10">
                         <x-store.icon name="search" class="size-[18px] shrink-0 text-ink" />
-                        <span class="sr-only">Search</span>
+                        <span class="sr-only">{{ __('Search') }}</span>
                         <input id="site-search" type="search" name="q" value="{{ request()->routeIs('shop') ? request('q') : '' }}"
-                               placeholder="Search products, ingredients or recipes..."
+                               placeholder="{{ __('Search products, ingredients or recipes...') }}"
                                class="w-full bg-transparent text-lead-mobile text-ink placeholder:text-body-muted focus:outline-none max-md:placeholder:text-[13px]">
                     </label>
-                    <button type="submit" class="flex size-[46px] shrink-0 items-center justify-center rounded-r-sm bg-brand-yellow text-ink transition-colors hover:bg-brand-yellow-60" aria-label="Search">
+                    <button type="submit" class="flex size-[46px] shrink-0 items-center justify-center rounded-r-sm bg-brand-yellow text-ink transition-colors hover:bg-brand-yellow-60" aria-label="{{ __('Search') }}">
                         <x-store.icon name="arrow-right" />
                     </button>
                 </form>
@@ -64,7 +64,7 @@
                    class="group hidden shrink-0 items-center gap-2 transition-opacity hover:opacity-80 lg:flex">
                     <x-store.icon name="location" class="transition-transform group-hover:scale-110" />
                     <span class="flex flex-col">
-                        <span class="text-body-xs font-normal text-body-muted">Locate the Store</span>
+                        <span class="text-body-xs font-normal text-body-muted">{{ __('Locate the Store') }}</span>
                         <strong class="text-body-xs font-extrabold capitalize text-ink">Saint John, NB, Canada</strong>
                     </span>
                 </a>
@@ -74,7 +74,7 @@
                         <button type="button" @click="open = ! open" :aria-expanded="open" aria-haspopup="menu" aria-controls="account-menu"
                                 class="flex flex-col items-center gap-[3px] px-1.5 py-px text-body-xs font-normal">
                             <x-store.icon name="profile" />
-                            {{ $user ? str($user->name)->before(' ') : 'Account' }}
+                            {{ $user ? str($user->name)->before(' ') : __('Account') }}
                         </button>
                         <x-store.account-menu :user="$user" />
                     </div>
@@ -82,10 +82,10 @@
                             x-data="{ count: {{ app(\App\Support\Cart::class)->count() }} }"
                             @cart-updated.window="count = $event.detail.count"
                             @click="$dispatch('cart-open')"
-                            :aria-label="`Open cart, ${count} items`"
+                            :aria-label="`{{ __('Open cart') }}, ${count}`"
                             class="relative flex flex-col items-center gap-[3px] px-3 py-px text-body-xs font-normal">
                         <x-store.icon name="shopping-bag" />
-                        Cart
+                        {{ __('Cart') }}
                         <span x-show="count > 0" x-cloak x-text="count" class="absolute -top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-price-40 px-1 text-[9px] leading-none font-bold text-white"></span>
                     </button>
                 </div>
@@ -103,7 +103,7 @@
                     <x-store.icon name="arrow-left" />
                 </button>
 
-                <nav x-ref="track" @scroll.debounce.50ms="update()" aria-label="Main navigation" class="flex flex-1 overflow-x-auto px-[5px] [scrollbar-width:none]">
+                <nav x-ref="track" @scroll.debounce.50ms="update()" aria-label="{{ __('Main navigation') }}" class="flex flex-1 overflow-x-auto px-[5px] [scrollbar-width:none]">
                     @foreach ($navLinks as $link)
                         @isset($link['menu'])
                             <button type="button"

@@ -51,7 +51,7 @@
                         @foreach ($available as $id => $line)
                             @php($product = $line->variation->product)
                             <li wire:key="line-{{ $id }}" class="flex gap-4 border-t border-grayscale-40 py-5 first:border-t-0 sm:gap-5">
-                                <button type="button" wire:click="toggle({{ $id }})" role="checkbox" aria-checked="{{ $line->selected ? 'true' : 'false' }}" aria-label="Include {{ $product->name }} in checkout" class="self-center">
+                                <button type="button" wire:click="toggle({{ $id }})" role="checkbox" aria-checked="{{ $line->selected ? 'true' : 'false' }}" aria-label="Include {{ $product->localized_name }} in checkout" class="self-center">
                                     <x-store.checkbox :checked="$line->selected" />
                                 </button>
 
@@ -61,7 +61,7 @@
 
                                 <div class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:justify-between">
                                     <div class="flex flex-col gap-1">
-                                        <a href="{{ route('product', $product) }}" wire:navigate class="text-[15px] font-bold hover:underline">{{ $product->name }}</a>
+                                        <a href="{{ route('product', $product) }}" wire:navigate class="text-[15px] font-bold hover:underline">{{ $product->localized_name }}</a>
                                         @if ($line->variation->name)
                                             <p class="text-body-sm font-normal text-body-muted">{{ $line->variation->name }}</p>
                                         @endif
@@ -108,7 +108,7 @@
                                     </div>
                                     <div class="flex flex-1 justify-between gap-3">
                                         <div class="text-grayscale-60">
-                                            <p class="text-[15px] font-bold">{{ $product->name }}</p>
+                                            <p class="text-[15px] font-bold">{{ $product->localized_name }}</p>
                                             <p class="text-body-sm">{{ $line->variation->name }}</p>
                                             <p class="mt-2 flex items-center gap-1.5 text-body-xs"><span class="size-1.5 rounded-full bg-grayscale-50"></span> Item unavailable</p>
                                         </div>

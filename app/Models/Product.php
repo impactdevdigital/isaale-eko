@@ -108,7 +108,8 @@ class Product extends Model
         // whereLike is case-insensitive everywhere (ILIKE on Postgres, where plain LIKE isn't).
         $like = '%'.str_replace(['%', '_'], '', $term).'%';
 
-        return $query->whereLike('name', $like);
+        // French names too, so "gombo" finds okra.
+        return $query->where(fn (Builder $q) => $q->whereLike('name', $like)->orWhereLike('name_fr', $like));
     }
 
     /**

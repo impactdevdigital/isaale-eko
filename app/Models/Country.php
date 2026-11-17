@@ -35,4 +35,10 @@ class Country extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    /** The name in the shopper's language (French when there is one). */
+    public function getLocalizedNameAttribute(): string
+    {
+        return $this->tr('name') ?: (string) $this->name;
+    }
 }

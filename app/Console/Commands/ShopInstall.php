@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\FrenchNames;
 use App\Models\Country;
 use App\Models\Product;
 use App\Models\Story;
@@ -60,6 +61,10 @@ class ShopInstall extends Command
                 // The shop still starts; the scheduled sync will try again.
                 $this->warn('Square import failed: '.$e->getMessage());
             }
+        }
+
+        if ($french = FrenchNames::fill()) {
+            $this->info("Added French names to {$french} products, categories and countries.");
         }
 
         if ($merged = $sync->mergeIntoStorefrontCategories()) {

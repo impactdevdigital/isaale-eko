@@ -31,7 +31,7 @@
                 <li class="flex items-center gap-2.5">
                     <img src="{{ asset($line->variation->product->image) }}" alt="" class="size-10 shrink-0 rounded-sm object-cover">
                     <div class="min-w-0 flex-1">
-                        <p class="truncate text-h5">{{ $line->variation->product->name }}</p>
+                        <p class="truncate text-h5">{{ $line->variation->product->localized_name }}</p>
                         <p class="text-body-xs font-normal text-body-muted">{{ collect([$line->variation->name, 'Qty '.$line->quantity])->filter()->join(' · ') }}</p>
                     </div>
                     <span class="text-[14px] font-bold">{{ money($line->variation->price_cents * $line->quantity) }}</span>

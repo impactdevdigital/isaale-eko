@@ -281,3 +281,8 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* French uses sentence case: don't title-case every word ("Cuisine et recettes", not "Cuisine Et Recettes"). */
+html[lang='fr'] .capitalize {
+    text-transform: none;
+}

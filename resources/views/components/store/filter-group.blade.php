@@ -3,7 +3,7 @@
 <div x-data="{ open: true }" class="border-b border-grayscale-40 pb-5 last-of-type:border-b-0">
     <button type="button" @click="open = ! open" :aria-expanded="open"
             class="flex w-full items-center justify-between border-b border-grayscale-40 px-2 pt-5 pb-2.5 text-[12px] leading-4 font-extrabold uppercase">
-        {{ $title }}
+        {{ __($title) }}
         <x-store.icon name="minus" x-show="open" />
         <x-store.icon name="plus" class="size-3" x-show="! open" x-cloak />
     </button>

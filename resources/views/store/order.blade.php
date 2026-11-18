@@ -130,7 +130,7 @@
             <dl class="flex flex-col gap-2 px-6 py-4 text-[14px]">
                 <div class="flex justify-between"><dt class="text-body-muted">Subtotal</dt><dd>{{ money($order->subtotal_cents) }}</dd></div>
                 @if ($order->discount_cents)
-                    <div class="flex justify-between"><dt class="text-body-muted">Coupon {{ $order->coupon_code }}</dt><dd class="text-stock-50">&minus;{{ money($order->discount_cents) }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-body-muted">{{ $order->discountLabel() }}</dt><dd class="text-stock-50">&minus;{{ money($order->discount_cents) }}</dd></div>
                 @endif
                 <div class="flex justify-between"><dt class="text-body-muted">{{ $order->fulfilment === 'pickup' ? 'Pickup fee' : 'Delivery fee' }}</dt><dd>{{ money($order->delivery_fee_cents) }}</dd></div>
                 <div class="mt-2 flex justify-between text-[18px] font-bold"><dt>Total</dt><dd>{{ money($order->total_cents) }}</dd></div>

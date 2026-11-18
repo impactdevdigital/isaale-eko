@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Livewire\Store\Concerns\SpendsLoyaltyReward;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\PaymentMethod;
@@ -40,6 +41,8 @@ use Livewire\Component;
 #[Title('Checkout')]
 class Checkout extends Component
 {
+    use SpendsLoyaltyReward;
+
     public string $fulfilment = 'pickup';
 
     /** Open dialog: slot, address or addresses. */
@@ -92,10 +95,6 @@ class Checkout extends Component
     // Payment
     public ?string $paymentMethod = null;
 
-    public string $couponCode = '';
-
-    public ?string $couponResult = null;
-
     public ?string $problem = null;
 
     /** Set when an online payment is declined: shows the Payment Declined screen. */
@@ -111,8 +110,6 @@ class Checkout extends Component
 
             return;
         }
-
-        $this->couponCode = app(Cart::class)->coupon()?->code ?? '';
 
         if ($user = Auth::user()) {
             $this->name = $user->name;
@@ -406,21 +403,6 @@ class Checkout extends Component
 
     // ----- Payment ------------------------------------------------------------
 
-    public function applyCoupon(): void
-    {
-        $this->validate(['couponCode' => ['required', 'string', 'max:40']], ['couponCode.required' => 'Enter a code first.']);
-
-        $cart = app(Cart::class);
-        $this->couponResult = $cart->applyCoupon($this->couponCode, $cart->subtotalCents());
-        $this->couponCode = strtoupper(trim($this->couponCode));
-    }
-
-    public function removeCoupon(): void
-    {
-        app(Cart::class)->removeCoupon();
-        $this->reset('couponCode', 'couponResult');
-    }
-
     /**
      * Place the order. Card and wallet payments pass the token from Square's
      * Web Payments SDK.
@@ -557,6 +539,7 @@ class Checkout extends Component
     private function finish(Order $order): void
     {
         app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
+        $this->rememberPhone($order);
 
         // The order is placed (and paid, for cards): a mail failure mustn't turn that into an error page.
         try {
@@ -574,6 +557,19 @@ class Checkout extends Component
 
         $this->dispatch('cart-updated', count: app(Cart::class)->count());
         $this->redirectRoute('orders.show', $order);
+    }
+
+    /**
+     * Keep a signed-in shopper's checkout phone on their account (when it
+     * has none), so their Square Loyalty points show under Rewards.
+     */
+    private function rememberPhone(Order $order): void
+    {
+        $user = Auth::user();
+
+        if ($user && ! $user->phone && $order->contact_phone && ! User::where('phone', $order->contact_phone)->exists()) {
+            $user->forceFill(['phone' => $order->contact_phone])->save();
+        }
     }
 
     public function retryPayment(): void
@@ -624,7 +620,8 @@ class Checkout extends Component
 
         $fulfilmentReady = $this->fulfilment === 'pickup' ? $this->pickupStart !== null : $deliveryReady;
 
-        $totals = CartTotals::for($checkoutLines, $cart->coupon(), $fee, $user, $user ? null : (filter_var($this->email, FILTER_VALIDATE_EMAIL) ?: null));
+        $rewardOffer = $this->rewardOffer();
+        $totals = CartTotals::for($checkoutLines, $this->chosenReward($rewardOffer), $fee, $user, $user ? null : (filter_var($this->email, FILTER_VALIDATE_EMAIL) ?: null));
         app(PromotionEngine::class)->recordExposure($totals->promotion, 'checkout');
 
         return view('livewire.store.checkout', [
@@ -632,6 +629,7 @@ class Checkout extends Component
             'checkoutLines' => $checkoutLines,
             'quantityChanged' => $lines->contains(fn ($line) => $line->notice),
             'totals' => $totals,
+            'rewardOffer' => $rewardOffer,
             'paymentMethods' => $this->paymentMethods(),
             'days' => $this->modal === 'slot' ? $windows->days() : collect(),
             'windows' => $this->modal === 'slot' && $this->slotDay ? $windows->windowsFor(CarbonImmutable::parse($this->slotDay, config('shop.timezone'))) : collect(),

@@ -102,16 +102,15 @@ test('the details step cannot be skipped without a verified code', function () {
     expect(User::count())->toBe(0);
 });
 
-test('the overview shows balances and recent orders', function () {
+test('the overview shows the rewards card and recent orders', function () {
     $user = User::create(['name' => 'Valentine Akin', 'email' => 'val@example.com']);
     $order = accountOrder($user);
-    $user->pointTransactions()->create(['type' => 'earned', 'points' => 76, 'description' => 'Purchase']);
 
+    // Square Loyalty is off in tests, so the card just links to Rewards (points are covered in SquareLoyaltyTest).
     $this->actingAs($user)->get('/account')
         ->assertOk()
         ->assertSee('Hi, Valentine.')
-        ->assertSee('$76.00')
-        ->assertSee('/ $100.00')
+        ->assertSee('See rewards')
         ->assertSee($order->number);
 });
 

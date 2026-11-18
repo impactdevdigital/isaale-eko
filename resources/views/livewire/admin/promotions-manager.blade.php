@@ -20,7 +20,7 @@
         <div>
             <h2 class="text-xl sm:text-2xl font-extrabold text-[#111111] tracking-tight">Promotions</h2>
             <p class="mt-1 text-xs sm:text-sm text-[#686868]">
-                Build offers from templates. Every promotion has an end date and ends by itself. One discount per order: shoppers get the better of a promotion or a promo/reward code.
+                Build offers from templates. Every promotion has an end date and ends by itself. One discount per order: shoppers get the better of a promotion or a Square Loyalty reward.
             </p>
         </div>
         @if ($step === 'list')
@@ -201,7 +201,7 @@
                 {{ $perCustomerLimit !== '' ? $perCustomerLimit.' per customer' : 'No limit per customer' }} ·
                 {{ $maxRedemptions !== '' ? 'capped at '.$maxRedemptions.' orders' : 'no budget cap' }}
                 {{ $minSubtotal !== '' ? '· minimum basket $'.$minSubtotal : '' }}.
-                It won’t combine with promo or reward codes; shoppers get whichever saves more.
+                It won’t combine with a Square Loyalty reward; shoppers get whichever saves more.
             </p>
 
             <div class="flex flex-wrap items-center gap-3">

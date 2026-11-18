@@ -1,29 +1,23 @@
 <?php
 
 /*
- * Loyalty (Key Features §3): every $100 of eligible spend unlocks $3 off.
+ * Loyalty runs on Square Loyalty (the programme set up in the Square
+ * Dashboard: 1 point per $1, 100 points = $3 off). The website signs
+ * shoppers up by the phone number they give at checkout, adds points for
+ * paid online orders, shows the balance, and lets signed-in shoppers spend
+ * a reward online. Points earned or spent in store are the same account.
  *
- * Shoppers only ever see dollars ("$76 / $100"); behind the scenes it is
- * 1 point per whole dollar, the way Square Loyalty would run it with points
- * hidden. Eligible spend is the items after any discount: no delivery fee,
- * no tax. The remainder carries over into the next $100.
+ * It uses the Square account that takes card payments (see
+ * SquareGateway::payments()), so test payments only ever touch a sandbox
+ * programme and real points start with real payments. It switches itself
+ * off when that account has no active loyalty programme.
  */
 return [
 
-    // Which engine runs loyalty: "website" today. Once the Square Loyalty
-    // spike passes, a SquareLoyaltyProvider can be bound here instead.
-    'provider' => env('LOYALTY_PROVIDER', 'website'),
+    // Kill switch: LOYALTY_ENABLED=false turns the website side off.
+    'enabled' => (bool) env('LOYALTY_ENABLED', true),
 
-    'points_per_dollar' => 1,
-
-    // Spend (in points, i.e. dollars) that unlocks one reward.
-    'block_points' => 100,
-
-    // The reward: a fixed amount off an order over a minimum.
-    'reward_value_cents' => 300,
-    'reward_min_order_cents' => 2500,
-
-    // An unlocked reward must be used within this many days.
-    'reward_valid_days' => 30,
+    // Orders older than this aren't retried by loyalty:sync.
+    'retry_days' => 7,
 
 ];

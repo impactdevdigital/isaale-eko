@@ -132,7 +132,7 @@
         </section>
 
         <div class="flex flex-col gap-4 lg:self-start">
-        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
+        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :reward-offer="$rewardOffer"
                                :show-free-delivery-hint="\App\Support\Delivery::enabled()"
                                :fee-label="\App\Support\Delivery::enabled() ? 'Estimated delivery' : 'Pickup fee'"
                                :fee-value="\App\Support\Delivery::enabled() ? 'Calculated at checkout' : 'Free'">

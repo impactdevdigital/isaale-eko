@@ -18,7 +18,7 @@ Thank you, {{ str($order->contact_name)->before(' ') }} — your order {{ $order
 
 Subtotal: {{ money($order->subtotal_cents) }}
 @if ($order->discount_cents)
-Coupon {{ $order->coupon_code }}: -{{ money($order->discount_cents) }}
+{{ $order->discountLabel() }}: -{{ money($order->discount_cents) }}
 @endif
 {{ $order->fulfilment === 'pickup' ? 'Pickup' : 'Delivery' }} fee: {{ money($order->delivery_fee_cents) }}
 Total: {{ money($order->total_cents) }} {{ match (true) {

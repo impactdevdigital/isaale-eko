@@ -7,7 +7,7 @@
             'tag' => $user->email, 'disabled' => ! $user->email,
             'items' => [
                 ['recipes', 'Recipe ideas & product highlights', 'Seasonal recipes, new arrivals and ingredient inspiration — sent weekly at most.', false],
-                ['rewards', 'Rewards & points updates', 'Know when your points are earned, when coupons arrive, and when rewards are ready.', false],
+                ['rewards', 'Rewards & points updates', 'Know when your points are earned and when a reward is ready.', false],
                 ['offers', 'Special offers & sale alerts', 'Promotional discounts and flash sales. You can turn this off at any time.', true],
             ],
             'note' => '<strong class="font-bold text-ink">Always on:</strong> Order confirmations, dispatch notices, delivery updates and account security emails are always sent regardless of your choices above.',

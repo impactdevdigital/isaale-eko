@@ -1,11 +1,11 @@
 {{--
     Order Summary card shared by the basket and checkout. Lives inside a Livewire
-    component that has couponCode / couponResult and applyCoupon / removeCoupon.
+    component that uses SpendsLoyaltyReward (useReward / dropReward).
 --}}
 @props([
     'lines',
     'totals',
-    'couponResult' => null,
+    'rewardOffer' => null,
     'feeLabel' => 'Estimated delivery',
     'feeValue' => 'Calculated at checkout',
     'totalLabel' => null,
@@ -13,14 +13,6 @@
     'note' => null,
     'noteTone' => 'ok',
 ])
-
-@php
-    $couponMessages = [
-        'invalid' => 'This code is not valid. Check it and try again.',
-        'expired' => 'This code has expired. Try another code.',
-        'minimum' => 'Your basket doesn’t reach this code’s minimum spend yet.',
-    ];
-@endphp
 
 <aside {{ $attributes->merge(['class' => 'overflow-hidden rounded-sm border border-grayscale-40 bg-surface']) }} aria-label="Order summary">
     <h2 class="bg-ink px-6 py-[18px] text-[18px] leading-6 font-bold text-white">Order Summary</h2>
@@ -39,25 +31,21 @@
             @endforeach
         </ul>
 
-        <form wire:submit="applyCoupon" class="flex flex-col gap-2 border-b border-grayscale-40 px-6 py-5">
-            <label for="coupon-code" class="text-[12px] leading-4 font-bold">Promo / voucher code</label>
-            <div class="flex">
-                <input id="coupon-code" type="text" wire:model="couponCode" placeholder="Enter code" autocomplete="off"
-                       @readonly($totals->coupon)
-                       class="h-9 min-w-0 flex-1 rounded-l-sm border border-r-0 border-grayscale-40 bg-grayscale-0 px-3 text-[14px] uppercase placeholder:normal-case focus:border-ink focus:outline-none">
-                @if ($totals->coupon)
-                    <button type="button" wire:click="removeCoupon" class="h-9 rounded-r-sm bg-ink px-4 text-button-sm text-white" title="Remove code">Applied</button>
+        @if ($rewardOffer)
+            @php $rewardOn = $totals->reward || $totals->setAsideReward; @endphp
+            <div class="flex items-center gap-3 border-b border-grayscale-40 px-6 py-5">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-purple text-white"><x-store.icon name="gift" class="size-[18px]" /></span>
+                <div class="min-w-0 flex-1">
+                    <p class="text-[12px] leading-4 font-bold">{{ $rewardOn ? 'Loyalty reward applied' : 'You have a loyalty reward' }}</p>
+                    <p class="text-[11px] text-body-muted">{{ $rewardOffer->name }} · uses {{ $rewardOffer->points }} points</p>
+                </div>
+                @if ($rewardOn)
+                    <button type="button" wire:click="dropReward" class="h-9 shrink-0 rounded-sm border border-ink px-3 text-button-sm">Remove</button>
                 @else
-                    <button type="submit" class="h-9 rounded-r-sm bg-ink px-4 text-button-sm text-white">Apply</button>
+                    <button type="button" wire:click="useReward" class="h-9 shrink-0 rounded-sm bg-ink px-4 text-button-sm text-white">Use it</button>
                 @endif
             </div>
-            @error('couponCode') <p class="text-[11px] font-bold text-price-40">{{ $message }}</p> @enderror
-            @if ($totals->coupon)
-                <p class="text-[11px] font-bold text-stock-50">{{ $totals->coupon->code }} applied — you saved {{ money($totals->discount) }}.</p>
-            @elseif ($couponResult && ($couponMessages[$couponResult] ?? null))
-                <p class="text-[11px] font-bold text-price-40" role="alert">{{ $couponMessages[$couponResult] }}</p>
-            @endif
-        </form>
+        @endif
     @endif
 
     <dl class="flex flex-col gap-3 border-b border-grayscale-40 px-6 py-5 text-[14px]">
@@ -71,13 +59,13 @@
         </div>
         @if ($totals->discount)
             <div class="flex justify-between gap-4">
-                <dt class="text-grayscale-80">{{ $totals->promotion ? $totals->promotion->promotion->name : 'Coupon discount' }}</dt>
+                <dt class="text-grayscale-80">{{ $totals->promotion ? $totals->promotion->promotion->name : 'Loyalty reward' }}</dt>
                 <dd class="font-bold text-stock-50">&minus;{{ money($totals->discount) }}</dd>
             </div>
         @endif
-        @if ($totals->setAsideCoupon)
+        @if ($totals->setAsideReward)
             <div class="rounded-sm bg-brand-yellow-10 px-3 py-1.5 text-[11px] font-medium text-brand-yellow-90" role="status">
-                Your code {{ $totals->setAsideCoupon->code }} isn’t used: {{ $totals->promotion->promotion->name }} saves you more. One discount per order.
+                Your reward isn’t used and your points stay saved: {{ $totals->promotion->promotion->name }} saves you more. One discount per order.
             </div>
         @endif
         @if ($showFreeDeliveryHint && $totals->subtotal > 0)

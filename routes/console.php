@@ -29,3 +29,6 @@ Schedule::command('issues:remind-overdue')->hourly();
 
 // Process uncollected orders and overdue pickup reminders
 Schedule::command('orders:handle-uncollected')->hourly();
+
+// Square Loyalty: retry points that didn't reach Square, give back points held on unpaid orders
+Schedule::command('loyalty:sync')->everyTenMinutes()->withoutOverlapping();

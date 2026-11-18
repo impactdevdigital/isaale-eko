@@ -84,11 +84,11 @@ class BudgetBuilder
     }
 
     /**
-     * What the ticked, available basket lines cost after any promo code.
+     * What the ticked, available basket lines cost after any promotion.
      */
     public function spent(): int
     {
-        return CartTotals::for($this->cart->checkoutLines(), $this->cart->coupon(), 0, auth()->user())->total();
+        return CartTotals::for($this->cart->checkoutLines(), null, 0, auth()->user())->total();
     }
 
     // ----- Mode 2: what can I cook with $X? ---------------------------------

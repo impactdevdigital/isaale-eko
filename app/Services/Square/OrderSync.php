@@ -3,7 +3,6 @@
 namespace App\Services\Square;
 
 use App\Models\Order;
-use App\Models\Promotion;
 use App\Models\User;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Log;
@@ -279,11 +278,7 @@ class OrderSync
 
     private function discountName(Order $order): string
     {
-        if ($order->coupon_code) {
-            return 'Promo code '.$order->coupon_code;
-        }
-
-        return ($order->promotion_id ? Promotion::find($order->promotion_id)?->name : null) ?? 'Website discount';
+        return $order->discountLabel();
     }
 
     /**

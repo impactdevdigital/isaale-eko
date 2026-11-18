@@ -2,18 +2,12 @@
 
 use App\Livewire\Store\Account\BuyAgain;
 use App\Livewire\Store\Account\Preferences;
-use App\Livewire\Store\Account\Rewards;
 use App\Livewire\Store\Account\Wishlist;
 use App\Livewire\Store\ProductPage;
 use App\Models\Consent;
-use App\Models\Coupon;
 use App\Models\Order;
-use App\Models\PointTransaction;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\Checkout\TakePayment;
-use App\Services\Loyalty\LoyaltyProvider;
-use App\Support\Cart;
 use Database\Seeders\DemoCatalogSeeder;
 use Livewire\Livewire;
 
@@ -39,125 +33,6 @@ function rewardsOrder(User $user, array $attributes = []): Order
         ...$attributes,
     ]);
 }
-
-test('paying online counts the order towards the next reward, once', function () {
-    $order = rewardsOrder($this->user);
-
-    app(TakePayment::class)->markPaid($order, 'sq-1');
-    app(TakePayment::class)->markPaid($order->fresh(), 'sq-1');
-
-    // $24.20 spent: 24 hidden points, shown as $24 / $100.
-    expect($this->user->pointsBalance())->toBe(24)
-        ->and(PointTransaction::count())->toBe(1)
-        ->and(app(LoyaltyProvider::class)->progress($this->user))
-        ->countedCents->toBe(2400)
-        ->blockCents->toBe(10000);
-});
-
-test('only the items after discounts count: no delivery fee', function () {
-    $order = rewardsOrder($this->user, ['fulfilment' => 'delivery', 'subtotal_cents' => 5000, 'discount_cents' => 500, 'delivery_fee_cents' => 799, 'total_cents' => 5299]);
-
-    app(TakePayment::class)->markPaid($order, 'sq-1');
-
-    expect($this->user->pointsBalance())->toBe(45);
-});
-
-test('pay-at-pickup orders count when collected, not before', function () {
-    $order = rewardsOrder($this->user, ['status' => Order::STATUS_PLACED, 'payment_method' => 'pay_at_pickup']);
-
-    $order->update(['fulfilment_status' => Order::FULFILMENT_READY]);
-    expect($this->user->pointsBalance())->toBe(0);
-
-    $order->update(['fulfilment_status' => Order::FULFILMENT_COMPLETED]);
-    expect($this->user->pointsBalance())->toBe(24);
-});
-
-test('cancelled orders count for nothing', function () {
-    rewardsOrder($this->user, ['status' => Order::STATUS_PLACED])->update(['status' => Order::STATUS_CANCELLED]);
-
-    expect($this->user->pointsBalance())->toBe(0);
-});
-
-test('every $100 unlocks $3 off automatically: minimum order $25, valid 30 days, remainder carries over', function () {
-    $this->user->pointTransactions()->create(['type' => 'earned', 'points' => 76, 'description' => '$76.00 spent']);
-
-    Livewire::test(Rewards::class)->assertSee('$76.00')->assertSee('/ $100.00')->assertSee('$24.00 more to unlock $3.00 off');
-
-    // A $230.00 order takes $76 to $306: three rewards, $6 carries over.
-    app(TakePayment::class)->markPaid(rewardsOrder($this->user, ['subtotal_cents' => 23000, 'total_cents' => 23000]), 'sq-2');
-
-    $rewards = Coupon::where('user_id', $this->user->id)->get();
-    expect($rewards)->toHaveCount(3)
-        ->and($rewards->first()->value)->toBe(300)
-        ->and($rewards->first()->min_subtotal_cents)->toBe(2500)
-        ->and($rewards->first()->max_uses)->toBe(1)
-        ->and($rewards->first()->expires_at->isSameDay(now()->addDays(30)))->toBeTrue()
-        ->and($this->user->pointsBalance())->toBe(6);
-
-    Livewire::test(Rewards::class)
-        ->assertSee('$6.00')
-        ->assertSee('$3.00 off an order of $25.00+')
-        ->assertSee('can’t be combined with other offers');
-});
-
-test('a reward goes on the basket only once it reaches the $25 minimum', function () {
-    $this->user->pointTransactions()->create(['type' => 'earned', 'points' => 99, 'description' => 'Purchase']);
-    app(TakePayment::class)->markPaid(rewardsOrder($this->user, ['subtotal_cents' => 100, 'total_cents' => 100]), 'sq-3'); // the 100th dollar
-    $reward = Coupon::where('user_id', $this->user->id)->sole();
-
-    $product = Product::whereHas('defaultVariation', fn ($q) => $q->where('price_cents', '<', 2500))->firstOrFail();
-    app(Cart::class)->add($product->defaultVariation->id);
-
-    Livewire::test(Rewards::class)->call('useReward', $reward->id)->assertSee('Your basket needs to reach $25.00 first');
-    expect(app(Cart::class)->coupon())->toBeNull();
-
-    app(Cart::class)->setQuantity($product->defaultVariation->id, (int) ceil(2500 / $product->defaultVariation->price_cents));
-
-    Livewire::test(Rewards::class)->call('useReward', $reward->id)->assertSee('On your basket');
-    expect(app(Cart::class)->coupon()?->code)->toBe($reward->code);
-});
-
-test('a refund takes back the progress its order earned, never the delivery fee', function () {
-    $order = rewardsOrder($this->user, ['fulfilment' => 'delivery', 'subtotal_cents' => 6000, 'delivery_fee_cents' => 799, 'total_cents' => 6799]);
-    app(TakePayment::class)->markPaid($order, 'sq-4');
-    expect($this->user->pointsBalance())->toBe(60);
-
-    $loyalty = app(LoyaltyProvider::class);
-    $loyalty->reversePurchase($order->fresh(), 2000);
-    expect($this->user->pointsBalance())->toBe(40);
-
-    // Refunding everything (including the fee) takes back no more than the order earned.
-    $loyalty->reversePurchase($order->fresh(), 6799);
-    $loyalty->reversePurchase($order->fresh(), 6799);
-    expect($this->user->pointsBalance())->toBe(0)
-        ->and(PointTransaction::where('type', PointTransaction::TYPE_REVERSED)->sum('points'))->toBe(-60);
-
-    Livewire::test(Rewards::class)->set('tab', 'used')->assertSee('Refund')->assertSee('$20.00 refunded');
-});
-
-test('reward codes only work for their owner', function () {
-    $coupon = Coupon::create(['code' => 'REWARD-ABC123', 'user_id' => $this->user->id, 'type' => 'fixed', 'value' => 500, 'max_uses' => 1, 'is_active' => true]);
-
-    expect(app(Cart::class)->applyCoupon($coupon->code, 1000))->toBe('applied');
-
-    app(Cart::class)->removeCoupon();
-    $this->actingAs(User::create(['name' => 'Other', 'email' => 'other@example.com']));
-
-    expect(app(Cart::class)->applyCoupon($coupon->code, 1000))->toBe('invalid');
-});
-
-test('the history filters what counted from what was unlocked or refunded', function () {
-    $order = rewardsOrder($this->user, ['number' => 'ISA-EARN01']);
-    $this->user->pointTransactions()->create(['type' => 'earned', 'order_id' => $order->id, 'points' => 160, 'description' => '$160.00 spent']);
-    $this->user->pointTransactions()->create(['type' => 'redeemed', 'points' => -100, 'description' => '$3.00 off unlocked']);
-
-    Livewire::test(Rewards::class)
-        ->assertSee('$160.00 spent')->assertSee('$3.00 off unlocked')->assertSee('ISA-EARN01')
-        ->set('tab', 'earned')
-        ->assertSee('$160.00 spent')->assertDontSee('$3.00 off unlocked')
-        ->set('tab', 'used')
-        ->assertDontSee('$160.00 spent')->assertSee('$3.00 off unlocked');
-});
 
 test('preferences start off and save as consent records', function () {
     $component = Livewire::test(Preferences::class)

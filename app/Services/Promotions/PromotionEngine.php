@@ -3,7 +3,6 @@
 namespace App\Services\Promotions;
 
 use App\Models\Order;
-use App\Models\PointTransaction;
 use App\Models\Promotion;
 use App\Models\User;
 use App\Services\Analytics;
@@ -61,7 +60,7 @@ class PromotionEngine
             'everyone' => true,
             'first_time' => $orders->doesntExist(),
             'lapsed' => $orders->exists() && $orders->max('placed_at') < now()->subDays(Promotion::LAPSED_AFTER_DAYS),
-            'loyalty_members' => $user && PointTransaction::where('user_id', $user->id)->exists(),
+            'loyalty_members' => $user && $user->orders()->whereNotNull('loyalty_account_id')->exists(),
             default => false,
         };
 
@@ -87,7 +86,7 @@ class PromotionEngine
             'lapsed' => (clone $customers)->whereHas('orders', $placed)
                 ->whereDoesntHave('orders', fn ($query) => $placed($query)->where('placed_at', '>=', now()->subDays(Promotion::LAPSED_AFTER_DAYS)))
                 ->count(),
-            'loyalty_members' => (clone $customers)->whereHas('pointTransactions')->count(),
+            'loyalty_members' => (clone $customers)->whereHas('orders', fn ($query) => $query->whereNotNull('loyalty_account_id'))->count(),
             default => (clone $customers)->count(),
         };
     }

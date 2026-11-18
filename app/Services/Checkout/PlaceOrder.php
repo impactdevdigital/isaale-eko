@@ -2,19 +2,20 @@
 
 namespace App\Services\Checkout;
 
-use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\Promotion;
 use App\Models\PromotionRedemption;
 use App\Models\User;
 use App\Services\Analytics;
+use App\Services\Loyalty\SquareLoyalty;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use App\Support\Delivery;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Turns the ticked basket lines into an order after re-checking stock,
@@ -28,6 +29,7 @@ class PlaceOrder
         private Cart $cart,
         private PickupWindows $windows,
         private DeliveryCheck $delivery,
+        private SquareLoyalty $loyalty,
     ) {}
 
     /**
@@ -79,21 +81,60 @@ class PlaceOrder
             throw new CheckoutProblem('We can’t deliver to this address. Edit it or choose Pickup.');
         }
 
-        $coupon = $this->cart->coupon();
+        // A Square Loyalty reward is only for a signed-in shopper who still has the points.
+        $reward = null;
 
-        // A guest only typed an email, so they can't use that account's personal reward codes.
-        if ($coupon && ! $coupon->usableBy($guestEmail === null ? $user : null)) {
-            $this->cart->removeCoupon();
+        if ($this->cart->usingReward()) {
+            $reward = $guestEmail === null ? $this->loyalty->availableReward($user) : null;
 
-            throw new CheckoutProblem('That reward code belongs to another account, so we removed it. Check your order summary, then pay.');
+            if (! $reward) {
+                $this->cart->dropReward();
+
+                throw new CheckoutProblem('Your loyalty reward isn’t available any more, so we took it off. Check your order summary, then pay.');
+            }
         }
+
         $subtotal = $this->cart->subtotalCents($lines);
-        $totals = CartTotals::for($checkoutLines, $coupon, $fulfilment === 'delivery' ? CartTotals::deliveryFeeFor($subtotal) : 0, $user, $guestEmail);
+        $totals = CartTotals::for($checkoutLines, $reward, $fulfilment === 'delivery' ? CartTotals::deliveryFeeFor($subtotal) : 0, $user, $guestEmail);
+
+        // Hold the reward's points in Square now; they're used once the order is paid (see SquareLoyalty).
+        $heldReward = null;
+
+        if ($totals->reward) {
+            try {
+                $heldReward = $this->loyalty->reserve($totals->reward, 'loyalty-reward-'.Str::uuid());
+            } catch (Throwable $e) {
+                report($e);
+
+                throw new CheckoutProblem('We couldn’t reach our rewards programme just now. Try again, or remove the reward to pay without it.');
+            }
+        }
+
         $contact = $guestEmail !== null
             ? ['channel' => 'email', 'value' => $guestEmail]
             : ($user->signInContact() ?? ['channel' => 'email', 'value' => $user->email]);
 
-        $order = DB::transaction(function () use ($user, $contactName, $fulfilment, $method, $window, $address, $totals, $checkoutLines, $contact, $contactPhone) {
+        try {
+            $order = $this->createOrder($user, $contactName, $fulfilment, $method, $window, $address, $totals, $checkoutLines, $contact, $contactPhone, $heldReward);
+        } catch (Throwable $e) {
+            if ($heldReward) {
+                $this->loyalty->cancelReservation($heldReward, $totals->reward->accountId);
+            }
+
+            throw $e;
+        }
+
+        // Online payments keep the basket until the charge succeeds.
+        if ($clearCart) {
+            $this->cart->clear(...$checkoutLines->keys()->all());
+        }
+
+        return $order;
+    }
+
+    private function createOrder(User $user, string $contactName, string $fulfilment, PaymentMethod $method, ?array $window, ?array $address, CartTotals $totals, $checkoutLines, array $contact, ?string $contactPhone, ?string $heldReward): Order
+    {
+        return DB::transaction(function () use ($user, $contactName, $fulfilment, $method, $window, $address, $totals, $checkoutLines, $contact, $contactPhone, $heldReward) {
             $order = Order::create([
                 'number' => $this->newNumber(),
                 'user_id' => $user->id,
@@ -110,8 +151,11 @@ class PlaceOrder
                 'discount_cents' => $totals->discount,
                 'delivery_fee_cents' => $totals->deliveryFee ?? 0,
                 'total_cents' => $totals->total(),
-                'coupon_code' => $totals->coupon?->code,
                 'promotion_id' => $totals->promotion?->promotion->id,
+                'loyalty_account_id' => $totals->reward?->accountId,
+                'loyalty_reward_id' => $heldReward,
+                'loyalty_reward_points' => $heldReward ? $totals->reward->points : null,
+                'loyalty_reward_status' => $heldReward ? SquareLoyalty::REWARD_ISSUED : null,
                 'payment_method' => $method->code,
                 'placed_at' => now(),
             ]);
@@ -127,10 +171,6 @@ class PlaceOrder
                     'quantity' => $line->quantity,
                     'line_total_cents' => $line->variation->price_cents * $line->quantity,
                 ]);
-            }
-
-            if ($totals->coupon) {
-                Coupon::whereKey($totals->coupon->id)->increment('times_used');
             }
 
             if ($applied = $totals->promotion) {
@@ -153,13 +193,6 @@ class PlaceOrder
 
             return $order;
         });
-
-        // Online payments keep the basket until the charge succeeds.
-        if ($clearCart) {
-            $this->cart->clear(...$checkoutLines->keys()->all());
-        }
-
-        return $order;
     }
 
     private function newNumber(): string

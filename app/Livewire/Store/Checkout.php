@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\Checkout\CheckoutProblem;
 use App\Services\Checkout\DeliveryCheck;
 use App\Services\Checkout\OrderReceipt;
+use App\Services\Checkout\PaymentReconciler;
 use App\Services\Checkout\PickupWindows;
 use App\Services\Checkout\PlaceOrder;
 use App\Services\Checkout\TakePayment;
@@ -20,6 +21,7 @@ use App\Support\CartTotals;
 use App\Support\Delivery;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -431,21 +433,63 @@ class Checkout extends Component
 
         $this->declined = null;
 
-        if (! $order = $this->placeOrder()) {
-            return;
-        }
+        // One payment at a time per shopper: a refresh or second tab can't start a parallel charge.
+        $lock = Cache::lock('checkout-pay:'.(Auth::id() ?? session()->getId()), 60);
 
-        $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
-
-        if ($failure) {
-            // The order isn't placed; the basket, details and slot stay as they were.
-            $this->declined = $failure;
-            $this->declinedAmount = $order->total_cents;
+        if (! $lock->get()) {
+            $this->problem = 'Your payment is already being processed. Please wait a moment.';
 
             return;
         }
 
-        $this->finish($order);
+        try {
+            // An earlier card payment we never heard back about: settle it before charging again.
+            if ($open = $this->openPayment()) {
+                $state = app(PaymentReconciler::class)->resolve($open, sendReceipt: false);
+
+                if ($state === PaymentReconciler::PAID) {
+                    $this->finish($open->fresh());
+
+                    return;
+                }
+
+                if ($state === PaymentReconciler::PENDING) {
+                    $this->problem = 'We’re still confirming your earlier payment for order '.$open->number.'. Please don’t pay again yet. Check your email or your orders in a few minutes.';
+
+                    return;
+                }
+            }
+
+            if (! $order = $this->placeOrder()) {
+                return;
+            }
+
+            $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
+
+            if ($failure) {
+                // The order isn't placed; the basket, details and slot stay as they were.
+                $this->declined = $failure;
+                $this->declinedAmount = $order->total_cents;
+
+                return;
+            }
+
+            $this->finish($order);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * This shopper's most recent card order whose payment outcome is still unknown.
+     */
+    private function openPayment(): ?Order
+    {
+        $userId = Auth::id() ?? User::where('email', strtolower(trim($this->email)))->value('id');
+
+        return $userId
+            ? PaymentReconciler::unresolved()->where('user_id', $userId)->latest('id')->first()
+            : null;
     }
 
     /**

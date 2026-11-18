@@ -141,7 +141,6 @@
                             <p class="text-body-xs text-price-40">{{ $message }}</p>
                         @enderror
                     </div>
-                    <x-store.check model="marketing" label="Email me offers and news (optional)" />
                 @endguest
 
                 <div class="flex flex-col gap-2">
@@ -151,9 +150,13 @@
                     @error('phone')
                         <p class="text-body-xs text-price-40">{{ $message }}</p>
                     @else
-                        <p class="text-[12px] leading-[18px] font-medium text-body-muted">We’ll only call or text about this order.</p>
+                        <p class="text-[12px] leading-[18px] font-medium text-body-muted">Used to register you for our rewards programme.</p>
                     @enderror
                 </div>
+
+                @guest
+                    <x-store.check model="marketing" label="Email me offers and news (optional)" />
+                @endguest
 
                 {{-- Pickup slot or delivery address --}}
                 @if ($fulfilment === 'pickup')

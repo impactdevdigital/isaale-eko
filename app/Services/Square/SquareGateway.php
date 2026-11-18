@@ -268,6 +268,25 @@ class SquareGateway
         ]))->throw()->json('payment');
     }
 
+    public function getPayment(string $paymentId): array
+    {
+        return $this->payHttp()->get("/v2/payments/{$paymentId}")->throw()->json('payment', []);
+    }
+
+    /**
+     * Payments taken in a time window, newest first: ['payments' => [...], 'cursor' => ?string].
+     */
+    public function listPayments(string $beginTime, string $endTime, ?string $cursor = null): array
+    {
+        return $this->payHttp()->get('/v2/payments', array_filter([
+            'begin_time' => $beginTime,
+            'end_time' => $endTime,
+            'location_id' => self::payments()['location_id'],
+            'sort_order' => 'DESC',
+            'cursor' => $cursor,
+        ]))->throw()->json() + ['payments' => [], 'cursor' => null];
+    }
+
     public function refundPayment(string $paymentId, int $cents, string $currency, string $reason, string $idempotencyKey): array
     {
         return $this->payHttp()->post('/v2/refunds', [

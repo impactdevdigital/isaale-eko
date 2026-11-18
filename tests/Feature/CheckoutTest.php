@@ -333,6 +333,7 @@ test('every order needs a phone number, pickup included', function () {
         ->set('name', 'Ada Obi')
         ->set('pickupStart', $start)
         ->set('paymentMethod', 'pay_at_pickup')
+        ->assertSeeInOrder(['Email Address', 'Full Name', 'Phone Number', 'Used to register you for our rewards programme.'])
         ->call('proceed')
         ->assertHasErrors('phone')
         ->assertSet('guestReady', false)

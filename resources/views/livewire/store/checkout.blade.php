@@ -288,7 +288,7 @@
             @endif
         </div>
 
-        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :coupon-result="$couponResult"
+        <x-store.order-summary :lines="$checkoutLines" :totals="$totals" :reward-offer="$rewardOffer"
                                :fee-label="$feeLabel" :fee-value="$feeValue" :note="$note" :note-tone="$noteTone" class="lg:self-start">
             @if ($readyToPay && $paymentMethod === 'etransfer')
                 <button type="button" wire:click="placeETransferOrder" wire:loading.attr="disabled" wire:target="placeETransferOrder"

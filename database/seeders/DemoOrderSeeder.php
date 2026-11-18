@@ -86,7 +86,6 @@ class DemoOrderSeeder extends Seeder
                 'discount_cents' => 500,
                 'delivery_fee_cents' => 499,
                 'total_cents' => 5489,
-                'coupon_code' => 'WELCOME5',
                 'payment_method' => 'card',
                 'placed_at' => now()->subHours(1),
                 'fulfilment_status' => Order::FULFILMENT_PREPARING,

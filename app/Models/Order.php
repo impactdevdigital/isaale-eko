@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\Loyalty\LoyaltyProvider;
+use App\Services\Loyalty\SquareLoyalty;
 use App\Services\Square\OrderSync;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -62,14 +62,18 @@ class Order extends Model
         'promised_by' => 'datetime',
         'pickup_reminder_sent_at' => 'datetime',
         'pickup_overdue_reminder_sent_at' => 'datetime',
+        'loyalty_points' => 'integer',
+        'loyalty_points_reversed' => 'integer',
+        'loyalty_reward_points' => 'integer',
+        'loyalty_synced_at' => 'datetime',
     ];
 
     protected static function booted(): void
     {
-        // Points are earned once the order is paid for, online or at the counter.
+        // Square Loyalty: points are earned once the order is paid for, online or at the counter.
         static::updated(function (Order $order) {
             if ($order->wasChanged(['status', 'fulfilment_status'])) {
-                app(LoyaltyProvider::class)->recordPurchase($order);
+                app(SquareLoyalty::class)->orderChanged($order);
             }
 
             // Keep the Square copy of the order in step (see OrderSync).
@@ -123,6 +127,19 @@ class Order extends Model
             // Returns aren't handled online yet.
             'returns' => $query->whereRaw('1 = 0'),
             default => null,
+        };
+    }
+
+    /**
+     * What the order's discount was, for receipts and Square.
+     */
+    public function discountLabel(): string
+    {
+        return match (true) {
+            (bool) $this->loyalty_reward_id => 'Loyalty reward',
+            (bool) $this->coupon_code => 'Coupon '.$this->coupon_code,
+            (bool) $this->promotion_id => Promotion::find($this->promotion_id)?->name ?? 'Discount',
+            default => 'Discount',
         };
     }
 

@@ -5,7 +5,7 @@ namespace App\Actions\Orders;
 use App\Models\Order;
 use App\Models\Refund;
 use App\Notifications\RefundNotice;
-use App\Services\Loyalty\LoyaltyProvider;
+use App\Services\Loyalty\SquareLoyalty;
 use App\Services\Square\SquareGateway;
 use Illuminate\Support\Facades\Notification;
 
@@ -92,8 +92,8 @@ class IssueRefund
             $order->update(['status' => 'refunded']);
         }
 
-        // A refund takes back the loyalty progress the order earned.
-        app(LoyaltyProvider::class)->reversePurchase($order, $order->refunded_cents);
+        // A refund takes back the Square Loyalty points the order earned.
+        app(SquareLoyalty::class)->reversePurchase($order, $order->refunded_cents);
 
         // 5. Send transaction notice to customer
         if ($order->contact_email) {

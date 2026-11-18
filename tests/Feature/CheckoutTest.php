@@ -75,16 +75,10 @@ test('items that sold out move to unavailable and quantities above stock are low
         ->assertViewHas('totals', fn ($totals) => $totals->subtotal === 499 * 2);
 });
 
-test('promo codes show applied, invalid, expired and minimum spend states', function () {
-    addToCart('fresh-okra', 4); // $9.96
+test('there is no promo or voucher code box any more', function () {
+    addToCart('fresh-okra', 4);
 
-    Livewire::test(CartPage::class)
-        ->set('couponCode', 'NOPE')->call('applyCoupon')->assertSee('This code is not valid.')
-        ->set('couponCode', 'spring5')->call('applyCoupon')->assertSee('This code has expired.')
-        ->set('couponCode', 'BIGSHOP15')->call('applyCoupon')->assertSee('minimum spend')
-        ->set('couponCode', 'welcome10')->call('applyCoupon')
-        ->assertSee('WELCOME10 applied — you saved '.money(100).'.')
-        ->assertViewHas('totals', fn ($totals) => $totals->total() === 996 - 100);
+    Livewire::test(CartPage::class)->assertDontSee('Promo / voucher code')->assertDontSee('Enter code');
 });
 
 test('checkout sends shoppers with an empty basket back to the basket', function () {

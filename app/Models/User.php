@@ -89,16 +89,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Recipe::class, 'saved_recipes')->withTimestamps()->orderByPivot('created_at', 'desc');
     }
 
-    public function pointTransactions(): HasMany
-    {
-        return $this->hasMany(PointTransaction::class)->latest()->latest('id');
-    }
-
-    public function pointsBalance(): int
-    {
-        return (int) $this->pointTransactions()->sum('points');
-    }
-
     /**
      * The verified contact the shopper signs in with, e.g. for "Verified email".
      *

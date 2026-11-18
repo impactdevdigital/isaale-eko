@@ -278,6 +278,106 @@ class SquareGateway
         ])->throw()->json('refund');
     }
 
+    // ---- loyalty (on the payments account, so test payments only ever earn test points) ----
+
+    /**
+     * The seller's loyalty programme, or null when the account has none.
+     */
+    public function loyaltyProgram(): ?array
+    {
+        $response = $this->payHttp()->get('/v2/loyalty/programs/main');
+
+        if ($response->status() === 404) {
+            return null;
+        }
+
+        return $response->throw()->json('program');
+    }
+
+    public function findLoyaltyAccount(string $phone): ?array
+    {
+        return $this->payHttp()->post('/v2/loyalty/accounts/search', [
+            'query' => ['mappings' => [['phone_number' => $phone]]],
+            'limit' => 1,
+        ])->throw()->json('loyalty_accounts.0');
+    }
+
+    public function createLoyaltyAccount(string $programId, string $phone, string $idempotencyKey): array
+    {
+        return $this->payHttp()->post('/v2/loyalty/accounts', [
+            'idempotency_key' => $idempotencyKey,
+            'loyalty_account' => ['program_id' => $programId, 'mapping' => ['phone_number' => $phone]],
+        ])->throw()->json('loyalty_account');
+    }
+
+    public function loyaltyAccount(string $accountId): array
+    {
+        return $this->payHttp()->get("/v2/loyalty/accounts/{$accountId}")->throw()->json('loyalty_account', []);
+    }
+
+    /**
+     * Points the programme gives for spending $cents (its own rules, e.g. 1 point per $1).
+     */
+    public function calculateLoyaltyPoints(string $programId, int $cents, string $currency): int
+    {
+        return (int) $this->payHttp()->post("/v2/loyalty/programs/{$programId}/calculate", [
+            'transaction_amount_money' => ['amount' => $cents, 'currency' => $currency],
+        ])->throw()->json('points', 0);
+    }
+
+    public function accumulateLoyaltyPoints(string $accountId, int $points, string $idempotencyKey): array
+    {
+        return $this->payHttp()->post("/v2/loyalty/accounts/{$accountId}/accumulate", [
+            'idempotency_key' => $idempotencyKey,
+            'accumulate_points' => ['points' => $points],
+            'location_id' => self::payments()['location_id'],
+        ])->throw()->json('events', []);
+    }
+
+    public function adjustLoyaltyPoints(string $accountId, int $points, string $reason, string $idempotencyKey): array
+    {
+        return $this->payHttp()->post("/v2/loyalty/accounts/{$accountId}/adjust", [
+            'idempotency_key' => $idempotencyKey,
+            'adjust_points' => ['points' => $points, 'reason' => $reason],
+        ])->throw()->json('event', []);
+    }
+
+    /**
+     * Turn points into a reward. The points are held from now on; redeem
+     * the reward once the order is paid, or delete it to give them back.
+     */
+    public function createLoyaltyReward(string $accountId, string $tierId, string $idempotencyKey): array
+    {
+        return $this->payHttp()->post('/v2/loyalty/rewards', [
+            'idempotency_key' => $idempotencyKey,
+            'reward' => ['loyalty_account_id' => $accountId, 'reward_tier_id' => $tierId],
+        ])->throw()->json('reward');
+    }
+
+    public function redeemLoyaltyReward(string $rewardId, string $idempotencyKey): array
+    {
+        return $this->payHttp()->post("/v2/loyalty/rewards/{$rewardId}/redeem", [
+            'idempotency_key' => $idempotencyKey,
+            'location_id' => self::payments()['location_id'],
+        ])->throw()->json('event', []);
+    }
+
+    public function deleteLoyaltyReward(string $rewardId): void
+    {
+        $this->payHttp()->delete("/v2/loyalty/rewards/{$rewardId}")->throw();
+    }
+
+    /**
+     * Latest points activity on an account, newest first: online and in store.
+     */
+    public function loyaltyEvents(string $accountId, int $limit = 30): array
+    {
+        return $this->payHttp()->post('/v2/loyalty/events/search', [
+            'query' => ['filter' => ['loyalty_account_filter' => ['loyalty_account_id' => $accountId]]],
+            'limit' => $limit,
+        ])->throw()->json('events', []);
+    }
+
     // ---- is this webhook really from Square? ----
     public function isValidWebhook(Request $request): bool
     {

@@ -1,6 +1,6 @@
 @php
     $user = auth()->user();
-    $loyalty = app(\App\Services\Loyalty\LoyaltyProvider::class)->progress($user);
+    $loyalty = app(\App\Services\Loyalty\SquareLoyalty::class)->progress($user, withHistory: false);
     $statusLinks = [
         ['all', 'box', 'All orders', 0],
         ['unpaid', 'card-remove', 'Unpaid', $tabCounts['unpaid']],
@@ -19,9 +19,13 @@
             <a href="{{ Route::has('account.rewards') ? route('account.rewards') : '#' }}" class="group relative block h-[130px] overflow-hidden rounded-sm bg-[repeating-linear-gradient(115deg,var(--color-brand-yellow-40)_0_70px,var(--color-brand-yellow-20)_70px_140px)] p-5">
                 <img src="{{ asset('images/account/diamond-heart.svg') }}" alt="" class="absolute -right-2 top-1/2 size-[120px] -translate-y-1/2">
                 <span class="relative flex items-center gap-2 text-[11px] leading-[14px] font-bold uppercase tracking-[1px]">
-                    <x-store.icon name="lovely" class="size-[18px]" /> {{ $loyalty->rewards->isNotEmpty() ? $loyalty->rewards->count().' '.str('reward')->plural($loyalty->rewards->count()).' ready' : 'Towards your next reward' }}
+                    <x-store.icon name="lovely" class="size-[18px]" /> {{ $loyalty->rewardsReady() ? $loyalty->rewardsReady().' '.str('reward')->plural($loyalty->rewardsReady()).' ready' : 'Loyalty points' }}
                 </span>
-                <span class="relative mt-3 block text-[28px] leading-8 font-bold">{{ money($loyalty->countedCents) }} <span class="text-[18px]">/ {{ money($loyalty->blockCents) }}</span></span>
+                @if ($loyalty->enabled && $loyalty->available && $loyalty->phone)
+                    <span class="relative mt-3 block text-[28px] leading-8 font-bold">{{ number_format($loyalty->points) }} <span class="text-[18px]">{{ str('point')->plural($loyalty->points) }}</span></span>
+                @else
+                    <span class="relative mt-3 block text-[22px] leading-8 font-bold">Rewards</span>
+                @endif
                 <span class="relative mt-3 flex items-center gap-1 text-[13px] font-bold">See rewards <x-store.icon name="chevron-right" class="size-3.5" /></span>
             </a>
 

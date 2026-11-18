@@ -2,20 +2,19 @@
 
 namespace App\Support;
 
-use App\Models\Coupon;
 use App\Models\ProductVariation;
 use Illuminate\Support\Collection;
 
 /**
  * Session-backed shopping basket. The session only holds variation ids,
- * quantities, checkout ticks and a promo code; prices and stock always
+ * quantities, checkout ticks and whether to spend a loyalty reward; prices and stock always
  * come from the database.
  */
 class Cart
 {
     private const SESSION_KEY = 'cart.lines';
 
-    private const COUPON_KEY = 'cart.coupon';
+    private const REWARD_KEY = 'cart.loyalty_reward';
 
     public const MAX_QUANTITY = 99;
 
@@ -167,38 +166,23 @@ class Cart
         return ($lines ?? $this->lines())->filter(fn ($line) => $line->selected && $line->available);
     }
 
-    public function coupon(): ?Coupon
-    {
-        $code = session(self::COUPON_KEY);
-
-        return $code ? Coupon::findByCode($code) : null;
-    }
-
     /**
-     * Try a promo code against the current subtotal. Returns applied,
-     * invalid, expired or minimum; only "applied" keeps the code.
+     * The shopper chose to spend a Square Loyalty reward on this basket.
+     * Whether they still have the points is checked whenever totals are worked out.
      */
-    public function applyCoupon(string $code, int $subtotalCents): string
+    public function usingReward(): bool
     {
-        $coupon = Coupon::findByCode($code);
-
-        $result = match (true) {
-            ! $coupon || ! $coupon->isLive() || ! $coupon->usableBy(auth()->user()) => 'invalid',
-            $coupon->isExpired() => 'expired',
-            $coupon->min_subtotal_cents && $subtotalCents < $coupon->min_subtotal_cents => 'minimum',
-            default => 'applied',
-        };
-
-        if ($result === 'applied') {
-            session([self::COUPON_KEY => $coupon->code]);
-        }
-
-        return $result;
+        return (bool) session(self::REWARD_KEY, false);
     }
 
-    public function removeCoupon(): void
+    public function useReward(): void
     {
-        session()->forget(self::COUPON_KEY);
+        session([self::REWARD_KEY => true]);
+    }
+
+    public function dropReward(): void
+    {
+        session()->forget(self::REWARD_KEY);
     }
 
     /**
@@ -207,7 +191,7 @@ class Cart
     public function clear(int ...$variationIds): void
     {
         $this->remove(...$variationIds);
-        $this->removeCoupon();
+        $this->dropReward();
     }
 
     /**

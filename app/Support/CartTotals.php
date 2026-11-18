@@ -2,8 +2,8 @@
 
 namespace App\Support;
 
-use App\Models\Coupon;
 use App\Models\User;
+use App\Services\Loyalty\LoyaltyReward;
 use App\Services\Promotions\AppliedPromotion;
 use App\Services\Promotions\PromotionEngine;
 use Illuminate\Support\Collection;
@@ -12,8 +12,8 @@ use Illuminate\Support\Collection;
  * Money breakdown shown in every Order Summary. All amounts are cents.
  * A null delivery fee means "not known yet" (no address checked).
  *
- * One discount per order: a promo/reward code or the best live promotion,
- * whichever saves the shopper more. They never stack.
+ * One discount per order: a Square Loyalty reward or the best live
+ * promotion, whichever saves the shopper more. They never stack.
  */
 final class CartTotals
 {
@@ -23,10 +23,10 @@ final class CartTotals
         public readonly int $savings,
         public readonly int $discount,
         public readonly ?int $deliveryFee,
-        public readonly ?Coupon $coupon,
+        public readonly ?LoyaltyReward $reward = null,
         public readonly ?AppliedPromotion $promotion = null,
-        // A valid code the shopper entered that lost out to a better promotion.
-        public readonly ?Coupon $setAsideCoupon = null,
+        // A reward the shopper chose that lost out to a better promotion (no points are spent).
+        public readonly ?LoyaltyReward $setAsideReward = null,
     ) {}
 
     /**
@@ -34,30 +34,28 @@ final class CartTotals
      * @param  ?User  $customer  the shopper, when known, for promotion eligibility
      * @param  ?string  $email  a guest's email at checkout, for promotion eligibility
      */
-    public static function for(Collection $checkoutLines, ?Coupon $coupon = null, ?int $deliveryFee = 0, ?User $customer = null, ?string $email = null): self
+    public static function for(Collection $checkoutLines, ?LoyaltyReward $reward = null, ?int $deliveryFee = 0, ?User $customer = null, ?string $email = null): self
     {
         $subtotal = $checkoutLines->sum(fn ($line) => $line->variation->price_cents * $line->quantity);
 
         // No "was" prices or product savings: the shop doesn't run product discounts.
         $savings = 0;
 
-        // A code that has lapsed since it was applied simply stops counting.
-        $usable = $coupon && $coupon->isLive() && ! $coupon->isExpired()
-            && (! $coupon->min_subtotal_cents || $subtotal >= $coupon->min_subtotal_cents);
-        $couponDiscount = $usable ? $coupon->discountFor($subtotal) : 0;
+        $rewardDiscount = $reward ? $reward->discountFor($subtotal) : 0;
+        $usable = $rewardDiscount > 0;
 
         $promotion = app(PromotionEngine::class)->best($checkoutLines, $customer, $email);
-        $promotionWins = $promotion && $promotion->discount > $couponDiscount;
+        $promotionWins = $promotion && $promotion->discount > $rewardDiscount;
 
         return new self(
             itemCount: (int) $checkoutLines->sum('quantity'),
             subtotal: $subtotal,
             savings: $savings,
-            discount: $promotionWins ? $promotion->discount : $couponDiscount,
+            discount: $promotionWins ? $promotion->discount : $rewardDiscount,
             deliveryFee: $deliveryFee,
-            coupon: $usable && ! $promotionWins ? $coupon : null,
+            reward: $usable && ! $promotionWins ? $reward : null,
             promotion: $promotionWins ? $promotion : null,
-            setAsideCoupon: $usable && $promotionWins ? $coupon : null,
+            setAsideReward: $usable && $promotionWins ? $reward : null,
         );
     }
 

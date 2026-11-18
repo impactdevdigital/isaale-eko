@@ -4,15 +4,14 @@ use App\Livewire\Admin\PromotionsManager;
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
 use App\Models\AnalyticsEvent;
-use App\Models\Coupon;
 use App\Models\Order;
-use App\Models\PointTransaction;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Promotion;
 use App\Models\PromotionRedemption;
 use App\Models\User;
 use App\Services\Checkout\PlaceOrder;
+use App\Services\Loyalty\LoyaltyReward;
 use App\Services\Promotions\PromotionEngine;
 use App\Support\Cart;
 use App\Support\CartTotals;
@@ -167,27 +166,22 @@ test('guests get the first order offer at checkout once they type an email with 
         ->assertSee(money(2000 - 500));
 });
 
-test('one discount per order: the better of a promotion and a code wins, and the shopper is told', function () {
+test('one discount per order: the better of a promotion and a loyalty reward wins, and the shopper is told', function () {
     $newcomer = User::factory()->create();
     promotion(['name' => 'Welcome 10% off']);
-    Coupon::create(['code' => 'TENOFF', 'type' => 'fixed', 'value' => 400, 'is_active' => true]);
+    $reward = new LoyaltyReward(accountId: 'acct-1', tierId: 'tier-1', name: '$4 off', points: 100, fixedCents: 400);
     $cart = app(Cart::class);
     $cart->add($this->rice->id);
     $cart->add($this->okra->id, 4); // subtotal $40
 
-    $cart->applyCoupon('TENOFF', $cart->subtotalCents());
+    // Reward: $4 off; promotion: 10% = $4. A tie keeps the reward.
+    $totals = CartTotals::for(lines(), $reward, customer: $newcomer);
+    expect($totals->discount)->toBe(400)->and($totals->reward)->toBe($reward)->and($totals->promotion)->toBeNull();
 
-    // Code: $4 off; promotion: 10% = $4. A tie keeps the code.
-    $totals = CartTotals::for(lines(), $cart->coupon(), customer: $newcomer);
-    expect($totals->discount)->toBe(400)->and($totals->coupon?->code)->toBe('TENOFF')->and($totals->promotion)->toBeNull();
-
-    // At $60 the promotion ($6) beats the code ($4): no stacking, the code is set aside.
+    // At $60 the promotion ($6) beats the reward ($4): no stacking, the reward is set aside.
     $cart->add($this->rice->id);
-    $totals = CartTotals::for(lines(), $cart->coupon(), customer: $newcomer);
-    expect($totals->discount)->toBe(600)->and($totals->promotion)->not->toBeNull()->and($totals->setAsideCoupon?->code)->toBe('TENOFF');
-
-    $this->actingAs($newcomer);
-    Livewire::test(CartPage::class)->assertSee('Your code TENOFF isn’t used: Welcome 10% off saves you more. One discount per order.');
+    $totals = CartTotals::for(lines(), $reward, customer: $newcomer);
+    expect($totals->discount)->toBe(600)->and($totals->promotion)->not->toBeNull()->and($totals->setAsideReward)->toBe($reward);
 });
 
 test('a budget cap stops the promotion once reached, and the last redemption is re-checked when the order is placed', function () {
@@ -209,7 +203,7 @@ test('audience sizes for the admin preview: lapsed customers and loyalty members
     Order::create(['number' => 'ISA-OLD001', 'user_id' => $lapsed->id, 'status' => Order::STATUS_PAID, 'fulfilment' => 'pickup', 'contact_name' => 'A', 'subtotal_cents' => 100, 'total_cents' => 100, 'payment_method' => 'card', 'placed_at' => now()->subDays(120)]);
     $recent = User::factory()->create();
     Order::create(['number' => 'ISA-NEW001', 'user_id' => $recent->id, 'status' => Order::STATUS_PAID, 'fulfilment' => 'pickup', 'contact_name' => 'B', 'subtotal_cents' => 100, 'total_cents' => 100, 'payment_method' => 'card', 'placed_at' => now()->subDays(10)]);
-    PointTransaction::create(['user_id' => $recent->id, 'type' => PointTransaction::TYPE_EARNED, 'points' => 10, 'description' => 'test']);
+    Order::where('user_id', $recent->id)->update(['loyalty_account_id' => 'acct-recent']);
 
     expect($engine->audienceSize('lapsed'))->toBe(1)
         ->and($engine->audienceSize('loyalty_members'))->toBe(1)

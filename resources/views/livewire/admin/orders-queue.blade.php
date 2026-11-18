@@ -914,7 +914,7 @@
                             </div>
                             @if ($selectedOrder->discount_cents > 0)
                                 <div class="flex justify-between text-[#DF2600]">
-                                    <span>Discount ({{ $selectedOrder->coupon_code ?? 'Promo' }})</span>
+                                    <span>Discount ({{ $selectedOrder->discountLabel() }})</span>
                                     <span>-{{ money($selectedOrder->discount_cents) }}</span>
                                 </div>
                             @endif

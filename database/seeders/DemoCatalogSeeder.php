@@ -118,8 +118,6 @@ class DemoCatalogSeeder extends Seeder
 
         $this->recipesAndCollections();
 
-        $this->call(DemoCouponSeeder::class);
-
         FrenchNames::fill();
     }
 

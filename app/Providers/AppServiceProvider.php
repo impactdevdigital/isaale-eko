@@ -8,8 +8,6 @@ use App\Models\Ingredient;
 use App\Models\MealCombo;
 use App\Models\Product;
 use App\Models\Recipe;
-use App\Services\Loyalty\LoyaltyProvider;
-use App\Services\Loyalty\WebsiteLoyaltyProvider;
 use App\Services\Messaging\LogSmsSender;
 use App\Services\Messaging\SmsSender;
 use App\Support\Cart;
@@ -27,12 +25,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SmsSender::class, LogSmsSender::class);
 
         $this->app->scoped(Cart::class);
-
-        // The loyalty engine. A SquareLoyaltyProvider slots in here once the
-        // Square Loyalty sandbox spike passes (see config/loyalty.php).
-        $this->app->bind(LoyaltyProvider::class, fn ($app) => match (config('loyalty.provider')) {
-            default => $app->make(WebsiteLoyaltyProvider::class),
-        });
     }
 
     /**

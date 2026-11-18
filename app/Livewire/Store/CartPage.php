@@ -3,6 +3,7 @@
 namespace App\Livewire\Store;
 
 use App\Livewire\Store\Concerns\BuildsBasketToBudget;
+use App\Livewire\Store\Concerns\SpendsLoyaltyReward;
 use App\Models\Product;
 use App\Services\Baskets\BudgetBuilder;
 use App\Services\Promotions\PromotionEngine;
@@ -18,19 +19,7 @@ use Livewire\Component;
 #[Title('Your basket')]
 class CartPage extends Component
 {
-    use BuildsBasketToBudget;
-
-    public string $couponCode = '';
-
-    /**
-     * applied, invalid, expired or minimum, after the shopper presses Apply.
-     */
-    public ?string $couponResult = null;
-
-    public function mount(): void
-    {
-        $this->couponCode = $this->cart()->coupon()?->code ?? '';
-    }
+    use BuildsBasketToBudget, SpendsLoyaltyReward;
 
     public function increment(int $variation): void
     {
@@ -72,20 +61,6 @@ class CartPage extends Component
         $this->changed();
     }
 
-    public function applyCoupon(): void
-    {
-        $this->validate(['couponCode' => ['required', 'string', 'max:40']], ['couponCode.required' => 'Enter a code first.']);
-
-        $this->couponResult = $this->cart()->applyCoupon($this->couponCode, $this->cart()->subtotalCents());
-        $this->couponCode = strtoupper(trim($this->couponCode));
-    }
-
-    public function removeCoupon(): void
-    {
-        $this->cart()->removeCoupon();
-        $this->reset('couponCode', 'couponResult');
-    }
-
     /**
      * Keep the header count and drawer in step with this page.
      */
@@ -115,7 +90,8 @@ class CartPage extends Component
         $cart = $this->cart();
         $lines = $cart->lines();
         $checkoutLines = $cart->checkoutLines($lines);
-        $totals = CartTotals::for($checkoutLines, $cart->coupon(), deliveryFee: null, customer: Auth::user());
+        $rewardOffer = $this->rewardOffer();
+        $totals = CartTotals::for($checkoutLines, $this->chosenReward($rewardOffer), deliveryFee: null, customer: Auth::user());
         app(PromotionEngine::class)->recordExposure($totals->promotion, 'basket');
 
         return view('livewire.store.cart-page', [
@@ -124,6 +100,7 @@ class CartPage extends Component
             'checkoutLines' => $checkoutLines,
             'allSelected' => $lines->isNotEmpty() && $lines->every->selected,
             'totals' => $totals,
+            'rewardOffer' => $rewardOffer,
             'budget' => app(BudgetBuilder::class)->status(),
             'budgetSuggestions' => app(BudgetBuilder::class)->suggestions(),
             'popular' => Product::forCard()

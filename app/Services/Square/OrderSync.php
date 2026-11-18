@@ -37,7 +37,11 @@ class OrderSync
 
     public static function enabled(): bool
     {
-        return (bool) config('services.square.sync_orders', true) && filled(config('services.square.token'));
+        // Test payments go to another (sandbox) account, so there is no real
+        // payment to attach a live Square order to: keep test orders out of it.
+        return (bool) config('services.square.sync_orders', true)
+            && filled(config('services.square.token'))
+            && ! SquareGateway::separatePayments();
     }
 
     /**

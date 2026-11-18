@@ -14,6 +14,7 @@ use App\Services\Checkout\PlaceOrder;
 use App\Services\Checkout\TakePayment;
 use App\Services\ConsentService;
 use App\Services\Promotions\PromotionEngine;
+use App\Services\Square\SquareGateway;
 use App\Support\Cart;
 use App\Support\CartTotals;
 use App\Support\Delivery;
@@ -573,9 +574,9 @@ class Checkout extends Component
             'pickupLabel' => $this->pickupStart ? self::windowLabel(CarbonImmutable::parse($this->pickupStart)) : null,
             'etransfer' => config('payments.etransfer'),
             'square' => [
-                'env' => config('services.square.env'),
-                'appId' => config('services.square.app_id'),
-                'locationId' => config('services.square.location_id'),
+                'env' => SquareGateway::payments()['env'],
+                'appId' => SquareGateway::payments()['app_id'],
+                'locationId' => SquareGateway::payments()['location_id'],
                 'method' => $this->paymentMethod,
                 'amount' => $totals->total(),
                 'currency' => config('shop.currency'),

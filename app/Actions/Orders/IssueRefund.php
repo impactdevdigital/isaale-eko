@@ -49,7 +49,7 @@ class IssueRefund
         $done = false;
         $squareRefundId = null;
 
-        if ($isOnlinePayment && filled($order->payment_id) && $this->square && filled(config('services.square.token'))) {
+        if ($isOnlinePayment && filled($order->payment_id) && $this->square && filled(SquareGateway::payments()['token'])) {
             try {
                 $sq = $this->square->refundPayment(
                     $order->payment_id,

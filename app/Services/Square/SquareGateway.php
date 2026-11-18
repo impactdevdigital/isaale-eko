@@ -11,19 +11,64 @@ use Illuminate\Support\Facades\Http;
 
 class SquareGateway
 {
+    /**
+     * The Square account card payments and refunds go to: the SQUARE_PAYMENTS_*
+     * account when one is set (e.g. sandbox, for test payments on a live
+     * catalogue), otherwise the main one.
+     *
+     * @return array{env: string, token: ?string, location_id: ?string, app_id: ?string}
+     */
+    public static function payments(): array
+    {
+        $own = config('services.square.payments', []);
+
+        if (! filled($own['token'] ?? null)) {
+            return [
+                'env' => (string) config('services.square.env'),
+                'token' => config('services.square.token'),
+                'location_id' => config('services.square.location_id'),
+                'app_id' => config('services.square.app_id'),
+            ];
+        }
+
+        return [
+            'env' => (string) ($own['env'] ?: 'sandbox'),
+            'token' => $own['token'],
+            'location_id' => $own['location_id'] ?? null,
+            'app_id' => $own['app_id'] ?? null,
+        ];
+    }
+
+    /**
+     * True when payments go to a different Square account from the catalogue
+     * (test payments on a live shop).
+     */
+    public static function separatePayments(): bool
+    {
+        return filled(config('services.square.payments.token'))
+            && config('services.square.payments.token') !== config('services.square.token');
+    }
+
     private function http(): PendingRequest
     {
         return $this->request()->asJson();
     }
 
-    private function request(): PendingRequest
+    private function payHttp(): PendingRequest
     {
-        $base = config('services.square.env') === 'production'
+        $pay = self::payments();
+
+        return $this->request($pay['env'], $pay['token'])->asJson();
+    }
+
+    private function request(?string $env = null, ?string $token = null): PendingRequest
+    {
+        $base = ($env ?? config('services.square.env')) === 'production'
             ? 'https://connect.squareup.com'
             : 'https://connect.squareupsandbox.com';
 
         return Http::baseUrl($base)
-            ->withToken(config('services.square.token'))
+            ->withToken($token ?? config('services.square.token'))
             ->withHeaders(['Square-Version' => config('services.square.version')])
             ->acceptJson()->timeout(20)
             ->retry(2, 500, fn ($e) => $e instanceof ConnectionException, throw: false);
@@ -211,10 +256,10 @@ class SquareGateway
      */
     public function chargeToken(string $sourceToken, int $cents, string $currency, string $idempotencyKey, string $referenceId, ?string $note = null, ?string $buyerEmail = null): array
     {
-        return $this->http()->post('/v2/payments', array_filter([
+        return $this->payHttp()->post('/v2/payments', array_filter([
             'idempotency_key' => $idempotencyKey,
             'source_id' => $sourceToken,
-            'location_id' => config('services.square.location_id'),
+            'location_id' => self::payments()['location_id'],
             'amount_money' => ['amount' => $cents, 'currency' => $currency],
             'reference_id' => $referenceId,
             'note' => $note,
@@ -225,7 +270,7 @@ class SquareGateway
 
     public function refundPayment(string $paymentId, int $cents, string $currency, string $reason, string $idempotencyKey): array
     {
-        return $this->http()->post('/v2/refunds', [
+        return $this->payHttp()->post('/v2/refunds', [
             'idempotency_key' => $idempotencyKey,
             'payment_id' => $paymentId,
             'amount_money' => ['amount' => $cents, 'currency' => $currency],

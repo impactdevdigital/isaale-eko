@@ -83,6 +83,12 @@
                 <p class="text-[14px] leading-[22px] font-medium text-body-muted">{{ $subtitle }}</p>
             </div>
 
+            @if ($square['env'] !== 'production')
+                <p class="rounded-sm border border-brand-yellow-50 bg-brand-yellow-10 px-4 py-3 text-body-sm" role="note">
+                    <strong>Test payments:</strong> no real money is taken. Use card 4111 1111 1111 1111, any future expiry, CVV 111, postal code 94103.
+                </p>
+            @endif
+
             @if ($quantityChanged)
                 <p class="rounded-sm bg-brand-yellow-10 px-4 py-3 text-body-sm text-brand-yellow-90" role="status">Some quantities changed because stock ran low. Your order summary shows what’s available.</p>
             @endif

@@ -5,6 +5,7 @@ use App\Mail\OrderConfirmedMail;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Square\SquareGateway;
 use App\Support\Cart;
 use Carbon\CarbonImmutable;
 use Database\Seeders\DemoCatalogSeeder;
@@ -117,4 +118,52 @@ test('the Square webhook settles an order whose payment completed later', functi
     expect($order->fresh()->status)->toBe(Order::STATUS_PAID)
         ->and($order->fresh()->payment_id)->toBe('sq-pay-late');
     Mail::assertSent(OrderConfirmedMail::class);
+});
+
+test('test payments go to the sandbox account while the catalogue stays live', function () {
+    config([
+        'services.square.env' => 'production',
+        'services.square.token' => 'live-token',
+        'services.square.location_id' => 'LIVE-LOC',
+        'services.square.app_id' => 'sq0idp-live',
+        'services.square.payments' => [
+            'env' => 'sandbox',
+            'token' => 'sandbox-token',
+            'location_id' => 'SANDBOX-LOC',
+            'app_id' => 'sandbox-sq0idb-test',
+        ],
+    ]);
+    Http::fake(['*/v2/payments' => Http::response(['payment' => ['id' => 'sq-test-1', 'status' => 'COMPLETED']])]);
+    $this->actingAs(User::factory()->create(['email_verified_at' => now()]));
+    app(Cart::class)->add($this->okra, 2);
+
+    Livewire::test(Checkout::class)
+        ->set('pickupStart', $this->slot)
+        ->set('paymentMethod', 'card')
+        ->assertSee('Test payments:')
+        ->assertSee('sandbox-sq0idb-test')
+        ->assertDontSee('sq0idp-live')
+        ->call('pay', 'cnon:card-nonce-ok', 'attempt-1')
+        ->assertRedirect();
+
+    // Card charged in sandbox; no order pushed to the live Square account.
+    Http::assertSent(fn ($request) => $request->url() === 'https://connect.squareupsandbox.com/v2/payments'
+        && $request->hasHeader('Authorization', 'Bearer sandbox-token')
+        && $request['location_id'] === 'SANDBOX-LOC');
+    Http::assertNotSent(fn ($request) => str_starts_with($request->url(), 'https://connect.squareup.com'));
+    expect(Order::firstOrFail()->status)->toBe(Order::STATUS_PAID);
+});
+
+test('without separate payment settings, payments use the main Square account', function () {
+    config([
+        'services.square.env' => 'production',
+        'services.square.token' => 'live-token',
+        'services.square.location_id' => 'LIVE-LOC',
+        'services.square.app_id' => 'sq0idp-live',
+        'services.square.payments' => ['env' => null, 'token' => null, 'location_id' => null, 'app_id' => null],
+    ]);
+
+    expect(SquareGateway::payments())->toBe([
+        'env' => 'production', 'token' => 'live-token', 'location_id' => 'LIVE-LOC', 'app_id' => 'sq0idp-live',
+    ])->and(SquareGateway::separatePayments())->toBeFalse();
 });

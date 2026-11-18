@@ -45,6 +45,16 @@ return [
         'webhook_url' => env('SQUARE_WEBHOOK_URL'),
         // Copy website orders into Square (items, customer, pickup/delivery). See OrderSync.
         'sync_orders' => (bool) env('SQUARE_SYNC_ORDERS', true),
+
+        // Card payments and refunds. Empty = the account above. Set all four
+        // SQUARE_PAYMENTS_* to a sandbox app to take test payments while the
+        // catalogue still comes from the live account. See SquareGateway::payments().
+        'payments' => [
+            'env'         => env('SQUARE_PAYMENTS_ENV'),
+            'token'       => env('SQUARE_PAYMENTS_ACCESS_TOKEN'),
+            'location_id' => env('SQUARE_PAYMENTS_LOCATION_ID'),
+            'app_id'      => env('SQUARE_PAYMENTS_APP_ID'),
+        ],
     ],
 
     'doordash' => [

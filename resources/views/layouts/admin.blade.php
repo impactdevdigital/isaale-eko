@@ -449,6 +449,21 @@
                             @endif
                         </a>
 
+                        <a href="{{ route('admin.stories') }}"
+                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors {{ request()->routeIs('admin.stories') ? 'bg-[#FFF0EC] text-[#DF2600]' : 'text-[#111111] hover:bg-[#F6F6F6]' }}">
+                            <span class="flex items-center gap-3">
+                                <svg class="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                </svg>
+                                Stories &amp; Updates
+                            </span>
+                            @if ($sidebarPendingComments > 0)
+                                <span class="text-[11px] font-bold bg-[#DF2600] text-white px-2 py-0.5 rounded-full" title="Comments waiting for approval">
+                                    {{ $sidebarPendingComments }}
+                                </span>
+                            @endif
+                        </a>
+
                         <div class="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-[#686868] opacity-60">
                             <span class="flex items-center gap-3">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

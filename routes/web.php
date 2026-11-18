@@ -118,7 +118,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/categories', CategoriesManager::class)->name('categories');
         Route::get('/recipes', RecipesManager::class)->name('recipes');
         Route::get('/stories', StoriesManager::class)->name('stories');
-        Route::get('/settings', StoreSettings::class)->name('settings');
+        Route::get('/settings', StoreSettings::class)->middleware('admin:manager')->name('settings');
         Route::get('/hours', StoreHoursEditor::class)->name('hours');
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
         Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');

@@ -12,7 +12,8 @@ use Livewire\Component;
 
 /**
  * Password-free sign-in drawer (Figma 06 "Create Account or Sign In"):
- * phone or email, a six-digit code, then a name for first-time shoppers.
+ * email, a six-digit code, then a name for first-time shoppers. Email only:
+ * the shop doesn't send SMS codes.
  * Accounts are matched only on the identifier just verified, as at checkout.
  */
 class SignIn extends Component
@@ -78,12 +79,14 @@ class SignIn extends Component
 
     public function useChannel(string $channel): void
     {
-        $this->channel = $channel === 'phone' ? 'phone' : 'email';
+        $this->channel = 'email';
         $this->resetErrorBag();
     }
 
     public function sendCode(): void
     {
+        $this->channel = 'email';
+
         $this->validate(
             $this->channel === 'email'
                 ? ['email' => ['required', 'email:rfc', 'max:255']]

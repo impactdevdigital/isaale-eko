@@ -160,7 +160,7 @@ test('guests get the first order offer at checkout once they type an email with 
     promotion(['name' => 'Welcome $5 off', 'template' => Promotion::TEMPLATE_FIRST_ORDER, 'audience' => 'first_time', 'discount_type' => 'fixed', 'discount_value' => 500]);
     app(Cart::class)->add($this->rice->id);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->assertDontSee('Welcome $5 off')
         ->set('email', 'brand-new@example.com')
         ->assertSee('Welcome $5 off')

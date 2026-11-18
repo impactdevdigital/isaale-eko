@@ -23,35 +23,16 @@
         @if ($step === 'contact')
             <h2 id="sign-in-title" class="mt-14 text-center text-[28px] leading-9 font-bold">Welcome To Ìsàlèè Èkó</h2>
             <p class="mt-2 text-center text-body text-body-muted">
-                {{ $channel === 'email' ? 'Enter your email — we’ll send you a confirmation code.' : 'Enter your mobile number — we’ll text you a confirmation code.' }}
+                Enter your email — we’ll send you a confirmation code.
             </p>
 
-            <div class="mt-8 grid grid-cols-2 gap-1 rounded-sm bg-grayscale-0 p-1" role="tablist" aria-label="Sign in with">
-                @foreach (['phone' => 'Phone', 'email' => 'Email'] as $value => $label)
-                    <button type="button" role="tab" aria-selected="{{ $channel === $value ? 'true' : 'false' }}" wire:click="useChannel('{{ $value }}')"
-                            @class(['flex h-9 items-center justify-center gap-2 rounded-sm text-[14px]', 'bg-surface font-bold text-ink shadow-sm' => $channel === $value, 'text-body-muted' => $channel !== $value])>
-                        <x-store.icon :name="$value === 'phone' ? 'phone' : 'mail'" class="size-4" />
-                        {{ $label }}
-                    </button>
-                @endforeach
-            </div>
-
-            <form wire:submit="sendCode" class="mt-6 flex flex-col gap-6">
-                @if ($channel === 'email')
-                    <div>
-                        <label for="sign-in-email" class="mb-2 block text-body-sm text-grayscale-80">Email address</label>
-                        <input id="sign-in-email" type="email" wire:model="email" autocomplete="email" placeholder="name@example.com"
-                               @class(['h-11 w-full rounded-sm border bg-grayscale-0 px-4 text-[16px] focus:border-ink focus:outline-none', 'border-price-40' => $errors->has('email'), 'border-grayscale-30' => ! $errors->has('email')])>
-                        @error('email') <p class="mt-1.5 text-body-xs text-price-40">{{ $message }}</p> @enderror
-                    </div>
-                @else
-                    <div>
-                        <label for="sign-in-phone" class="mb-2 block text-body-sm text-grayscale-80">Mobile number</label>
-                        <input id="sign-in-phone" type="tel" wire:model="phone" autocomplete="tel" placeholder="+1 (555) 000-0000"
-                               @class(['h-11 w-full rounded-sm border bg-grayscale-0 px-4 text-[16px] focus:border-ink focus:outline-none', 'border-price-40' => $errors->has('phone'), 'border-grayscale-30' => ! $errors->has('phone')])>
-                        @error('phone') <p class="mt-1.5 text-body-xs text-price-40">{{ $message }}</p> @enderror
-                    </div>
-                @endif
+            <form wire:submit="sendCode" class="mt-8 flex flex-col gap-6">
+                <div>
+                    <label for="sign-in-email" class="mb-2 block text-body-sm text-grayscale-80">Email address</label>
+                    <input id="sign-in-email" type="email" wire:model="email" autocomplete="email" placeholder="name@example.com"
+                           @class(['h-11 w-full rounded-sm border bg-grayscale-0 px-4 text-[16px] focus:border-ink focus:outline-none', 'border-price-40' => $errors->has('email'), 'border-grayscale-30' => ! $errors->has('email')])>
+                    @error('email') <p class="mt-1.5 text-body-xs text-price-40">{{ $message }}</p> @enderror
+                </div>
 
                 <button type="submit" wire:loading.attr="disabled" class="h-12 rounded-full bg-ink text-[15px] font-bold text-white disabled:opacity-60">Get Confirmation Code</button>
             </form>

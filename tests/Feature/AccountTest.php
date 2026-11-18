@@ -69,7 +69,7 @@ test('guests are sent to the sign-in drawer and come back to the page they asked
     expect(Auth::id())->toBe($user->id);
 });
 
-test('a first-time shopper verifies a phone and gives their name', function () {
+test('sign in is email only: no phone option and no SMS', function () {
     $sms = new class implements SmsSender
     {
         public array $sent = [];
@@ -81,28 +81,17 @@ test('a first-time shopper verifies a phone and gives their name', function () {
     };
     app()->instance(SmsSender::class, $sms);
 
-    $component = Livewire::test(SignIn::class)
+    Livewire::test(SignIn::class)
+        ->set('open', true)
+        ->assertDontSee('Mobile number')
         ->call('useChannel', 'phone')
+        ->assertSet('channel', 'email')
         ->set('phone', '(506) 555-0101')
+        ->set('email', 'ada@example.com')
         ->call('sendCode')
-        ->assertSet('codeDestination', '+15065550101');
+        ->assertSet('codeDestination', 'ada@example.com');
 
-    preg_match('/\d{6}/', $sms->sent[0][1], $m);
-
-    $component->set('code', '000000')->call('verifyCode')->assertHasErrors('code');
-
-    $component->set('code', $m[0])->call('verifyCode')
-        ->assertSet('step', 'details')
-        ->call('completeAccount')
-        ->assertHasErrors('name')
-        ->set('name', 'Ada Obi')
-        ->call('completeAccount')
-        ->assertRedirect();
-
-    $user = User::where('phone', '+15065550101')->first();
-    expect($user->name)->toBe('Ada Obi')
-        ->and($user->phone_verified_at)->not->toBeNull()
-        ->and(Auth::id())->toBe($user->id);
+    expect($sms->sent)->toBe([]);
 });
 
 test('the details step cannot be skipped without a verified code', function () {

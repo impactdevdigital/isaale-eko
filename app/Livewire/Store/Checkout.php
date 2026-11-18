@@ -50,6 +50,9 @@ class Checkout extends Component
 
     public bool $marketing = false;
 
+    /** Every order needs a phone number, so the store can reach the shopper about it. */
+    public string $phone = '';
+
     /** A guest's details passed "Proceed to checkout"; editing them hides Pay again. */
     #[Locked]
     public bool $guestReady = false;
@@ -116,6 +119,10 @@ class Checkout extends Component
             if ($default = $user->addresses()->first()) {
                 $this->useAddress($default->id);
             }
+
+            $this->phone = (string) ($user->phone
+                ?? $user->orders()->whereNotNull('contact_phone')->latest('id')->value('contact_phone')
+                ?? $default?->phone);
         }
     }
 
@@ -175,6 +182,10 @@ class Checkout extends Component
             if (trim($this->name) === '' || mb_strlen(trim($this->name)) > 120) {
                 $this->addError('name', 'Enter your full name.');
             }
+        }
+
+        if (! $this->phoneIsValid()) {
+            $this->addError('phone', 'Enter a phone number with area code.');
         }
 
         if ($this->fulfilment === 'pickup' && ! $this->pickupStart) {
@@ -453,9 +464,21 @@ class Checkout extends Component
         }
     }
 
+    private function phoneIsValid(): bool
+    {
+        return (bool) preg_match('/^\+?[0-9 ()-]{10,20}$/', trim($this->phone));
+    }
+
     private function placeOrder(): ?Order
     {
         $guest = Auth::guest();
+
+        if (! $this->phoneIsValid()) {
+            $this->addError('phone', 'Enter a phone number with area code.');
+            $this->problem = 'Add your phone number so we can reach you about this order.';
+
+            return null;
+        }
 
         if (! $user = $this->customer()) {
             $this->problem = 'Check your email and name, then press Proceed to checkout.';
@@ -473,6 +496,7 @@ class Checkout extends Component
                 address: $this->fulfilment === 'delivery' ? $this->address : null,
                 clearCart: false,
                 guestEmail: $guest ? $user->email : null,
+                contactPhone: self::normalisePhone($this->phone),
             );
         } catch (CheckoutProblem $problem) {
             // Keep the verified identity, address and slot; just explain what to fix.
@@ -568,7 +592,7 @@ class Checkout extends Component
             'days' => $this->modal === 'slot' ? $windows->days() : collect(),
             'windows' => $this->modal === 'slot' && $this->slotDay ? $windows->windowsFor(CarbonImmutable::parse($this->slotDay, config('shop.timezone'))) : collect(),
             'savedAddresses' => $user ? $user->addresses : collect(),
-            'readyToPay' => ($user || $this->guestReady) && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
+            'readyToPay' => ($user || $this->guestReady) && $this->phoneIsValid() && $fulfilmentReady && $this->paymentMethod && $checkoutLines->isNotEmpty(),
             'fulfilmentReady' => $fulfilmentReady,
             'deliveryEnabled' => Delivery::enabled(),
             'pickupLabel' => $this->pickupStart ? self::windowLabel(CarbonImmutable::parse($this->pickupStart)) : null,

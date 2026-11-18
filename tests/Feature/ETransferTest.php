@@ -29,7 +29,7 @@ function placeETransferPickupOrder(): Order
     test()->actingAs($user);
     app(Cart::class)->add(Product::where('slug', 'fresh-okra')->firstOrFail()->defaultVariation->id, 2);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->set('paymentMethod', 'etransfer')
@@ -45,7 +45,7 @@ function placeETransferPickupOrder(): Order
 test('e-Transfer is offered at checkout for pickup and delivery', function () {
     app(Cart::class)->add(Product::where('slug', 'fresh-okra')->firstOrFail()->defaultVariation->id);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->assertSee('Interac e-Transfer')
         ->call('choose', 'delivery')
         ->assertSee('Interac e-Transfer');
@@ -75,7 +75,7 @@ test('the card pay action ignores e-Transfer so no charge is attempted', functio
     $this->actingAs(User::factory()->create(['email_verified_at' => now()]));
     app(Cart::class)->add(Product::where('slug', 'fresh-okra')->firstOrFail()->defaultVariation->id);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->set('paymentMethod', 'etransfer')

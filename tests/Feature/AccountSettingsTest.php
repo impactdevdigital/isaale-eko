@@ -109,21 +109,17 @@ test('an email already used by another account is refused', function () {
         ->assertSet('modal', 'enter-new');
 });
 
-test('a phone can be added without a current one to verify', function () {
-    $component = Livewire::test(AccountManagement::class)
+test('a phone number is saved straight away, with no SMS code', function () {
+    Livewire::test(AccountManagement::class)
         ->call('change', 'phone')
         ->assertSet('modal', 'enter-new')
         ->set('newValue', '506 555 0199')
         ->call('sendNewCode')
-        ->assertSet('codeDestination', '+15065550199');
+        ->assertSet('modal', null)
+        ->assertSet('notice', 'Your phone number was updated.');
 
-    preg_match('/\d{6}/', $this->sms->sent[0][1], $m);
-
-    $component->set('code', $m[0])->call('verifyNew');
-
-    expect($this->user->fresh())
-        ->phone->toBe('+15065550199')
-        ->phone_verified_at->not->toBeNull();
+    expect($this->user->fresh()->phone)->toBe('+15065550199')
+        ->and($this->sms->sent)->toBe([]);
 });
 
 test('closing the account signs out and keeps orders for the store', function () {

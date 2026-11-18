@@ -144,6 +144,17 @@
                     <x-store.check model="marketing" label="Email me offers and news (optional)" />
                 @endguest
 
+                <div class="flex flex-col gap-2">
+                    <label for="phone" class="text-[14px] leading-5">Phone Number</label>
+                    <input id="phone" type="tel" wire:model.blur="phone" autocomplete="tel" inputmode="tel" placeholder="(506) 555-0123"
+                           @class(['h-12 w-full rounded-sm border bg-surface px-4 text-[14px] placeholder:text-body-muted focus:border-ink focus:outline-none', 'border-price-40' => $errors->has('phone'), 'border-grayscale-40' => ! $errors->has('phone')])>
+                    @error('phone')
+                        <p class="text-body-xs text-price-40">{{ $message }}</p>
+                    @else
+                        <p class="text-[12px] leading-[18px] font-medium text-body-muted">We’ll only call or text about this order.</p>
+                    @enderror
+                </div>
+
                 {{-- Pickup slot or delivery address --}}
                 @if ($fulfilment === 'pickup')
                     <div class="flex flex-col gap-2">

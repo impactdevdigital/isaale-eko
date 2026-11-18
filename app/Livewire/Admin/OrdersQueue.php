@@ -13,8 +13,10 @@ use App\Models\ProductVariation;
 use App\Models\Setting;
 use App\Models\SubstitutionRequest;
 use App\Services\Checkout\OrderReceipt;
+use App\Services\Checkout\PaymentReconciler;
 use App\Services\Store\StoreHours;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -69,6 +71,15 @@ class OrdersQueue extends Component
         'fulfilmentFilter' => ['except' => ''],
         'paymentFilter' => ['except' => ''],
     ];
+
+    public function mount(): void
+    {
+        // No scheduler runs on Render's free plan, so settle stuck card
+        // payments here (at most every five minutes), after the page is sent.
+        if (filled(config('services.square.token')) && Cache::add('payments:reconcile:recent', true, 300)) {
+            dispatch(fn () => app(PaymentReconciler::class)->resolveAll())->afterResponse();
+        }
+    }
 
     public function updatingSearch(): void
     {

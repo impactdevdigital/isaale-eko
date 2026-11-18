@@ -14,6 +14,13 @@ Schedule::command('square:sync')
     ->withoutOverlapping()
     ->when(fn () => filled(config('services.square.token')));
 
+// Settle card orders whose payment outcome Square never told us (timeouts).
+// Render has no scheduler on the free plan, so the orders queue also runs this (see OrdersQueue).
+Schedule::command('payments:reconcile')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->when(fn () => filled(config('services.square.token')));
+
 // Expire unanswered substitution requests after 15 minutes
 Schedule::command('substitutions:expire')->everyMinute();
 

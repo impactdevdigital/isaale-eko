@@ -83,7 +83,8 @@ class AccountManagement extends Component
 
         $user = Auth::user();
 
-        if ($user->{$this->changing.'_verified_at'} && $user->{$this->changing}) {
+        // The shop sends no SMS, so a phone number is just saved (it's a contact number, not a sign-in).
+        if ($this->changing === 'email' && $user->email_verified_at && $user->email) {
             $this->sendTo($user->{$this->changing});
             $this->modal = 'verify-current';
 
@@ -129,6 +130,14 @@ class AccountManagement extends Component
 
         if (User::where($this->changing, $destination)->exists()) {
             $this->addError('newValue', 'Another account already uses this '.($this->changing === 'email' ? 'email address.' : 'number.'));
+
+            return;
+        }
+
+        if ($this->changing === 'phone') {
+            $user->forceFill(['phone' => $destination, 'phone_verified_at' => null])->save();
+            $this->notice = 'Your phone number was updated.';
+            $this->close();
 
             return;
         }

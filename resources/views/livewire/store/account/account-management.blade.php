@@ -110,7 +110,7 @@
 
     @if ($modal === 'enter-new')
         <x-store.modal :title="'Enter your new '.($changing === 'phone' ? 'phone number' : 'email')"
-                       :subtitle="($current ? 'Your current '.$label.' has been verified. ' : '').'We’ll send a code to your new '.($changing === 'phone' ? 'phone number' : 'email').' to confirm it belongs to you.'"
+                       :subtitle="$changing === 'phone' ? 'We’ll use this number to reach you about your orders.' : ($current ? 'Your current '.$label.' has been verified. ' : '').'We’ll send a code to your new email to confirm it belongs to you.'"
                        width="max-w-[420px]">
             <form wire:submit="sendNewCode" class="flex flex-col gap-5">
                 <x-store.field model="newValue" :label="$changing === 'phone' ? 'Mobile number' : 'Email address'" :type="$changing === 'phone' ? 'tel' : 'email'"
@@ -120,7 +120,7 @@
                 @endif
                 <div class="flex justify-end gap-3 border-t border-grayscale-30 pt-5">
                     <button type="button" wire:click="close" class="rounded-full border border-grayscale-40 px-5 py-3 text-[15px] font-bold">Cancel</button>
-                    <button type="submit" wire:loading.attr="disabled" class="rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-white disabled:opacity-60">Send verification code</button>
+                    <button type="submit" wire:loading.attr="disabled" class="rounded-full bg-ink px-5 py-3 text-[15px] font-bold text-white disabled:opacity-60">{{ $changing === 'phone' ? 'Save number' : 'Send verification code' }}</button>
                 </div>
             </form>
         </x-store.modal>

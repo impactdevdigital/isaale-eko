@@ -53,7 +53,7 @@ function payByCardSynced(): Order
     test()->actingAs(User::factory()->create(['name' => 'Amara Okafor', 'email' => 'amara@example.com', 'email_verified_at' => now()]));
     app(Cart::class)->add(test()->okra->id, 2);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('pickupStart', test()->slot)
         ->set('paymentMethod', 'card')
         ->call('pay', 'cnon:card-nonce-ok', 'attempt-1')
@@ -142,7 +142,7 @@ test('a confirmed e-Transfer goes to Square as an order paid by bank transfer', 
     $this->actingAs(User::factory()->create(['email' => 'ada@example.com', 'email_verified_at' => now()]));
     app(Cart::class)->add($this->okra->id, 2);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->set('paymentMethod', 'etransfer')

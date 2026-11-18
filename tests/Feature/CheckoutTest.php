@@ -95,7 +95,7 @@ test('guest pickup: no email code, straight to Pay and the confirmation page', f
     addToCart('fresh-okra', 2);
     $start = CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String();
 
-    $component = Livewire::test(Checkout::class)
+    $component = Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->assertSee('Fulfilment &amp; Order Review', false)
         ->assertSee('Pickup selected · No delivery address needed')
         ->assertSee('Proceed to checkout')
@@ -145,7 +145,7 @@ test('guest pickup: no email code, straight to Pay and the confirmation page', f
 test('a guest who edits their email after Proceed has to press Proceed again', function () {
     addToCart('fresh-okra');
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->set('email', 'valentine@example.com')
@@ -163,7 +163,7 @@ test('a guest who edits their email after Proceed has to press Proceed again', f
 test('guest delivery: an out-of-area address blocks proceeding; a Saint John address adds the fee', function () {
     addToCart('fresh-okra');
 
-    $component = Livewire::test(Checkout::class)
+    $component = Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->call('choose', 'delivery')
         ->assertSee('Enter your address to calculate the delivery fee')
         ->call('open', 'address')
@@ -210,7 +210,7 @@ test('with delivery switched off, checkout and the basket offer pickup only', fu
         ->assertDontSee('Estimated delivery')
         ->assertSee('Pickup fee');
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->assertDontSee('<option value="delivery"', false)
         ->call('choose', 'delivery')
         ->assertSet('fulfilment', 'pickup');
@@ -231,7 +231,7 @@ test('with delivery switched off, checkout and the basket offer pickup only', fu
 test('item quantities can be changed from the checkout page', function () {
     $variation = addToCart('fresh-okra');
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->call('increment', $variation)
         ->call('increment', $variation)
         ->call('decrement', $variation)
@@ -250,7 +250,7 @@ test('signed-in shoppers use a saved address without verifying again', function 
     $this->actingAs($user);
     addToCart('nestle-milo', 7); // over the free delivery threshold
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->call('choose', 'delivery')
         ->assertSet('selectedAddressId', $address->id)
         ->assertSet('addressStatus', 'ok')
@@ -265,7 +265,7 @@ test('a full pickup window can’t be booked', function () {
     $this->actingAs(User::factory()->create(['email_verified_at' => now()]));
     addToCart('fresh-okra');
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->assertHasErrors('slotStart')
@@ -275,7 +275,7 @@ test('a full pickup window can’t be booked', function () {
 test('pay at pickup is not offered at checkout', function () {
     addToCart('fresh-okra');
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->assertViewHas('paymentMethods', fn ($methods) => ! $methods->contains('code', 'pay_at_pickup'))
         ->assertDontSee('Pay at Pickup')
         ->call('choose', 'delivery')
@@ -285,7 +285,7 @@ test('pay at pickup is not offered at checkout', function () {
 test('a guest’s orders appear in their order history when they sign in later with the same email', function () {
     addToCart('fresh-okra');
 
-    $component = Livewire::test(Checkout::class)
+    $component = Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('slotStart', CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String())
         ->call('confirmSlot')
         ->set('email', 'valentine@example.com')
@@ -322,4 +322,35 @@ test('orders are only visible to their owner', function () {
 
     $this->get(route('orders.show', $order))->assertNotFound();
     $this->actingAs(User::factory()->create())->get(route('orders.show', $order))->assertNotFound();
+});
+
+test('every order needs a phone number, pickup included', function () {
+    addToCart('fresh-okra', 2);
+    $start = CarbonImmutable::parse('2026-10-26 11:00', 'America/Moncton')->toIso8601String();
+
+    $component = Livewire::test(Checkout::class)
+        ->set('email', 'guest@example.com')
+        ->set('name', 'Ada Obi')
+        ->set('pickupStart', $start)
+        ->set('paymentMethod', 'pay_at_pickup')
+        ->call('proceed')
+        ->assertHasErrors('phone')
+        ->assertSet('guestReady', false)
+        ->set('phone', '506 555 0123')
+        ->call('proceed')
+        ->assertHasNoErrors()
+        ->assertSet('guestReady', true);
+});
+
+test('the phone number is saved on the order and filled in next time', function () {
+    $user = User::factory()->create(['email_verified_at' => now(), 'phone' => null]);
+    $this->actingAs($user);
+    Order::create([
+        'number' => 'ISA-PREV01', 'user_id' => $user->id, 'status' => Order::STATUS_PAID, 'fulfilment' => 'pickup',
+        'contact_name' => 'Ada', 'contact_phone' => '+15065550177', 'subtotal_cents' => 100, 'total_cents' => 100,
+        'payment_method' => 'card', 'placed_at' => now(),
+    ]);
+    addToCart('fresh-okra');
+
+    Livewire::test(Checkout::class)->assertSet('phone', '+15065550177');
 });

@@ -44,6 +44,7 @@ class PlaceOrder
         ?array $address = null,
         bool $clearCart = true,
         ?string $guestEmail = null,
+        ?string $contactPhone = null,
     ): Order {
         $lines = $this->cart->lines();
         $checkoutLines = $this->cart->checkoutLines($lines);
@@ -92,7 +93,7 @@ class PlaceOrder
             ? ['channel' => 'email', 'value' => $guestEmail]
             : ($user->signInContact() ?? ['channel' => 'email', 'value' => $user->email]);
 
-        $order = DB::transaction(function () use ($user, $contactName, $fulfilment, $method, $window, $address, $totals, $checkoutLines, $contact) {
+        $order = DB::transaction(function () use ($user, $contactName, $fulfilment, $method, $window, $address, $totals, $checkoutLines, $contact, $contactPhone) {
             $order = Order::create([
                 'number' => $this->newNumber(),
                 'user_id' => $user->id,
@@ -100,7 +101,7 @@ class PlaceOrder
                 'fulfilment' => $fulfilment,
                 'contact_name' => $contactName,
                 'contact_email' => $contact['channel'] === 'email' ? $contact['value'] : null,
-                'contact_phone' => $contact['channel'] === 'phone' ? $contact['value'] : ($address['phone'] ?? null),
+                'contact_phone' => $contactPhone ?? ($contact['channel'] === 'phone' ? $contact['value'] : ($address['phone'] ?? null)),
                 'pickup_starts_at' => $window ? $window['start']->utc() : null,
                 'pickup_ends_at' => $window ? $window['end']->utc() : null,
                 'delivery_address' => $fulfilment === 'delivery' ? $address : null,

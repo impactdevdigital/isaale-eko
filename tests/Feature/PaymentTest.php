@@ -30,7 +30,7 @@ test('a card payment charges the server-side total and confirms the order', func
     $this->actingAs(User::factory()->create(['email' => 'amara@example.com', 'email_verified_at' => now()]));
     app(Cart::class)->add($this->okra, 2);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('pickupStart', $this->slot)
         ->set('paymentMethod', 'card')
         ->call('pay', 'cnon:card-nonce-ok', 'attempt-1')
@@ -62,7 +62,7 @@ test('a declined card shows the declined screen and keeps the basket and slot', 
     $this->actingAs(User::factory()->create(['email_verified_at' => now()]));
     app(Cart::class)->add($this->okra);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('pickupStart', $this->slot)
         ->set('paymentMethod', 'card')
         ->call('pay', 'cnon:card-nonce-declined')
@@ -83,7 +83,7 @@ test('online payment methods need a Square token', function () {
     $this->actingAs(User::factory()->create(['email_verified_at' => now()]));
     app(Cart::class)->add($this->okra);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('pickupStart', $this->slot)
         ->set('paymentMethod', 'card')
         ->call('pay');
@@ -137,7 +137,7 @@ test('test payments go to the sandbox account while the catalogue stays live', f
     $this->actingAs(User::factory()->create(['email_verified_at' => now()]));
     app(Cart::class)->add($this->okra, 2);
 
-    Livewire::test(Checkout::class)
+    Livewire::test(Checkout::class)->set('phone', '506 555 0123')
         ->set('pickupStart', $this->slot)
         ->set('paymentMethod', 'card')
         ->assertSee('Test payments:')

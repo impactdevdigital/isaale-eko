@@ -30,6 +30,9 @@ Schedule::command('issues:remind-overdue')->hourly();
 // Process uncollected orders and overdue pickup reminders
 Schedule::command('orders:handle-uncollected')->hourly();
 
+// Back-in-stock emails (also sent straight after each Square stock update)
+Schedule::command('stock:notify')->everyTenMinutes()->withoutOverlapping();
+
 // Brevo: newsletter sign-ups that haven't reached the list yet (older ones, or failed)
 Schedule::command('brevo:sync')->hourly()->withoutOverlapping()
     ->when(fn () => filled(config('services.brevo.key')) && filled(config('services.brevo.list_id')));

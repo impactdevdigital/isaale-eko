@@ -70,6 +70,14 @@ class Order extends Model
 
     protected static function booted(): void
     {
+        // Order timeline: record the first status and every change after it.
+        static::created(fn (Order $order) => $order->recordStatus());
+        static::updated(function (Order $order) {
+            if ($order->wasChanged(['status', 'fulfilment_status'])) {
+                $order->recordStatus();
+            }
+        });
+
         // Square Loyalty: points are earned once the order is paid for, online or at the counter.
         static::updated(function (Order $order) {
             if ($order->wasChanged(['status', 'fulfilment_status'])) {
@@ -93,6 +101,43 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function statusEvents(): HasMany
+    {
+        return $this->hasMany(OrderStatusEvent::class)->orderBy('created_at')->orderBy('id');
+    }
+
+    /**
+     * Staff-facing name of where the order is now, for the timeline.
+     * Preparing is the point the store accepts the order.
+     */
+    public function stageLabel(): string
+    {
+        $pickup = $this->fulfilment === 'pickup';
+
+        return match (true) {
+            $this->status === self::STATUS_CANCELLED => 'Cancelled',
+            $this->status === self::STATUS_REFUNDED => 'Refunded',
+            $this->status === self::STATUS_UNCOLLECTED => 'Uncollected',
+            $this->status === self::STATUS_PAYMENT_FAILED => 'Payment declined',
+            $this->status === self::STATUS_AWAITING_PAYMENT => $this->payment_method === 'etransfer' ? 'Order placed · awaiting e-Transfer' : 'Order placed · payment pending',
+            $this->fulfilment_status === self::FULFILMENT_PREPARING => 'Accepted · preparing',
+            $this->fulfilment_status === self::FULFILMENT_READY => $pickup ? 'Ready · awaiting pickup' : 'Ready for delivery',
+            $this->fulfilment_status === self::FULFILMENT_COMPLETED => $pickup ? 'Picked up · completed' : 'Delivered · completed',
+            $this->status === self::STATUS_PAID => 'Paid · new order',
+            default => 'New order',
+        };
+    }
+
+    public function recordStatus(): void
+    {
+        $this->statusEvents()->create([
+            'status' => $this->status,
+            'fulfilment_status' => $this->fulfilment_status,
+            'label' => $this->stageLabel(),
+            'user_id' => auth()->user()?->is_admin ? auth()->id() : null,
+        ]);
     }
 
     public function items(): HasMany
@@ -200,9 +245,10 @@ class Order extends Model
      */
     public function trackerSteps(): array
     {
+        // Preparing is where the store accepts the order.
         return $this->fulfilment === 'pickup'
-            ? ['Order confirmed', 'Preparing for pickup', 'Ready to collect', 'Collected']
-            : ['Order confirmed', 'Preparing for delivery', 'Out for delivery', 'Delivered'];
+            ? ['Order confirmed', 'Accepted · preparing for pickup', 'Ready to collect', 'Collected']
+            : ['Order confirmed', 'Accepted · preparing for delivery', 'Out for delivery', 'Delivered'];
     }
 
     /**

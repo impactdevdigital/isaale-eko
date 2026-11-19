@@ -72,6 +72,10 @@ Route::get('/brand-updates/{story:slug}', \App\Livewire\Store\Stories\StoryShow:
 // Community Hub teaser (Figma 07.07)
 Route::get('/community', \App\Livewire\Store\CommunityHub::class)->name('community');
 
+// Help & Contact: "Report a problem" opens an Issues Desk case
+Route::get('/help', \App\Livewire\Store\HelpCentre::class)->name('help');
+Route::redirect('/contact', '/help');
+
 // Policy Pages
 Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');
 Route::view('/refund-policy', 'store.refund-policy')->name('refund-policy');
@@ -123,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
         Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');
         Route::get('/loyalty', LoyaltyTracker::class)->middleware('admin:manager')->name('loyalty');
+        Route::get('/analytics', \App\Livewire\Admin\AnalyticsDashboard::class)->middleware('admin:manager')->name('analytics');
         Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
         Route::get('/square-check', SquareCatalogCheck::class)->middleware('admin:manager')->name('square-check');
     });

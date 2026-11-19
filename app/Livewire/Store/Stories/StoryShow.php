@@ -116,6 +116,8 @@ class StoryShow extends Component
         return view('livewire.store.stories.story-show', [
             'comments' => $this->story->approvedComments()->get(),
             'trending' => self::trending($this->story->id),
+            'storyProducts' => $this->story->products()->forCard()->get(),
+            'storyRecipes' => $this->story->recipes()->approved()->with(['products' => fn ($query) => $query->forCard()])->get(),
         ])->title($this->story->title);
     }
 }

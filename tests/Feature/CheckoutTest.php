@@ -71,7 +71,8 @@ test('items that sold out move to unavailable and quantities above stock are low
 
     Livewire::test(CartPage::class)
         ->assertSee('Unavailable items (1)')
-        ->assertSee('Only 2 left — we updated your quantity.')
+        ->assertSee('Low Stock — we lowered your quantity to what we have.')
+        ->assertDontSee('Only 2 left')
         ->assertViewHas('totals', fn ($totals) => $totals->subtotal === 499 * 2);
 });
 

@@ -50,6 +50,12 @@ class Recipe extends Model
         return $this->belongsToMany(Product::class)->withPivot('sort_order')->orderByPivot('sort_order');
     }
 
+    /** Food Stories and Brand Updates linked to this recipe. */
+    public function stories(): BelongsToMany
+    {
+        return $this->belongsToMany(Story::class)->withPivot('sort_order');
+    }
+
     public function mealCombos(): BelongsToMany
     {
         return $this->belongsToMany(MealCombo::class, 'meal_combo_recipes')->withPivot('sort_order');

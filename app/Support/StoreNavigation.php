@@ -87,7 +87,7 @@ class StoreNavigation
                     ->all(),
             ],
             'help' => [
-                'sidebar' => [__('Ask Asha') => '#', __('Delivery & pickup') => '#', __('FAQ') => '#', __('Contact us') => '#'],
+                'sidebar' => [__('Ask Asha') => '#', __('Delivery & pickup') => '#', __('FAQ') => '#', __('Report a problem') => route('help'), __('Contact us') => route('help')],
                 'eyebrow' => __('Here to help'),
                 'title' => __('Ask Asha Anything'),
                 'link' => __('Talk to Asha'),

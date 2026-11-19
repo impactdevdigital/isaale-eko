@@ -65,7 +65,7 @@
                                     Was {{ money($line->thenUnitCents) }}, now {{ money($line->variation->price_cents) }}
                                 </p>
                             @elseif ($line->status === BasketLine::STOCK_LOWERED)
-                                <p class="mt-1 text-body-xs font-bold text-brand-yellow-90">Only {{ $line->quantity }} left — we lowered the quantity</p>
+                                <p class="mt-1 text-body-xs font-bold text-brand-yellow-90">Low Stock — we lowered the quantity</p>
                             @endif
                         </div>
                     </div>

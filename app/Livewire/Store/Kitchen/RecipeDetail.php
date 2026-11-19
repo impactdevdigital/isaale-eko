@@ -152,6 +152,7 @@ class RecipeDetail extends Component
         return view('livewire.store.kitchen.recipe-detail', [
             'resolved' => $resolved,
             'cookNext' => $cookNext,
+            'stories' => $this->recipe->stories()->published()->latest('published_at')->take(3)->get(),
             'isSaved' => Auth::check() && Auth::user()->savedRecipes()->whereKey($this->recipe->id)->exists(),
             'cuisines' => config('kitchen.cuisines', []),
         ])->title("{$this->recipe->title} — Ìsalèè Kitchen");

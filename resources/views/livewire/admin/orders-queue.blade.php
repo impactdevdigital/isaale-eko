@@ -301,7 +301,7 @@
                                         wire:click="startPreparing({{ $order->id }})"
                                         style="background-color: #DF2600;"
                                         class="flex-1 py-2 px-3 rounded-xl text-white text-xs font-bold shadow-xs text-center active:scale-98 transition-transform">
-                                    Start Preparing
+                                    Accept &amp; Prepare
                                 </button>
                             @elseif ($order->fulfilment_status === \App\Models\Order::FULFILMENT_PREPARING)
                                 <button type="button"
@@ -515,7 +515,7 @@
                                                     wire:click="startPreparing({{ $order->id }})"
                                                     style="background-color: #DF2600;"
                                                     class="px-3 py-1.5 rounded-xl text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
-                                                Start Preparing
+                                                Accept &amp; Prepare
                                             </button>
                                         @elseif ($order->fulfilment_status === \App\Models\Order::FULFILMENT_PREPARING)
                                             <button type="button"
@@ -906,6 +906,24 @@
                             </div>
                         </div>
 
+                        <!-- Order Timeline: every status change, Atlantic time -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-white border border-[#EEEEEE]">
+                            <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#686868]">Order Timeline</h4>
+                            <ol class="mt-3 space-y-3">
+                                @forelse ($selectedOrder->statusEvents()->with('user')->get() as $event)
+                                    <li class="flex gap-3">
+                                        <span @class(['mt-1 size-2.5 shrink-0 rounded-full', 'bg-[#DF2600]' => $loop->last, 'bg-[#BBBBBB]' => ! $loop->last])></span>
+                                        <div class="min-w-0 text-sm">
+                                            <p class="font-bold text-[#111111]">{{ $event->label }}</p>
+                                            <p class="text-xs text-[#686868]">{{ $event->timeLabel() }}@if ($event->user) · by {{ $event->user->name }}@endif</p>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="text-xs text-[#686868]">No status changes recorded yet.</li>
+                                @endforelse
+                            </ol>
+                        </div>
+
                         <!-- Payment & Price Breakdown -->
                         <div class="p-4 sm:p-5 rounded-2xl bg-[#FAFAFA] border border-[#EEEEEE] space-y-2 text-sm">
                             <div class="flex justify-between text-[#686868]">
@@ -1006,7 +1024,7 @@
                                             wire:click="startPreparing({{ $selectedOrder->id }})"
                                             style="background-color: #DF2600;"
                                             class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-sm hover:opacity-90 transition-opacity shadow-xs text-center active:scale-98">
-                                        Start Preparing Order
+                                        Accept &amp; Start Preparing
                                     </button>
                                     <button type="button"
                                             wire:click="markAsReady({{ $selectedOrder->id }})"

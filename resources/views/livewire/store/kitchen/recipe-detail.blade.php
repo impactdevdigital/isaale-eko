@@ -265,6 +265,17 @@
         </div>
     </section>
 
+    @if ($stories->isNotEmpty())
+        <section class="mt-16 md:mt-24 border-t border-grayscale-20 pt-12 md:pt-16" aria-labelledby="recipe-stories-title">
+            <h2 id="recipe-stories-title" class="text-h2-mobile md:text-h2 font-bold text-ink">{{ __('The Story Behind It') }}</h2>
+            <div class="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                @foreach ($stories as $story)
+                    <x-store.story-card :story="$story" wire:key="recipe-story-{{ $story->id }}" />
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <!-- Cook Next Section (Figma 07.02) -->
     @if ($cookNext->isNotEmpty())
         <section class="mt-16 md:mt-24 border-t border-grayscale-20 pt-12 md:pt-16">

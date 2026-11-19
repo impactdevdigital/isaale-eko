@@ -163,7 +163,7 @@ test('order details show the tracker and are private to the owner', function () 
     $this->actingAs($user)->get('/account/orders/'.$order->number)
         ->assertOk()
         ->assertSee('Order Details')
-        ->assertSee('Preparing for pickup')
+        ->assertSee('Accepted · preparing for pickup')
         ->assertSee('We’re preparing your order now.')
         ->assertSee('Pineapple');
 

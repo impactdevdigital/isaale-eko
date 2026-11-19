@@ -152,7 +152,16 @@ class Checkout extends Component
         $this->modal = $modal;
 
         if ($modal === 'slot') {
-            $firstOpen = app(PickupWindows::class)->days()->firstWhere('open', true);
+            $windows = app(PickupWindows::class);
+            $days = $windows->days();
+            $firstOpen = $days->firstWhere('open', true);
+
+            Analytics::track('view_pickup_slots', [
+                'open_days' => $days->where('open', true)->count(),
+                'available_slots' => $days->sum(fn ($day) => $windows->windowsFor($day['date'])->where('available', true)->count()),
+                'first_available_in_days' => $firstOpen ? $days->search($firstOpen) : null,
+            ]);
+
             $this->slotDay ??= $firstOpen ? $firstOpen['date']->toDateString() : null;
             $this->slotStart = $this->pickupStart;
         }

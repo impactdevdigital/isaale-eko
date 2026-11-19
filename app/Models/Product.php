@@ -68,6 +68,12 @@ class Product extends Model
         return $this->belongsToMany(Recipe::class)->withPivot('sort_order');
     }
 
+    /** Food Stories and Brand Updates that feature this product. */
+    public function stories(): BelongsToMany
+    {
+        return $this->belongsToMany(Story::class)->withPivot('sort_order');
+    }
+
     /**
      * On sale: active in Square and not hidden by staff.
      */

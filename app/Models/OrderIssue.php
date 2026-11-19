@@ -20,6 +20,9 @@ class OrderIssue extends Model
     public const KIND_RETURN = 'return';
     public const KIND_SAFETY = 'safety';
 
+    /** A general question from the Help page, possibly without an order. */
+    public const KIND_ENQUIRY = 'enquiry';
+
     public const CHANNEL_WEBSITE = 'website';
     public const CHANNEL_EMAIL = 'email';
     public const CHANNEL_WHATSAPP = 'whatsapp';
@@ -38,6 +41,22 @@ class OrderIssue extends Model
         'first_response_at' => 'datetime',
         'resolved_at' => 'datetime',
     ];
+
+    /** Who to contact: what they typed on the Help form, else the order's details. */
+    public function contactName(): ?string
+    {
+        return $this->contact_name ?? $this->order?->contact_name ?? $this->user?->name;
+    }
+
+    public function contactEmail(): ?string
+    {
+        return $this->contact_email ?? $this->order?->contact_email ?? $this->user?->email;
+    }
+
+    public function contactPhone(): ?string
+    {
+        return $this->contact_phone ?? $this->order?->contact_phone;
+    }
 
     public function order(): BelongsTo
     {

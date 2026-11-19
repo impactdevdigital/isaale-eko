@@ -58,7 +58,7 @@ class Cart
 
             if ($available && $variation->stock_quantity !== null && $line['quantity'] > $variation->stock_quantity) {
                 $stored[$id]['quantity'] = $line['quantity'] = $variation->stock_quantity;
-                $notice = "Only {$variation->stock_quantity} left — we updated your quantity.";
+                $notice = 'Low Stock — we lowered your quantity to what we have.';
                 $changed = true;
             }
 

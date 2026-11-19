@@ -105,10 +105,12 @@ test('product page shows the right stock state', function (string $slug, string 
     $product = Product::where('slug', $slug)->firstOrFail();
 
     expect($product->stockState())->toBe($state);
-    $this->get("/products/{$slug}")->assertSee($text, escape: false);
+    $this->get("/products/{$slug}")->assertSee($text, escape: false)
+        ->assertDontSee('Only '.$product->defaultVariation->stock_quantity.' left')
+        ->assertDontSee('remaining in stock');
 })->with([
     'in stock' => ['indomie', 'in_stock', 'In stock · Ready to deliver'],
-    'low stock' => ['fresh-spinach', 'low_stock', 'Only 3 left'],
+    'low stock' => ['fresh-spinach', 'low_stock', 'Low Stock'],
     'out of stock' => ['mama-gold-garri', 'out_of_stock', 'Temporarily sold out'],
 ]);
 

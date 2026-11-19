@@ -53,7 +53,7 @@ test('a card payment charges the server-side total and confirms the order', func
     $this->withSession(['order_placed' => $order->number])
         ->get(route('orders.show', $order))
         ->assertSee('Thank You, Your Order Is Confirmed')
-        ->assertSee('Preparing for pickup')
+        ->assertSee('Accepted · preparing for pickup')
         ->assertSee('Paid online');
 });
 

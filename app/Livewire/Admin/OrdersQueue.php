@@ -174,7 +174,7 @@ class OrdersQueue extends Component
             'fulfilment_status' => Order::FULFILMENT_PREPARING,
         ]);
 
-        session()->flash('success', "Order #{$order->number} marked as Preparing.");
+        session()->flash('success', "Order #{$order->number} accepted and marked as Preparing. The customer's tracker now shows it as accepted.");
     }
 
     public function markAsReady(int $orderId, ExpireSubstitutions $expire): void

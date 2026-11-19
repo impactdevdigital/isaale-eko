@@ -122,6 +122,7 @@
                     <option value="problem">Damaged / Missing / Quality Issues</option>
                     <option value="return">Non-Food Returns (Change of Mind)</option>
                     <option value="safety">Food Safety & Allergen Alerts</option>
+                    <option value="enquiry">General Enquiries (Website)</option>
                 </select>
             </div>
         </div>
@@ -165,10 +166,10 @@
                             </span>
                         </div>
                         <h4 class="mt-1 font-extrabold text-sm text-[#111111] leading-tight">
-                            Order #{{ $issue->order->number }}
+                            {{ $issue->order ? 'Order #'.$issue->order->number : 'General enquiry' }}
                         </h4>
                         <div class="text-xs text-[#686868]">
-                            {{ $issue->order->contact_name }} · via {{ ucfirst($issue->channel) }}
+                            {{ $issue->contactName() }} · via {{ ucfirst($issue->channel) }}
                         </div>
                     </div>
 
@@ -246,11 +247,11 @@
                                 </span>
                             </td>
                             <td class="py-3.5 px-4 font-bold text-[#111111]">
-                                #{{ $issue->order->number }}
+                                {{ $issue->order ? '#'.$issue->order->number : '—' }}
                             </td>
                             <td class="py-3.5 px-4">
-                                <div class="font-bold text-[#111111]">{{ $issue->order->contact_name }}</div>
-                                <div class="text-[11px] text-[#686868]">{{ $issue->order->contact_phone ?? $issue->order->contact_email }}</div>
+                                <div class="font-bold text-[#111111]">{{ $issue->contactName() }}</div>
+                                <div class="text-[11px] text-[#686868]">{{ $issue->contactPhone() ?? $issue->contactEmail() }}</div>
                             </td>
                             <td class="py-3.5 px-4 text-xs text-[#686868]">
                                 {{ $issue->reported_at ? $issue->reported_at->format('M j, g:i A') : '—' }}
@@ -328,7 +329,7 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono text-xs font-black text-[#DF2600]">Claim {{ $selectedIssue->reference }}</span>
-                                    <span class="text-xs text-[#686868]">· Order #{{ $selectedIssue->order->number }}</span>
+                                    <span class="text-xs text-[#686868]">· {{ $selectedIssue->order ? 'Order #'.$selectedIssue->order->number : 'No order' }}</span>
                                 </div>
                                 <h3 class="text-lg sm:text-xl font-black text-[#111111] mt-0.5" id="slide-over-title">
                                     {{ ucfirst($selectedIssue->kind) }} Review
@@ -347,19 +348,19 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div class="p-4 rounded-2xl border border-[#EEEEEE] space-y-1">
                                     <span class="text-[11px] font-bold uppercase tracking-wider text-[#686868]">Customer</span>
-                                    <div class="font-extrabold text-[#111111]">{{ $selectedIssue->order->contact_name }}</div>
-                                    @if ($selectedIssue->order->contact_phone)
+                                    <div class="font-extrabold text-[#111111]">{{ $selectedIssue->contactName() }}</div>
+                                    @if ($selectedIssue->contactPhone())
                                         <div class="text-xs">
-                                            <a href="tel:{{ $selectedIssue->order->contact_phone }}" class="text-[#DF2600] font-bold hover:underline inline-flex items-center gap-1">
+                                            <a href="tel:{{ $selectedIssue->contactPhone() }}" class="text-[#DF2600] font-bold hover:underline inline-flex items-center gap-1">
                                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                                 </svg>
-                                                {{ $selectedIssue->order->contact_phone }}
+                                                {{ $selectedIssue->contactPhone() }}
                                             </a>
                                         </div>
                                     @endif
-                                    @if ($selectedIssue->order->contact_email)
-                                        <div class="text-xs text-[#686868] truncate">{{ $selectedIssue->order->contact_email }}</div>
+                                    @if ($selectedIssue->contactEmail())
+                                        <div class="text-xs text-[#686868] truncate">{{ $selectedIssue->contactEmail() }}</div>
                                     @endif
                                 </div>
 
@@ -384,6 +385,7 @@
                             @endif
 
                             <!-- Claimed Items Breakdown -->
+                            @if ($selectedIssue->items->isNotEmpty())
                             <div>
                                 <h4 class="text-xs font-bold uppercase tracking-wider text-[#686868] mb-3">
                                     Claimed Items ({{ $selectedIssue->items->count() }})
@@ -417,6 +419,8 @@
                                 </div>
                             </div>
 
+                            @endif
+
                             <!-- Uploaded Proof Photos -->
                             @if ($selectedIssue->photos->isNotEmpty())
                                 <div>
@@ -437,6 +441,7 @@
                             @endif
 
                             <!-- Financial Ledger Card -->
+                            @if ($selectedIssue->order)
                             <div class="p-4 rounded-2xl bg-[#FAFAFA] border border-[#EEEEEE] space-y-2 text-xs">
                                 <span class="font-bold uppercase tracking-wider text-[#686868] block">Order Financial Balance</span>
                                 <div class="flex justify-between text-[#686868]">
@@ -452,6 +457,7 @@
                                     <span>{{ money($selectedIssue->order->activeRefundableCents()) }}</span>
                                 </div>
                             </div>
+                            @endif
 
                             <!-- Case Activity Diary / Timeline -->
                             <div>
@@ -490,7 +496,27 @@
 
                         <!-- Drawer Footer Resolution Buttons -->
                         <div class="p-4 sm:p-6 border-t border-[#EEEEEE] bg-[#FAFAFA] space-y-3 shrink-0">
-                            @if ($selectedIssue->isPending())
+                            @if ($selectedIssue->isPending() && $selectedIssue->items->isEmpty())
+                                {{-- Website enquiries without order items: reply by email or phone, then close the case. --}}
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                    @if ($selectedIssue->contactEmail())
+                                        <a href="mailto:{{ $selectedIssue->contactEmail() }}?subject={{ rawurlencode('Your Ìsàlèè Èkó request '.$selectedIssue->reference) }}"
+                                           class="flex-1 py-3 px-4 rounded-xl border border-[#EEEEEE] bg-white text-[#111111] font-extrabold text-xs sm:text-sm hover:bg-[#F6F6F6] text-center">
+                                            Reply by Email
+                                        </a>
+                                    @endif
+                                    <button type="button"
+                                            wire:click="markEnquiryResolved"
+                                            wire:confirm="Mark case {{ $selectedIssue->reference }} as resolved?"
+                                            style="background-color: #007D49;"
+                                            class="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-xs sm:text-sm hover:opacity-90 transition-opacity shadow-xs text-center">
+                                        Mark Resolved
+                                    </button>
+                                </div>
+                                @if ($selectedIssue->order)
+                                    <p class="text-[11px] text-[#686868]">To refund or replace items, use “Log Customer Complaint” with order #{{ $selectedIssue->order->number }} and tick the affected items.</p>
+                                @endif
+                            @elseif ($selectedIssue->isPending())
                                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                     <button type="button"
                                             wire:click="openResolutionModal('refund')"

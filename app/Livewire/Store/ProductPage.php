@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Services\Analytics;
 use App\Models\Product;
 use App\Models\StockNotification;
 use App\Support\Cart;
@@ -26,6 +27,14 @@ class ProductPage extends Component
     public function mount(Product $product): void
     {
         $this->product = $product->load(['defaultVariation', 'category', 'country']);
+
+        if ($variation = $this->product->defaultVariation) {
+            Analytics::track('view_item', [
+                'currency' => config('shop.currency', 'CAD'),
+                'value' => round($variation->price_cents / 100, 2),
+                'items' => [Analytics::item($variation->setRelation('product', $this->product))],
+            ]);
+        }
     }
 
     public function increment(): void

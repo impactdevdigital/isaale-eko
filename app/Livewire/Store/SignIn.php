@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Services\Analytics;
 use App\Models\User;
 use App\Services\Checkout\OneTimeCode;
 use Illuminate\Support\Facades\Auth;
@@ -168,7 +169,13 @@ class SignIn extends Component
 
         $this->validate(['name' => ['required', 'string', 'max:120']], ['name.required' => 'Enter your full name.']);
 
-        $this->signIn(User::firstOrCreate([$this->column() => $this->codeDestination], ['name' => trim($this->name)]));
+        $user = User::firstOrCreate([$this->column() => $this->codeDestination], ['name' => trim($this->name)]);
+
+        if ($user->wasRecentlyCreated) {
+            Analytics::track('sign_up', ['method' => $this->codeChannel], nextPage: true);
+        }
+
+        $this->signIn($user);
     }
 
     private function signIn(User $user): void
@@ -178,6 +185,7 @@ class SignIn extends Component
 
         Auth::login($user, remember: true);
         session()->regenerate();
+        Analytics::track('login', ['method' => $this->codeChannel], nextPage: true);
 
         $this->redirect(session()->pull('url.intended', $this->returnTo));
     }

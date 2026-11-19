@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Services\Analytics;
 use App\Livewire\Store\Concerns\SpendsLoyaltyReward;
 use App\Models\Address;
 use App\Models\Order;
@@ -105,11 +106,20 @@ class Checkout extends Component
 
     public function mount(): void
     {
-        if (app(Cart::class)->checkoutLines()->isEmpty()) {
+        $cart = app(Cart::class);
+        $lines = $cart->checkoutLines();
+
+        if ($lines->isEmpty()) {
             $this->redirectRoute('cart');
 
             return;
         }
+
+        Analytics::track('begin_checkout', [
+            'currency' => config('shop.currency', 'CAD'),
+            'value' => round($cart->subtotalCents($lines) / 100, 2),
+            'items' => $lines->map(fn ($line) => Analytics::item($line->variation, $line->quantity))->values()->all(),
+        ]);
 
         if ($user = Auth::user()) {
             $this->name = $user->name;
@@ -129,6 +139,7 @@ class Checkout extends Component
     {
         $this->fulfilment = $fulfilment === 'delivery' && Delivery::enabled() ? 'delivery' : 'pickup';
         $this->problem = null;
+        Analytics::track('select_fulfilment', ['method' => $this->fulfilment]);
 
         if ($this->paymentMethod && ! $this->paymentMethods()->contains('code', $this->paymentMethod)) {
             $this->paymentMethod = null;
@@ -250,7 +261,7 @@ class Checkout extends Component
         $user = User::firstOrCreate(['email' => $email], ['name' => trim($this->name)]);
 
         if ($this->marketing) {
-            app(ConsentService::class)->grant('email', $user->id, $email, 'checkout');
+            app(ConsentService::class)->grant('email', $user->id, $email, 'checkout', trim($this->name));
         }
 
         return $user;
@@ -277,6 +288,11 @@ class Checkout extends Component
         }
 
         $this->pickupStart = $window['start']->toIso8601String();
+        Analytics::track('select_pickup_slot', [
+            'days_ahead' => (int) now(config('shop.timezone'))->startOfDay()->diffInDays($window['start']->startOfDay()),
+            'weekday' => $window['start']->format('l'),
+            'hour' => (int) $window['start']->format('G'),
+        ]);
         $this->modal = null;
         $this->problem = null;
         $this->resetErrorBag('pickupStart');
@@ -446,9 +462,11 @@ class Checkout extends Component
                 return;
             }
 
+            Analytics::track('payment_attempted', ['payment_type' => $this->paymentMethod, 'value' => round($order->total_cents / 100, 2)]);
             $failure = app(TakePayment::class)->charge($order, $token, $attempt ?: (string) str()->ulid());
 
             if ($failure) {
+                Analytics::track('payment_failed', ['payment_type' => $this->paymentMethod]);
                 // The order isn't placed; the basket, details and slot stay as they were.
                 $this->declined = $failure;
                 $this->declinedAmount = $order->total_cents;
@@ -486,6 +504,7 @@ class Checkout extends Component
         }
 
         if ($order = $this->placeOrder()) {
+            Analytics::track('payment_attempted', ['payment_type' => 'etransfer', 'value' => round($order->total_cents / 100, 2)]);
             $this->finish($order);
         }
     }
@@ -540,6 +559,7 @@ class Checkout extends Component
     {
         app(Cart::class)->clear(...$order->items->pluck('product_variation_id')->all());
         $this->rememberPhone($order);
+        $this->trackPurchase($order);
 
         // The order is placed (and paid, for cards): a mail failure mustn't turn that into an error page.
         try {
@@ -557,6 +577,39 @@ class Checkout extends Component
 
         $this->dispatch('cart-updated', count: app(Cart::class)->count());
         $this->redirectRoute('orders.show', $order);
+    }
+
+    /**
+     * GA4 purchase (plus payment and reward events), fired on the order
+     * confirmation page the shopper is sent to.
+     */
+    private function trackPurchase(Order $order): void
+    {
+        $currency = config('shop.currency', 'CAD');
+
+        if ($order->status === Order::STATUS_PAID) {
+            Analytics::track('payment_successful', ['payment_type' => $order->payment_method, 'value' => round($order->total_cents / 100, 2)], nextPage: true);
+        }
+
+        if ($order->loyalty_reward_id) {
+            Analytics::track('reward_redeemed', ['currency' => $currency, 'value' => round($order->discount_cents / 100, 2)], nextPage: true);
+        }
+
+        Analytics::track('purchase', [
+            'transaction_id' => $order->number,
+            'currency' => $currency,
+            'value' => round($order->total_cents / 100, 2),
+            'shipping' => round(($order->delivery_fee_cents ?? 0) / 100, 2),
+            'payment_type' => $order->payment_method,
+            'fulfilment' => $order->fulfilment,
+            'items' => $order->items->map(fn ($item) => [
+                'item_id' => (string) $item->product_variation_id,
+                'item_name' => $item->name,
+                'item_variant' => $item->variation_name,
+                'price' => round($item->unit_price_cents / 100, 2),
+                'quantity' => $item->quantity,
+            ])->values()->all(),
+        ], nextPage: true);
     }
 
     /**

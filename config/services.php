@@ -22,6 +22,24 @@ return [
         'key' => env('RESEND_API_KEY'),
     ],
 
+    // Marketing email (newsletter, new arrivals, promotions). Email consents are
+    // copied into this Brevo list. Off until both values are set. See App\Services\Marketing\Brevo.
+    'brevo' => [
+        'key' => env('BREVO_API_KEY'),
+        'list_id' => env('BREVO_LIST_ID'),
+        // Optional lists for the other account email topics (Updates & preferences).
+        // Empty = that topic stays on the website only.
+        'topic_lists' => [
+            'email_offers' => env('BREVO_OFFERS_LIST_ID'),
+            'email_rewards' => env('BREVO_REWARDS_LIST_ID'),
+        ],
+    ],
+
+    // Google Analytics 4, e.g. G-XXXXXXXXXX. Off until set. See App\Services\Analytics.
+    'google_analytics' => [
+        'measurement_id' => env('GA_MEASUREMENT_ID'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

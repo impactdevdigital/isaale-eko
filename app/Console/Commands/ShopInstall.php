@@ -80,6 +80,13 @@ class ShopInstall extends Command
             app(DemoCatalogSeeder::class)->extras();
         }
 
+        // No scheduler on Render's free plan: send waiting newsletter sign-ups to Brevo on each start.
+        try {
+            $this->call('brevo:sync');
+        } catch (\Throwable $e) {
+            $this->warn('Brevo sync failed: '.$e->getMessage());
+        }
+
         return self::SUCCESS;
     }
 }

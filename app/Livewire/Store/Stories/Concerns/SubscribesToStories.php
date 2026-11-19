@@ -35,7 +35,7 @@ trait SubscribesToStories
 
         RateLimiter::hit($key, 600);
 
-        app(ConsentService::class)->grant('email', Auth::id(), strtolower(trim($this->subscribeEmail)), 'food_stories');
+        app(ConsentService::class)->grant('email', Auth::id(), strtolower(trim($this->subscribeEmail)), 'food_stories', $this->subscribeName);
 
         $this->reset('subscribeName', 'subscribeEmail');
         $this->subscribed = true;

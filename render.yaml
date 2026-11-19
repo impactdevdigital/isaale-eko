@@ -74,6 +74,17 @@ envVarGroups:
         sync: false
       - key: MAIL_FROM_NAME
         value: Ìsàlèè Èkó
+      # Marketing email (Brevo) and Google Analytics 4: both stay off until set.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_LIST_ID
+        sync: false
+      - key: BREVO_OFFERS_LIST_ID     # optional
+        sync: false
+      - key: BREVO_REWARDS_LIST_ID    # optional
+        sync: false
+      - key: GA_MEASUREMENT_ID
+        sync: false
 
 services:
   # The website.

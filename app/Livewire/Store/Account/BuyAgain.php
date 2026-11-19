@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Account;
 
+use App\Services\Analytics;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -31,6 +32,7 @@ class BuyAgain extends Component
         $this->dispatch('cart-updated', count: app(Cart::class)->count());
 
         if ($added > 0) {
+            Analytics::track('buy_again', ['source' => 'usuals', 'lines' => $added]);
             $this->dispatch('cart-open');
         }
     }

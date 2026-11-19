@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Services\Analytics;
 use App\Models\ProductVariation;
 use Illuminate\Support\Collection;
 
@@ -96,6 +97,7 @@ class Cart
         ];
 
         $this->save($stored);
+        $this->track('add_to_cart', [$variation->loadMissing('product')], [$variation->id => max(1, $quantity)]);
 
         return true;
     }
@@ -141,7 +143,14 @@ class Cart
 
     public function remove(int ...$variationIds): void
     {
-        $this->save(array_diff_key($this->stored(), array_flip($variationIds)));
+        $stored = $this->stored();
+        $removed = array_intersect_key($stored, array_flip($variationIds));
+        $this->save(array_diff_key($stored, $removed));
+
+        if ($removed) {
+            $variations = ProductVariation::with('product')->whereKey(array_keys($removed))->get()->all();
+            $this->track('remove_from_cart', $variations, array_map(fn ($line) => $line['quantity'], $removed));
+        }
     }
 
     public function count(): int
@@ -190,8 +199,25 @@ class Cart
      */
     public function clear(int ...$variationIds): void
     {
-        $this->remove(...$variationIds);
+        $this->save(array_diff_key($this->stored(), array_flip($variationIds)));
         $this->dropReward();
+    }
+
+    /**
+     * GA4 ecommerce event for basket lines.
+     *
+     * @param  ProductVariation[]  $variations
+     * @param  array<int, int>  $quantities  variation id => quantity
+     */
+    private function track(string $event, array $variations, array $quantities): void
+    {
+        $items = array_map(fn (ProductVariation $variation) => Analytics::item($variation, $quantities[$variation->id] ?? 1), $variations);
+
+        Analytics::track($event, [
+            'currency' => config('shop.currency', 'CAD'),
+            'value' => round(array_sum(array_map(fn ($item) => $item['price'] * $item['quantity'], $items)), 2),
+            'items' => $items,
+        ]);
     }
 
     /**

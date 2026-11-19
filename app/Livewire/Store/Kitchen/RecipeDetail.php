@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Kitchen;
 
+use App\Services\Analytics;
 use App\Actions\Kitchen\AddRecipeToCart;
 use App\Models\Recipe;
 use App\Services\Kitchen\RecipeResolver;
@@ -32,6 +33,8 @@ class RecipeDetail extends Component
         if (! $recipe->isApproved() && ! auth()->user()?->is_admin) {
             abort(404);
         }
+
+        Analytics::track('view_recipe', ['recipe_id' => $recipe->id, 'recipe_name' => $recipe->name]);
 
         $this->recipe = $recipe->loadMissing([
             'country',

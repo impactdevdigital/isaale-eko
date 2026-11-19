@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Country;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Services\Analytics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Layout;
@@ -67,6 +68,10 @@ class ProductListing extends Component
     #[Locked]
     public ?int $countryPageId = null;
 
+    /** What was last sent to analytics, so re-renders don't repeat it. */
+    #[Locked]
+    public array $tracked = ['q' => '', 'category' => '', 'country' => ''];
+
     public function mount(?Country $countryPage = null): void
     {
         abort_if($countryPage?->exists && ! $countryPage->is_listed, 404);
@@ -107,6 +112,7 @@ class ProductListing extends Component
         $countryPage = $this->countryPageId ? Country::find($this->countryPageId) : null;
         $category = $this->category ? Category::where('slug', $this->category)->first() : null;
         $products = $this->query($category)->paginate(self::PER_PAGE);
+        $this->trackDiscovery($category, $products->total());
 
         return view('livewire.store.product-listing', [
             'products' => $products,
@@ -120,6 +126,31 @@ class ProductListing extends Component
             'countries' => Country::listed()->whereHas('products', fn ($p) => $p->active())->orderBy('sort_order')->get(),
             'noSearchResults' => $this->q !== '' && $products->total() === 0 && ! $this->hasFilters(),
         ])->title($this->pageTitle($category, $countryPage));
+    }
+
+    /**
+     * Search, search with no results, category and country choices: each
+     * sent once when it changes.
+     */
+    private function trackDiscovery(?Category $category, int $results): void
+    {
+        if ($this->q !== '' && $this->q !== $this->tracked['q']) {
+            Analytics::track('search', ['search_term' => $this->q, 'results' => $results]);
+
+            if ($results === 0) {
+                Analytics::track('search_no_results', ['search_term' => $this->q]);
+            }
+        }
+
+        if ($category && $category->slug !== $this->tracked['category']) {
+            Analytics::track('select_category', ['category' => $category->name]);
+        }
+
+        if ($this->country !== '' && $this->country !== $this->tracked['country']) {
+            Analytics::track('select_country', ['country' => $this->country, 'source' => $this->countryPageId ? 'country_page' : 'filter']);
+        }
+
+        $this->tracked = ['q' => $this->q, 'category' => (string) $category?->slug, 'country' => $this->country];
     }
 
     /**

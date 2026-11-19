@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Stories;
 
+use App\Services\Analytics;
 use App\Livewire\Store\Stories\Concerns\SubscribesToStories;
 use App\Models\Story;
 use App\Models\StoryComment;
@@ -42,6 +43,7 @@ class StoryShow extends Component
         abort_unless($story->type === $type && ($story->isPublished() || Auth::user()?->is_admin), 404);
 
         $this->story = $story;
+        Analytics::track('view_content', ['content_type' => $story->type, 'content_id' => $story->id, 'title' => $story->title]);
 
         if ($user = Auth::user()) {
             $this->commentName = (string) $user->name;

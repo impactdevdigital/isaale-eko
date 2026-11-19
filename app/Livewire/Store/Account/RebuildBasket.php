@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Account;
 
+use App\Services\Analytics;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SavedBasket;
@@ -140,6 +141,7 @@ class RebuildBasket extends Component
             return;
         }
 
+        Analytics::track('buy_again', ['source' => $this->basketId ? 'saved_basket' : 'past_order', 'lines' => $added], nextPage: true);
         $this->dispatch('cart-updated', count: $cart->count());
         session()->flash('rebuilt', $added === 1 ? 'Added 1 item to your basket.' : "Added {$added} items to your basket.");
         $this->redirectRoute('cart', navigate: true);

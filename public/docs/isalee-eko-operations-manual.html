@@ -296,6 +296,17 @@
             color: #DF2600;
         }
     </style>
+    <style>
+        .pill-neutral { background: #F1F1F1; color: #555555; }
+        .pill-blue { background: #EBF4FF; color: #0055D4; }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; break-inside: avoid; }
+        h3 { page-break-after: avoid; break-after: avoid; }
+        .whats-new li { margin-bottom: 2pt; }
+        .callout li strong, .callout p strong { display: inline; margin: 0; font-size: inherit; }
+        .toc-list { margin: 10pt 0; }
+        .toc-item { padding: 3pt 0; font-size: 9pt; }
+    </style>
 </head>
 <body>
 
@@ -307,22 +318,22 @@
             <div class="brand-badge">ÌSÀLÈÈ ÈKÓ · OPERATIONS PORTAL</div>
             <div class="cover-title">Store Operations & Administration Manual</div>
             <div class="cover-subtitle">
-                A complete, step-by-step handover handbook for store owners, general managers, and retail associates to manage daily customer orders, inventory stock, grocery categories, authentic kitchen recipes, store hours, and team access credentials.
+                A complete, step-by-step handover handbook for store owners, managers and associates: daily orders, customer issues, the Square catalogue, categories, recipes, stories, store hours, promotions, loyalty, payments and team access.
             </div>
         </div>
 
         <div class="cover-details-grid">
             <div>
                 <div class="meta-label">Application</div>
-                <div class="meta-value">Ìsàlèè Èkó E-Commerce & Retail Engine</div>
+                <div class="meta-value">Ìsàlèè Èkó Online Store & Operations Portal</div>
             </div>
             <div>
                 <div class="meta-label">Location / Timezone</div>
-                <div class="meta-value">Moncton, NB, Canada · America/Moncton (AST)</div>
+                <div class="meta-value">Saint John, NB, Canada · Atlantic Time (America/Moncton)</div>
             </div>
             <div>
                 <div class="meta-label">Primary Portal URL</div>
-                <div class="meta-value">http://isaleeeko.ca/admin/login</div>
+                <div class="meta-value">https://isaleeko.com/admin/login</div>
             </div>
             <div>
                 <div class="meta-label">Default Currency</div>
@@ -330,11 +341,11 @@
             </div>
             <div>
                 <div class="meta-label">Integration Gateway</div>
-                <div class="meta-value">Square POS & Web Payments</div>
+                <div class="meta-value">Square (Catalogue, Payments, Orders & Loyalty)</div>
             </div>
             <div>
                 <div class="meta-label">Document Version</div>
-                <div class="meta-value">Version 1.0 (Official Client Handover Edition)</div>
+                <div class="meta-value">Version 2.1 (Updated Handover Edition)</div>
             </div>
         </div>
 
@@ -344,7 +355,7 @@
                 Prepared exclusively for the management and operations staff of Ìsàlèè Èkó.
             </div>
             <div>
-                Published: October 2026
+                Published: November 2026
             </div>
         </div>
     </div>
@@ -354,622 +365,691 @@
     <!-- ========================================== -->
     <div class="page-break">
         <h2>Table of Contents</h2>
-        <p>This manual covers every function of the Ìsàlèè Èkó operations portal, arranged in operational sequence from morning opening to evening reconciliation.</p>
+        <p>This manual covers every screen of the Ìsàlèè Èkó Operations Portal, roughly in the order a working day uses them. It is written for non-technical team members: no programming or server knowledge is needed.</p>
 
         <ul class="toc-list">
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 1:</strong> Access & Authentication (Logging In, Roles & Security)</span>
-                <span class="toc-page">Page 3</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 2:</strong> Operations Command Center (Dashboard & Live Metrics)</span>
-                <span class="toc-page">Page 4</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 3:</strong> Orders Queue & Fulfillment Workflow</span>
-                <span class="toc-page">Page 5</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 4:</strong> Products & Real-Time Inventory Control</span>
-                <span class="toc-page">Page 7</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 5:</strong> Categories, Sub-Categories & Storefront Hierarchy</span>
-                <span class="toc-page">Page 8</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 6:</strong> Kitchen Recipes & Grocery Basket Linking</span>
-                <span class="toc-page">Page 9</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 7:</strong> Operating Hours, Closures & Emergency Toggle</span>
-                <span class="toc-page">Page 10</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 8:</strong> Square POS & Payment Gateways</span>
-                <span class="toc-page">Page 11</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 9:</strong> Staff & Team Access Management (User Handover System)</span>
-                <span class="toc-page">Page 12</span>
-            </li>
-            <li class="toc-item">
-                <span class="toc-title"><strong>Section 10:</strong> Daily Opening & Closing Checklists & Emergency Recovery</span>
-                <span class="toc-page">Page 14</span>
-            </li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 1:</strong> Access & Authentication (Logging In, Roles & Security)</span><span class="toc-page">Page 3</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 2:</strong> Operations Command Center (Dashboard)</span><span class="toc-page">Page 5</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 3:</strong> Orders Queue & Fulfillment Workflow</span><span class="toc-page">Page 6</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 4:</strong> Issues Desk (Customer Claims, Refunds & Returns)</span><span class="toc-page">Page 9</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 5:</strong> Products & Inventory (Square Catalogue)</span><span class="toc-page">Page 11</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 6:</strong> Categories & Sub-Categories</span><span class="toc-page">Page 13</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 7:</strong> Kitchen Recipes, Ingredients & Substitutions</span><span class="toc-page">Page 14</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 8:</strong> Stories & Updates</span><span class="toc-page">Page 15</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 9:</strong> Hours & Closures</span><span class="toc-page">Page 16</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 10:</strong> Store Settings</span><span class="toc-page">Page 17</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 11:</strong> Promotions</span><span class="toc-page">Page 18</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 12:</strong> Loyalty (Square Loyalty)</span><span class="toc-page">Page 19</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 13:</strong> Analytics &amp; Measurement</span><span class="toc-page">Page 20</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 14:</strong> Payment Methods & Delivery Switch</span><span class="toc-page">Page 21</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 15:</strong> Square Check & Catalogue Pull</span><span class="toc-page">Page 22</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 16:</strong> Staff & Access Management</span><span class="toc-page">Page 23</span></li>
+            <li class="toc-item"><span class="toc-title"><strong>Section 17:</strong> Daily Checklists & Emergency Recovery</span><span class="toc-page">Page 25</span></li>
         </ul>
 
-        <div class="callout callout-info">
-            <strong>Target Audience Note</strong>
-            This manual is designed for non-technical team members. No programming or server knowledge is required to operate any function described herein.
+        <div class="callout callout-success">
+            <strong>What's new in Version 2.1</strong>
+            <ul class="whats-new" style="margin: 4pt 0 0;">
+                <li><strong>Square is now the single source of truth</strong> for products, prices and stock. Change them in Square, not in the portal.</li>
+                <li>New screens: <strong>Issues Desk</strong>, <strong>Stories & Updates</strong>, <strong>Store Settings</strong>, <strong>Promotions</strong>, <strong>Loyalty</strong> and <strong>Square Check</strong>.</li>
+                <li>Orders now cover substitutions, Interac e-Transfer confirmation, uncollected orders and rescheduling.</li>
+                <li>Pay at counter has been retired. Customers pay online by card, Apple Pay, Google Pay or Interac e-Transfer.</li>
+                <li>New in 2.1: <strong>Analytics</strong> screen, <strong>order timeline</strong>, <strong>Accept &amp; Prepare</strong>, stories linked to products and recipes, website <strong>Report a Problem</strong> cases, and automatic back-in-stock emails.</li>
+            </ul>
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 1: ACCESS & AUTHENTICATION -->
+    <!-- SECTION 1 -->
     <!-- ========================================== -->
-    <div class="page-break">
+    <div class="page-break" id="s1">
         <h2>Section 1: Access & Authentication</h2>
-        
+
         <h3>1.1 Accessing the Operations Portal</h3>
-        <p>The store operations portal is completely isolated from the public storefront to maintain operational privacy and protect customer payment records.</p>
+        <p>The Operations Portal is separate from the public storefront, to keep customer and payment records private.</p>
         <ul>
-            <li><strong>Login URL:</strong> <code>https://isaleeeko.ca/admin/login</code> (or <code>http://127.0.0.1:8000/admin/login</code> in local network)</li>
-            <li><strong>Required Credentials:</strong> Your registered staff email address and password.</li>
+            <li><strong>Login URL:</strong> <code>https://isaleeko.com/admin/login</code></li>
+            <li><strong>Required Credentials:</strong> Your staff email address and password.</li>
         </ul>
 
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">1</span>
-                <span class="step-title">Enter Your Credentials</span>
-            </div>
-            <p>Type your assigned staff email address and password into the respective fields. If you are using a shared store tablet, do not check automatic browser password saves.</p>
+            <div class="step-header"><span class="step-number">1</span><span class="step-title">Enter Your Credentials</span></div>
+            <p>Type your staff email address and password. On a shared store tablet, do not let the browser save the password.</p>
         </div>
-
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">2</span>
-                <span class="step-title">Click "Sign In to Operations"</span>
-            </div>
-            <p>Upon verification, the system will direct you directly into the <strong>Operations Command Center</strong>.</p>
+            <div class="step-header"><span class="step-number">2</span><span class="step-title">Sign In</span></div>
+            <p>After your details are checked, you land on the <strong>Operations Overview</strong> dashboard.</p>
         </div>
 
-        <h3>1.2 Two-Tier Staff Role Separation</h3>
-        <p>Ìsàlèè Èkó employs a strict two-tier security model to prevent accidental modification of financial keys while allowing store staff full speed on daily fulfillment:</p>
+        <h3>1.2 Two-Tier Staff Roles</h3>
+        <p>Associates have everything they need for daily fulfilment. Money, staff and system controls are for managers only. Screens you can't use are hidden from your menu.</p>
 
         <table>
             <thead>
-                <tr>
-                    <th>Capability / Screen</th>
-                    <th>Store Associate <span class="pill pill-associate">Associate</span></th>
-                    <th>Store Manager <span class="pill pill-manager">Manager</span></th>
-                </tr>
+                <tr><th>Screen (sidebar)</th><th>Store Associate <span class="pill pill-associate">Associate</span></th><th>Store Manager <span class="pill pill-manager">Manager</span></th></tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>Operations Dashboard</strong></td>
-                    <td>Full View (Orders, Sales, Low Stock)</td>
-                    <td>Full View (Orders, Sales, Low Stock)</td>
-                </tr>
-                <tr>
-                    <td><strong>Orders Queue & Packing</strong></td>
-                    <td>Fulfill, Pack, Complete Orders</td>
-                    <td>Fulfill, Pack, Refund, Complete</td>
-                </tr>
-                <tr>
-                    <td><strong>Products & Stock Quantities</strong></td>
-                    <td>Edit Stock Counts & Variations</td>
-                    <td>Full Catalog & Price Editing</td>
-                </tr>
-                <tr>
-                    <td><strong>Categories & Recipes</strong></td>
-                    <td>Create, Edit, Upload Photos</td>
-                    <td>Full Hierarchy & Sync Control</td>
-                </tr>
-                <tr>
-                    <td><strong>Store Hours & Holiday Closures</strong></td>
-                    <td>View Operating Times</td>
-                    <td>Edit Hours & Emergency Closure</td>
-                </tr>
-                <tr>
-                    <td><strong>Square Tokens & Payment Keys</strong></td>
-                    <td><span style="color: #DF2600; font-weight: bold;">Hidden (No Access)</span></td>
-                    <td><span style="color: #007D49; font-weight: bold;">Full Access</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Staff Roster & Passwords</strong></td>
-                    <td><span style="color: #DF2600; font-weight: bold;">Hidden (No Access)</span></td>
-                    <td><span style="color: #007D49; font-weight: bold;">Add, Reset, Deactivate</span></td>
-                </tr>
+                <tr><td><strong>Operations Overview</strong></td><td>Full view</td><td>Full view</td></tr>
+                <tr><td><strong>Orders Queue</strong></td><td>Prepare, ready, hand over, substitutions, e-Transfer, reschedule, cancel</td><td>Same</td></tr>
+                <tr><td><strong>Issues Desk</strong></td><td>Log, review and resolve cases</td><td>Same</td></tr>
+                <tr><td><strong>Products & Inventory</strong></td><td>Edit descriptions, French text, category, country, return class, featured / hidden</td><td>Same</td></tr>
+                <tr><td><strong>Categories, Kitchen Recipes, Stories & Updates</strong></td><td>Create, edit, publish</td><td>Same</td></tr>
+                <tr><td><strong>Hours & Closures</strong></td><td>Edit hours & add closures</td><td>Same</td></tr>
+                <tr><td><strong>Staff & Access, Store Settings</strong></td><td><span style="color: #DF2600; font-weight: bold;">Hidden (No Access)</span></td><td><span style="color: #007D49; font-weight: bold;">Full Access</span></td></tr>
+                <tr><td><strong>Promotions, Loyalty, Analytics, Payment Methods, Square Check</strong></td><td><span style="color: #DF2600; font-weight: bold;">Hidden (No Access)</span></td><td><span style="color: #007D49; font-weight: bold;">Full Access</span></td></tr>
             </tbody>
         </table>
 
         <h3>1.3 Changing Your Password (Self-Service)</h3>
-        <p>Any staff member can change their password at any time without asking a manager:</p>
         <ol>
-            <li>Look at the top-right corner of the topbar next to your name initials.</li>
-            <li>Click the <strong>Key icon</strong> (<kbd>Change My Password</kbd>).</li>
-            <li>In the drawer that appears, type your <strong>Current Password</strong>, your <strong>New Password</strong> (minimum 6 characters), and confirm it.</li>
-            <li>Click <strong>Update Password</strong>. Your new credentials take effect immediately.</li>
+            <li>At the top right of the portal, next to your name, click the <strong>Key icon</strong> (<kbd>Change My Password</kbd>).</li>
+            <li>Enter your <strong>Current Password</strong>, then your <strong>New Password</strong> (at least 6 characters) twice.</li>
+            <li>Click <strong>Update Password</strong>. The new password works straight away.</li>
         </ol>
+
+        <h3>1.4 Signing Out</h3>
+        <p>Click the <strong>door / exit icon</strong> next to your name. Always sign out on shared devices.</p>
 
         <div class="callout callout-warning">
             <strong>Deactivated Staff Security Guard</strong>
-            If an employee leaves the company and a manager marks them as <strong>Deactivated</strong>, their active session is terminated instantly. Even if they type the correct password, the portal will reject access and display an account suspension notice.
+            When a manager marks an employee as <strong>Deactivated</strong>, that person is signed out on their next click and cannot sign in again, even with the correct password. The login page tells them their account is deactivated.
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 2: OPERATIONS COMMAND CENTER -->
+    <!-- SECTION 2 -->
     <!-- ========================================== -->
-    <div class="page-break">
+    <div class="page-break" id="s2">
         <h2>Section 2: Operations Command Center</h2>
-        <p>The <strong>Dashboard Overview</strong> (<code>/admin</code>) serves as the morning launchpad and live nerve center for the retail grocery store.</p>
+        <p>The <strong>Operations Overview</strong> (<code>/admin</code>) is the morning launchpad and live view of the store.</p>
 
-        <h3>2.1 Live KPI Metric Tiles</h3>
+        <h3>2.1 Live Tiles</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Scorecard Tile</th>
-                    <th>What It Measures</th>
-                    <th>Action Required</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Tile</th><th>What It Shows</th><th>Action</th></tr></thead>
             <tbody>
-                <tr>
-                    <td><strong>Today's Gross Sales</strong></td>
-                    <td>Total revenue from orders placed today in Moncton time (AST).</td>
-                    <td>Review daily sales velocity against store targets.</td>
-                </tr>
-                <tr>
-                    <td><strong>Orders Placed Today</strong></td>
-                    <td>Count of new orders received since midnight.</td>
-                    <td>Helps pace kitchen and packaging staffing.</td>
-                </tr>
-                <tr>
-                    <td><strong>Active Fulfillment</strong></td>
-                    <td>Orders marked <code>Placed</code> or <code>Paid</code> awaiting completion.</td>
-                    <td>Must be cleared to 0 before the end of the shift.</td>
-                </tr>
-                <tr>
-                    <td><strong>Low Stock Alerts</strong></td>
-                    <td>Number of product items with 5 or fewer units left in inventory.</td>
-                    <td>Alert warehouse suppliers or restock retail shelves.</td>
-                </tr>
+                <tr><td><strong>Live Orders Queue</strong></td><td>Orders placed or paid that are not yet completed.</td><td>Clear to 0 before the end of the shift.</td></tr>
+                <tr><td><strong>Today's Sales</strong></td><td>Total value and number of today's orders (cancelled orders excluded), in Atlantic Time.</td><td>Track the day against targets.</td></tr>
+                <tr><td><strong>Uncollected</strong></td><td>Pickup orders not collected after their grace period.</td><td>Review in the Orders Queue → Uncollected tab.</td></tr>
+                <tr><td><strong>Low Stock</strong></td><td>Product sizes with 5 or fewer units in Square.</td><td>Reorder or restock in Square.</td></tr>
             </tbody>
         </table>
 
-        <h3>2.2 Real-Time Store Operating Pill</h3>
-        <p>At the top of the dashboard, a colored badge displays the exact public status of the physical store:</p>
+        <h3>2.2 Store Status Pill</h3>
+        <p>At the top of the dashboard, a coloured badge shows today's store status from <strong>Hours & Closures</strong>:</p>
         <ul>
-            <li><span class="pill pill-active">● Open until 7:00 PM</span> — Store is within regular scheduled hours and accepting shoppers.</li>
-            <li><span class="pill pill-pending">● Opens at 10:00 AM</span> — Store is currently closed overnight; will open automatically at the scheduled time.</li>
-            <li><span class="pill pill-danger">● Closed: Holiday / Emergency</span> — Scheduled closure or emergency toggle is active.</li>
+            <li><span class="pill pill-active">● Open until 7:00 PM</span>: within today's opening hours.</li>
+            <li><span class="pill pill-pending">● Opens at 10:00 AM</span>: not open yet today.</li>
+            <li><span class="pill pill-danger">● Closed for Holiday</span>: a closure is set for today, or the store is closed on this weekday.</li>
         </ul>
 
-        <h3>2.3 Urgent Orders Queue (First-In, First-Out)</h3>
-        <p>The dashboard displays the <strong>5 oldest pending orders</strong> that need packing right away. Clicking on any order number takes staff directly into the packing desk.</p>
+        <h3>2.3 Urgent Orders Requiring Packing</h3>
+        <p>The <strong>5 oldest unfinished orders</strong>, oldest first. Click <strong>Pack Order</strong> to open the order, or <strong>View All Orders →</strong> for the full queue.</p>
 
-        <h3>2.4 Low Stock & Depleted Inventory Panel</h3>
-        <p>Displays products where stock is dangerously low (&le; 5 units). If a customer purchases the last item on the storefront, the variation automatically flips to "Sold Out" online to prevent overselling.</p>
+        <h3>2.4 Recent Customer Transactions</h3>
+        <p>The latest orders across the store, with status and total.</p>
+
+        <h3>2.5 Quick Actions & Stock Depletion Alerts</h3>
+        <p><strong>Quick Actions</strong> link to frequent tasks such as <em>Manage Products & Stock</em>. <strong>Stock Depletion Alerts</strong> lists the items closest to selling out. When an item reaches 0 in Square, it shows as "Out of stock" online straight away, so it can't be oversold.</p>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 3: ORDERS QUEUE & FULFILLMENT WORKFLOW -->
+    <!-- SECTION 3 -->
     <!-- ========================================== -->
-    <div class="page-break">
+    <div class="page-break" id="s3">
         <h2>Section 3: Orders Queue & Fulfillment Workflow</h2>
-        <p>Accessible from the sidebar under <strong>Fulfillment & Operations &rarr; Orders Queue</strong> (<code>/admin/orders</code>).</p>
+        <p>Sidebar: <strong>Fulfillment & Operations → Orders Queue</strong> (<code>/admin/orders</code>). The red badge shows how many orders are active. The page refreshes itself every 30 seconds.</p>
 
-        <h3>3.1 Order Lifecycle Stages</h3>
+        <h3>3.1 Finding Orders</h3>
+        <ul>
+            <li><strong>Tabs:</strong> Active Queue · New · Preparing · Ready · Uncollected · e-Transfers to Confirm · Completed · Cancelled · All History.</li>
+            <li><strong>Search:</strong> order number, customer name, phone or email.</li>
+            <li><strong>Filters:</strong> In-Store Pickup / Local Delivery, and Paid Online / Unpaid (e-Transfer).</li>
+        </ul>
+
+        <h3>3.2 Order Lifecycle</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Status Badge</th>
-                    <th>Meaning</th>
-                    <th>Staff Responsibility</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Badge</th><th>Meaning</th><th>Staff Action</th></tr></thead>
             <tbody>
-                <tr>
-                    <td><span class="pill pill-danger">Placed</span></td>
-                    <td>Order submitted by customer; payment authorization initiated.</td>
-                    <td>Review order items and begin pulling groceries from shelves.</td>
-                </tr>
-                <tr>
-                    <td><span class="pill pill-pending">Paid / Packing</span></td>
-                    <td>Payment confirmed via Square. Items are currently being packed.</td>
-                    <td>Bag items, verify batch quantities, and print packing slip.</td>
-                </tr>
-                <tr>
-                    <td><span class="pill pill-associate">Ready for Pickup</span></td>
-                    <td>Customer selected in-store pickup; parcel placed in pickup shelving.</td>
-                    <td>Customer receives automatic pickup notification. Hand over on arrival.</td>
-                </tr>
-                <tr>
-                    <td><span class="pill pill-associate">Out for Delivery</span></td>
-                    <td>Order handed to local Moncton delivery driver.</td>
-                    <td>Package en route to customer's residential address.</td>
-                </tr>
-                <tr>
-                    <td><span class="pill pill-active">Completed</span></td>
-                    <td>Goods received by customer; transaction finalized.</td>
-                    <td>No further action required. Order archived in history.</td>
-                </tr>
+                <tr><td><span class="pill pill-pending">Awaiting e-Transfer</span></td><td>Customer chose Interac e-Transfer and the money hasn't been confirmed yet. The order is locked.</td><td>Check the bank. <strong>Confirm e-Transfer Received</strong> or <strong>Cancel (Not Paid)</strong>.</td></tr>
+                <tr><td><span class="pill pill-danger">New Order</span></td><td>Paid and waiting to be started.</td><td><strong>Accept &amp; Prepare</strong>. This is the moment the store accepts the order.</td></tr>
+                <tr><td><span class="pill pill-pending">Preparing</span></td><td>Being picked and packed.</td><td>Pick items and handle substitutions, then <strong>Mark Ready</strong>.</td></tr>
+                <tr><td><span class="pill pill-associate">Ready</span></td><td>Packed and on the pickup shelf (or ready for delivery).</td><td>On arrival, press <strong>Complete & Hand Over</strong> (or <strong>Mark Delivered</strong>).</td></tr>
+                <tr><td><span class="pill pill-active">Completed</span></td><td>Collected or delivered.</td><td>No further action.</td></tr>
+                <tr><td><span class="pill pill-danger">Uncollected</span></td><td>Pickup not collected in time.</td><td><strong>Review & Reschedule</strong>, hand over, or <strong>Cancel & Policy Refund</strong>.</td></tr>
+                <tr><td><span class="pill pill-neutral">Cancelled / Refunded</span></td><td>Closed with or without a refund.</td><td>None.</td></tr>
             </tbody>
         </table>
+        <p>Order progress is also sent to Square, and customers see it on their order tracker (Order confirmed → Accepted · preparing → Ready to collect → Collected).</p>
 
-        <h3>3.2 Step-by-Step Order Packing Guide</h3>
-        
+        <h3>3.3 Step-by-Step Packing Guide</h3>
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">1</span>
-                <span class="step-title">Locate Order on Queue</span>
-            </div>
-            <p>Filter by <strong>Active Orders</strong> or search by customer name, phone number, or 5-digit Order Number (e.g. <code>#ORD-8291</code>).</p>
+            <div class="step-header"><span class="step-number">1</span><span class="step-title">Open the Order</span></div>
+            <p>Click <strong>Details</strong> (or the order row) to open the order drawer: items and sizes, customer contact, pickup slot or delivery address, payment status and total.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">2</span><span class="step-title">Accept &amp; Start Preparing</span></div>
+            <p>Press <strong>Accept &amp; Start Preparing</strong>. There is no separate "Accepted" step: this tells the team and the customer that the order is accepted and being prepared.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">3</span><span class="step-title">Pick & Pack</span></div>
+            <p>Collect items from shelves and freezer. Keep frozen and fresh items (meat, fish, plantain) insulated.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">4</span><span class="step-title">Mark Ready, then Hand Over</span></div>
+            <p>Press <strong>Mark Ready for Collection</strong> and put the bag on the pickup shelf behind the till. When the customer arrives, press <strong>Complete & Hand Over</strong>.</p>
         </div>
 
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">2</span>
-                <span class="step-title">Open Order Detail Drawer</span>
-            </div>
-            <p>Click on the order row. Inspect all requested variations (e.g., <em>"Yam Tubers (Medium 3-Pack)"</em> or <em>"Honey Beans 5kg"</em>) and check any customer delivery instructions.</p>
+        <h3>3.4 Item Unavailable? No Silent Substitutions</h3>
+        <p>Never swap an item without the customer's agreement. In the order drawer, next to the item:</p>
+        <ol>
+            <li>Click <strong>Item Unavailable</strong>, choose a replacement option (or <strong>Full Refund</strong>), add an optional note, and press <strong>Initiate Substitution (Call Customer)</strong>.</li>
+            <li>Call the customer and record whether you reached them. Then record <strong>Customer Approved</strong> or <strong>Customer Declined (Refund)</strong>.</li>
+            <li>If you can't reach them, use <strong>Resend</strong> to email the question. The customer can answer from the link.</li>
+            <li>If the item turns up on the shelf, choose <strong>Cancel request (item found on shelf)</strong>.</li>
+        </ol>
+        <div class="callout callout-warning">
+            <strong>Response Window</strong>
+            Questions not answered within the window set in Store Settings (default 15 minutes) are refunded automatically for that item. The same happens if you press Mark Ready or Complete while a question is still open.
         </div>
 
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">3</span>
-                <span class="step-title">Pick & Pack Goods</span>
-            </div>
-            <p>Collect items from store shelves or freezer. Verify perishable items (meat, frozen fish, plantain) are properly temperature-insulated.</p>
-        </div>
+        <h3>3.5 Interac e-Transfer Orders</h3>
+        <p>The <strong>e-Transfers to Confirm</strong> tab lists orders waiting for money. When the e-Transfer arrives in the store's bank account, open the order and press <strong>Confirm e-Transfer Received</strong>. The customer is emailed and the order joins the queue. If the money never arrives, press <strong>Cancel (Not Paid)</strong>. Nothing was charged, so there is nothing to refund.</p>
 
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">4</span>
-                <span class="step-title">Update Fulfillment Status</span>
-            </div>
-            <p>Change status to <strong>Ready for Pickup</strong> or <strong>Completed</strong>. The system records the timestamp and staff audit trail.</p>
-        </div>
+        <h3>3.6 Uncollected Orders & Rescheduling</h3>
+        <ul>
+            <li>Customers get a reminder if they miss their pickup time. After the grace period (Store Settings), the order is held for staff or cancelled automatically, depending on your settings.</li>
+            <li><strong>Mark as Uncollected</strong> moves a pickup order to the Uncollected tab and emails the customer.</li>
+            <li><strong>Reschedule Pickup</strong> lets you choose a new day and time slot.</li>
+            <li><strong>Cancel & Policy Refund</strong> asks for a reason and a refund level (100%, 50% or 0%). The refund goes back through Square.</li>
+        </ul>
+
+        <h3>3.7 Order Timeline</h3>
+        <p>At the bottom of every order drawer, the <strong>Order Timeline</strong> lists each status change: for example <em>Paid · new order</em>, <em>Accepted · preparing</em>, <em>Ready · awaiting pickup</em>, <em>Picked up · completed</em>. Each one shows the date and time in Atlantic Time and the staff member who made it. Use it to answer "when was this ready?" questions from customers.</p>
 
         <div class="callout callout-info">
-            <strong>Split Fulfillment Types</strong>
-            Orders are clearly tagged as either <strong>Local Moncton Delivery</strong> (with street address and postal code) or <strong>In-Store Express Pickup</strong>. Keep pickup bags in the designated pickup counter behind the till.
+            <strong>Stuck Card Payments</strong>
+            If a card payment timed out, opening the Orders Queue checks Square automatically and settles it (at most every 5 minutes). Customers are never charged twice.
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 4: PRODUCTS & INVENTORY CONTROL -->
+    <!-- SECTION 4 -->
     <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 4: Products & Inventory Management</h2>
-        <p>Accessible from the sidebar under <strong>Catalog & Content &rarr; Products & Inventory</strong> (<code>/admin/products</code>).</p>
+    <div class="page-break" id="s4">
+        <h2>Section 4: Issues Desk</h2>
+        <p>Sidebar: <strong>Fulfillment & Operations → Issues Desk</strong> (<code>/admin/issues</code>). Use it for any complaint about a completed order. The red badge counts open cases.</p>
 
-        <h3>4.1 Catalog Overview</h3>
-        <p>The products screen lists all grocery items available in the store, organized with their respective brand, country of origin (Nigeria, Ghana, Jamaica, Canada), and price variations.</p>
-
-        <h3>4.2 Managing Product Variations & Stock Counts</h3>
-        <p>African grocery items often sell in multiple formats (e.g., Single Tuber vs 3-Pack; 2kg bag vs 10kg sack). Each format has its own independent stock level.</p>
-
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">1</span>
-                <span class="step-title">Adjusting Stock Quantities</span>
-            </div>
-            <p>Click <strong>Edit</strong> on any product. Scroll down to the <strong>Variations & Pricing</strong> table. Directly update the numerical <strong>Stock Quantity</strong> field (e.g., received 25 new bags of Golden Penny Semovita). Click <strong>Save Changes</strong>.</p>
-        </div>
-
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">2</span>
-                <span class="step-title">Setting Featured Status</span>
-            </div>
-            <p>Toggle the <strong>Featured on Storefront</strong> checkbox to spotlight seasonal items (like fresh yellow garri or fresh scotch bonnets) directly on the homepage banner.</p>
-        </div>
-
-        <div class="callout callout-success">
-            <strong>Square Inventory Synchronization</strong>
-            If an in-store customer purchases an item through the physical Square POS register, the web catalog stock reduces in real time to prevent duplicate orders.
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- SECTION 5: CATEGORIES & SUB-CATEGORIES -->
-    <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 5: Categories & Sub-Categories Hierarchy</h2>
-        <p>Accessible from the sidebar under <strong>Catalog & Content &rarr; Categories & Sub-Cats</strong> (<code>/admin/categories</code>).</p>
-
-        <h3>5.1 Catalog Hierarchy Model</h3>
-        <p>Categories follow a two-tier organizational hierarchy:</p>
+        <h3>4.1 Case Types</h3>
         <ul>
-            <li><strong>Parent Departments (Root):</strong> Broad supermarket departments (e.g., <em>"Flour, Grains & Rice"</em>, <em>"Spices & Seasonings"</em>, <em>"Snacks & Drinks"</em>, <em>"Frozen Meats & Seafood"</em>).</li>
-            <li><strong>Sub-Categories:</strong> Specialized groupings nested beneath parents (e.g., <em>"Fufu Flour"</em>, <em>"Poundo Yam"</em>, <em>"Suya Pepper"</em>).</li>
+            <li><strong>Damaged / Missing / Quality Issues</strong>: problems with food or groceries.</li>
+            <li><strong>Non-Food Returns (Change of Mind)</strong>: non-food items within the return window.</li>
+            <li><strong>Food Safety & Allergen Alerts</strong>: treat as urgent. They have their own tile.</li>
+            <li><strong>General Enquiries (Website)</strong>: questions sent through the website Help form, sometimes without an order.</li>
         </ul>
 
-        <h3>5.2 Adding a New Category</h3>
+        <h3>4.2 Logging a Case Taken by Phone, WhatsApp, Email or In Store</h3>
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">1</span>
-                <span class="step-title">Click "+ New Category"</span>
-            </div>
-            <p>Type the customer-facing name (e.g., <em>"Dried Fish & Stockfish"</em>).</p>
+            <div class="step-header"><span class="step-number">1</span><span class="step-title">Log Customer Complaint</span></div>
+            <p>Enter the order number and press <strong>Locate Order</strong>. Choose the channel (phone, WhatsApp, email, in store) and the case type.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">2</span><span class="step-title">Select Items & Describe</span></div>
+            <p>Tick the affected items and quantities, describe the problem, and press <strong>Open Case</strong>.</p>
         </div>
 
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">2</span>
-                <span class="step-title">Select Parent Department</span>
-            </div>
-            <p>If this is a sub-category, pick its parent department from the dropdown. If creating a brand-new top-level department, leave it set to <em>-- None (Top-Level Department) --</em>.</p>
-        </div>
-
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">3</span>
-                <span class="step-title">Choose Visual Icon Badge</span>
-            </div>
-            <p>Click on any of the pre-configured high-definition icon badges in the visual palette, or type an emoji directly into the icon box.</p>
-        </div>
-
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">4</span>
-                <span class="step-title">Select or Upload Category Photo</span>
-            </div>
-            <p>Staff can pick from the pre-loaded <strong>Store Photo Library</strong> with 1 click, or switch to <strong>Upload from Device</strong> to drag and drop a clean JPG/PNG image from a camera or phone.</p>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- SECTION 6: KITCHEN RECIPES & BASKET LINKING -->
-    <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 6: Kitchen Recipes & Culinary Content</h2>
-        <p>Accessible from the sidebar under <strong>Catalog & Content &rarr; Kitchen Recipes</strong> (<code>/admin/recipes</code>).</p>
-
-        <h3>6.1 Why Recipes Drive Grocery Basket Size</h3>
-        <p>Ìsàlèè Èkó recipes are not just cooking instructions — they are an interactive sales driver. When customers view a recipe (like <em>"Authentic Nigerian Egusi Soup"</em>), the storefront provides a single <strong>"Add All Ingredients to Cart"</strong> button that adds the exact ground egusi, palm oil, crayfish, and stockfish directly into their basket.</p>
-
-        <h3>6.2 Publishing a Recipe</h3>
-        <ol>
-            <li>Click <strong>+ New Recipe</strong> in the top-right corner.</li>
-            <li>Fill in:
-                <ul>
-                    <li><strong>Recipe Title:</strong> e.g., <em>"Smoky Jollof Rice (Party Style)"</em>.</li>
-                    <li><strong>Origin / Country:</strong> Nigeria, Ghana, etc.</li>
-                    <li><strong>Difficulty & Times:</strong> Prep time (minutes), Cook time (minutes), and Servings count.</li>
-                </ul>
-            </li>
-            <li><strong>Link Store Ingredients:</strong> For each required ingredient, link it to the actual product item in your store inventory so shoppers can purchase it with one tap.</li>
-            <li><strong>Cooking Steps:</strong> Type simple, numbered step-by-step instructions.</li>
-            <li>Click <strong>Publish Recipe</strong>. It appears on the public storefront immediately.</li>
-        </ol>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- SECTION 7: STORE HOURS & CLOSURES -->
-    <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 7: Store Hours, Closures & Emergency Toggle</h2>
-        <p>Accessible under <strong>Store Controls &rarr; Hours & Closures</strong> (<code>/admin/hours</code>).</p>
-
-        <h3>7.1 Standard Weekly Operating Hours</h3>
-        <p>Configure the physical store schedule for each day of the week (Monday through Sunday). Times operate in the Moncton local timezone (America/Moncton):</p>
+        <h3>4.3 Working a Case</h3>
+        <p>Click <strong>Inspect Case</strong> to see the order, items, photos and the <strong>Case Diary & Timeline</strong>. Use <strong>Record Note</strong> for internal notes. Then choose a resolution:</p>
         <table>
-            <thead>
-                <tr>
-                    <th>Day of Week</th>
-                    <th>Standard Schedule</th>
-                    <th>Online Order Cutoff</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Resolution</th><th>What Happens</th></tr></thead>
             <tbody>
-                <tr><td>Monday – Friday</td><td>10:00 AM – 7:00 PM</td><td>Pickup until 6:45 PM</td></tr>
-                <tr><td>Saturday</td><td>10:00 AM – 6:00 PM</td><td>Pickup until 5:45 PM</td></tr>
-                <tr><td>Sunday</td><td>12:00 PM – 5:00 PM</td><td>Pickup until 4:45 PM</td></tr>
+                <tr><td><strong>Execute Policy Refund</strong></td><td>Refunds the affected items through Square (optionally including the delivery fee) and emails the customer.</td></tr>
+                <tr><td><strong>Schedule Replacement Order</strong></td><td>Creates a replacement for the affected items.</td></tr>
+                <tr><td><strong>Send Resolution Options to Customer</strong></td><td>Lets the customer choose a refund or a replacement. The case shows <em>Awaiting Choice</em>.</td></tr>
+                <tr><td><strong>Decline Customer Claim</strong></td><td>Closes the case with a standard reason (e.g. food change of mind) or your own note.</td></tr>
+            </tbody>
+        </table>
+        <p><strong>Statuses:</strong> New Intake → Reviewing → Awaiting Customer → Resolved / Declined. Cases that pass the staff response target (default 24 hours) without a first reply are flagged <span class="pill pill-danger">Breached</span>. Check the Issues Desk at least twice a day.</p>
+        <p>Report windows (e.g. 24 hours for food) and return windows are set in <strong>Store Settings → Returns & Issues Policy</strong>.</p>
+
+        <h3>4.4 Cases from the Website (Report a Problem)</h3>
+        <p>Customers can open a case themselves on the <strong>Help &amp; Contact</strong> page (<code>/help</code>), linked from the header Help menu, the footer and every order page. These cases show the channel <em>website</em> and the contact details the customer typed.</p>
+        <ul>
+            <li><strong>With order items:</strong> if the customer entered their order number and email and ticked the affected items, the case works like any other. Refund, replace, offer choices or decline.</li>
+            <li><strong>Questions or no items:</strong> the drawer shows <strong>Reply by Email</strong> and <strong>Mark Resolved</strong>. Reply to the customer, then mark the case resolved. If the reply leads to a refund, use <em>Log Customer Complaint</em> with the order number and tick the items.</li>
+        </ul>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 5 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s5">
+        <h2>Section 5: Products & Inventory</h2>
+        <p>Sidebar: <strong>Catalog & Content → Products & Inventory</strong> (<code>/admin/products</code>).</p>
+
+        <div class="callout callout-danger">
+            <strong>Change Prices, Stock, Photos and New Items in Square</strong>
+            Square is the single source of truth. Product names, sizes, prices, photos and stock counts come from your Square catalogue and are <strong>not</strong> edited here. Sales at the Square till reduce online stock too. Changes made in Square usually appear on the website within minutes.
+        </div>
+
+        <h3>5.1 Finding Products</h3>
+        <ul>
+            <li>Search by name, French name or SKU.</li>
+            <li>Filter by category (includes its sub-categories), stock state (In Stock, Low Stock, Out of Stock, Untracked in Square), or return class.</li>
+            <li>The header shows when the last Square sync ran.</li>
+        </ul>
+
+        <h3>5.2 What You Can Edit Here</h3>
+        <p>Click a product to open its drawer. These website-only details are kept when Square syncs:</p>
+        <table>
+            <thead><tr><th>Field</th><th>Use It For</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Description</strong></td><td>The "Good to know" text on the product page. Put the <strong>ingredients, preparation/use, dietary and storage information</strong> here, along with taste and origin.</td></tr>
+                <tr><td><strong>French name & description</strong></td><td>Shown when customers switch the site to Français.</td></tr>
+                <tr><td><strong>Category & Country</strong></td><td>Where the product appears in the menus and on Shop by Country pages.</td></tr>
+                <tr><td><strong>Return class</strong></td><td>Perishable, Non-perishable or Non-food. Sets the report and return window in the Issues Desk.</td></tr>
+                <tr><td><strong>Featured</strong></td><td>Spotlights the product on the storefront.</td></tr>
+                <tr><td><strong>Hidden</strong></td><td>Removes the product from the website without touching Square, e.g. in-store-only items.</td></tr>
+            </tbody>
+        </table>
+        <p>Press <strong>Save</strong> to apply. Featured and Hidden can also be switched straight from the list.</p>
+
+        <h3>5.3 What Customers See</h3>
+        <p>Customers see <strong>In Stock</strong>, <strong>Low Stock</strong> (at or below the threshold in Store Settings, default 5) or <strong>Out of Stock</strong>, never the exact number. Items that Square doesn't track stock for are always shown as available.</p>
+        <p><strong>Back-in-stock emails:</strong> out-of-stock pages let customers leave their email. As soon as Square shows the item back in stock, each of them is emailed once with a link to the product. Nothing for staff to do.</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 6 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s6">
+        <h2>Section 6: Categories & Sub-Categories</h2>
+        <p>Sidebar: <strong>Catalog & Content → Categories & Sub-Cats</strong> (<code>/admin/categories</code>).</p>
+
+        <h3>6.1 Hierarchy</h3>
+        <ul>
+            <li><strong>Departments (top level):</strong> broad aisles, e.g. <em>"Flour, Grains & Rice"</em> or <em>"Spices & Seasonings"</em>.</li>
+            <li><strong>Sub-Categories:</strong> nested groups, e.g. <em>"Fufu Flour"</em> or <em>"Suya Pepper"</em>.</li>
+        </ul>
+        <p>Categories that come from Square show their <strong>Square ID</strong>. Ones created only on the website show <span class="pill pill-neutral">Local Only</span>. Use <strong>Hierarchical View</strong> with Expand All / Collapse All, or filter by department, featured status and sync state.</p>
+
+        <h3>6.2 Adding or Editing a Category</h3>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">1</span><span class="step-title">Click "New Category" (or "+" on a Department)</span></div>
+            <p>Type the customer-facing name. The web address is filled in for you.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">2</span><span class="step-title">Choose the Parent</span></div>
+            <p>Choose a parent department for a sub-category, or leave it empty for a new top-level department.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">3</span><span class="step-title">Icon & Photo</span></div>
+            <p>Pick an icon, then choose a photo from the <strong>Store Photo Library</strong> or switch to <strong>Upload from Device</strong>.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">4</span><span class="step-title">Featured & Order</span></div>
+            <p>Switch on <strong>Featured</strong> to spotlight the category on the homepage, and set its display order. Save.</p>
+        </div>
+        <div class="callout callout-info">
+            <strong>Deleting</strong>
+            Before you delete a category, the portal warns you if it still has products or sub-categories.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 7 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s7">
+        <h2>Section 7: Kitchen Recipes, Ingredients & Substitutions</h2>
+        <p>Sidebar: <strong>Catalog & Content → Kitchen Recipes</strong> (<code>/admin/recipes</code>).</p>
+
+        <h3>7.1 Why Recipes Sell Groceries</h3>
+        <p>Each recipe has an <strong>"Add all ingredients to basket"</strong> button that adds the exact store products. Recipes also power <em>Cook With What I Have</em>, <em>Cook on a Budget</em> and the "Cook with" section on product pages.</p>
+
+        <h3>7.2 The Three Tabs</h3>
+        <ul>
+            <li><strong>Recipes & Stage Gate:</strong> every recipe with its approval status, ingredient list and estimated kit cost for 4 people.</li>
+            <li><strong>Ingredients & Shelf Variations:</strong> cooking ingredients (e.g. "palm oil") linked to the store products and sizes that supply them. Rank 1 is the preferred one. Ingredients can be marked <em>Pantry Staple</em> (not added to the basket).</li>
+            <li><strong>Curated Substitutions:</strong> chef-approved swaps offered when an ingredient is out of stock.</li>
+        </ul>
+
+        <h3>7.3 Publishing a Recipe</h3>
+        <ol>
+            <li>Click <strong>New Recipe</strong>. Fill in the title, cuisine, origin country, servings, prep and cook times, intro, and photo.</li>
+            <li>Add ingredients from the ingredient list, with quantities. Mark optional ones as optional.</li>
+            <li>Write numbered cooking steps and save. The recipe is saved as a <span class="pill pill-pending">Draft</span>.</li>
+            <li>When every check passes, press <strong>Approve Live</strong>. The recipe then appears on the storefront.</li>
+        </ol>
+        <div class="callout callout-warning">
+            <strong>Stage Gate: Why "Approve Live" Is Blocked</strong>
+            A recipe can't go live until it has steps, a valid cuisine, at least one required ingredient, and store products linked to every ingredient. Any missing item is listed on the recipe card. Fix it in the <em>Ingredients</em> tab with <strong>Link Variations</strong>.
+        </div>
+        <p>Use the <strong>star</strong> to feature a recipe on the homepage.</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 8 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s8">
+        <h2>Section 8: Stories & Updates</h2>
+        <p>Sidebar: <strong>Catalog & Content → Stories & Updates</strong> (<code>/admin/stories</code>). The red badge counts reader comments waiting for approval.</p>
+
+        <h3>8.1 Two Kinds of Post</h3>
+        <ul>
+            <li><span class="pill pill-pending">Food Story</span>: cultural and food storytelling, shown at <code>/food-stories</code>.</li>
+            <li><span class="pill pill-blue">Brand Update</span>: announcements, new arrivals and store news, shown at <code>/brand-updates</code>.</li>
+        </ul>
+
+        <h3>8.2 Writing a Post</h3>
+        <ol>
+            <li>Click <strong>New Food Story</strong> or <strong>New Brand Update</strong>.</li>
+            <li>Fill in the title (the web address is suggested for you), optional author, a short summary for the listing cards, and the story text.</li>
+            <li><strong>Formatting:</strong> leave a blank line between paragraphs. Start a line with <code>##</code> for a heading. Use <code>**bold**</code> and <code>*italics*</code>.</li>
+            <li>Add a cover photo (JPG, PNG or WebP, up to 5 MB; wide photos look best) and an estimated read time.</li>
+            <li>Choose <strong>Published</strong> or <strong>Draft (hidden)</strong>. Leave the publish date empty to publish now, or pick a future date to schedule it.</li>
+            <li>Optionally tick <strong>Show in Trending Stories</strong> and <strong>Allow comments</strong>, then save.</li>
+        </ol>
+
+        <h3>8.3 Linking Products and Recipes</h3>
+        <p>In the editor, use <strong>Products in this story</strong> and <strong>Recipes in this story</strong>: type at least two letters, pick from the list, and remove with ×. The order you pick them in is the order shown.</p>
+        <ul>
+            <li>The story page shows <strong>Shop this story</strong> (product cards with Add to basket) and <strong>Cook from this story</strong> (recipes).</li>
+            <li>Each linked product and recipe page shows the story under <strong>The Story Behind It</strong>, once it's published.</li>
+            <li>Only link what is genuinely related. Nothing appears where no link is made.</li>
+        </ul>
+
+        <h3>8.4 Moderating Comments</h3>
+        <p>Open the <strong>Comments</strong> tab. <strong>Approve</strong> a comment to show it, <strong>Reject</strong> (or <strong>Hide</strong>) to keep it off the site, or <strong>Delete</strong> it permanently.</p>
+        <div class="callout callout-info">
+            <strong>Unpublish Instead of Delete</strong>
+            Deleting a post also deletes its comments and can't be undone. To take a post down for now, unpublish it.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 9 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s9">
+        <h2>Section 9: Hours & Closures</h2>
+        <p>Sidebar: <strong>Store Controls → Hours & Closures</strong> (<code>/admin/hours</code>). All times are Atlantic Time.</p>
+
+        <h3>9.1 Weekly Opening Hours</h3>
+        <p>For each day, tick whether the store is open, then enter the <strong>Open</strong> and <strong>Close</strong> times (e.g. 10:00 and 19:00). Press <strong>Save Opening Hours</strong>. Pickup slots are created from these hours, using the pickup settings in Store Settings.</p>
+
+        <h3>9.2 Holiday & One-Off Closures</h3>
+        <ol>
+            <li>Under <strong>Store Closures & Holidays</strong>, choose the <strong>Closure Date</strong>.</li>
+            <li>Add a reason (e.g. <em>"Christmas Day"</em>, <em>"Stock-take"</em>).</li>
+            <li>Press <strong>Add Closure</strong>. Customers can no longer book pickup on that date.</li>
+        </ol>
+        <p>To reopen a date, press <strong>Remove</strong> next to it.</p>
+
+        <div class="callout callout-danger">
+            <strong>Emergency Closure (Snowstorm / Power Outage)</strong>
+            There is no separate emergency switch. To close today at short notice, <strong>add a closure for today's date</strong>. New pickups for today stop at once and the dashboard shows "Closed for Holiday". Contact customers with orders already booked for today from the Orders Queue, and reschedule them.
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 10 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s10">
+        <h2>Section 10: Store Settings</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Store Settings</strong> (<code>/admin/settings</code>). Choose a group on the left, change the values, then press <strong>Save Settings</strong>. New checkouts use the new values immediately, and every change is logged.</p>
+
+        <table>
+            <thead><tr><th>Group</th><th>Settings (default)</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Pickup & Scheduling</strong></td><td>Earliest pickup after ordering (30 min) · Gap between slots (15 min) · Last pickup before closing (15 min) · Booking horizon (7 days) · Late-pickup reminder delay (30 min)</td></tr>
+                <tr><td><strong>Uncollected Orders</strong></td><td>Grace period (3 days) · Action when it expires: <em>Hold for staff review</em> or <em>Cancel automatically</em> · Refund % on cancellation (100%)</td></tr>
+                <tr><td><strong>Stock & Tags</strong></td><td>Low-stock threshold (5) · "New Arrival" period (21 days) · Best-seller lookback (30 days) · Best-seller count (12)</td></tr>
+                <tr><td><strong>Local Delivery</strong></td><td>Maximum delivery radius (15 km)</td></tr>
+                <tr><td><strong>Returns & Issues Policy</strong></td><td>Report windows for food, groceries and non-food · Non-food change-of-mind return window · Staff response target (24 h) · Customer substitution reply window (15 min)</td></tr>
+                <tr><td><strong>Support & Contact</strong></td><td>Support email (support@isaleeko.com) · Support phone · Support WhatsApp</td></tr>
+                <tr><td><strong>Language & Fallbacks</strong></td><td>Whether unreviewed French translations are shown</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 11 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s11">
+        <h2>Section 11: Promotions</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Promotions</strong> (<code>/admin/promotions</code>).</p>
+
+        <div class="callout callout-info">
+            <strong>How Discounts Work</strong>
+            Promotions apply automatically. There are no promo or voucher codes. Each order gets <strong>one</strong> discount: whichever saves the customer more, a promotion or a Square Loyalty reward. Every promotion must have an end date and stops by itself.
+        </div>
+
+        <h3>11.1 Creating a First Online Order Offer</h3>
+        <ol>
+            <li>Click <strong>Create promotion</strong> and choose <strong>First online order offer</strong>. Only customers with no previous order qualify, checked by account and email.</li>
+            <li>Enter the <strong>Name</strong> customers see in their order summary, and the objective.</li>
+            <li>Set the discount: <strong>Percent off</strong> or <strong>Dollars off</strong>.</li>
+            <li>Set <strong>Starts</strong> and <strong>Ends (required)</strong>, plus an optional <strong>Minimum basket</strong>, <strong>Limit per customer</strong> and <strong>Budget cap</strong> (the most orders it can be used on).</li>
+            <li>Press <strong>Preview</strong> to check who is eligible and see an example price. Then press <strong>Activate</strong>, or <strong>Save as draft</strong>.</li>
+        </ol>
+
+        <h3>11.2 Managing Promotions</h3>
+        <ul>
+            <li><strong>Pause</strong> / <strong>Resume</strong>: stop the offer for now, then restart it.</li>
+            <li><strong>End now</strong>: ends the offer for good. It can't be restarted.</li>
+            <li><strong>Edit</strong> / <strong>Delete</strong>: available for drafts.</li>
+            <li>Each promotion shows how many times it has been used.</li>
+        </ul>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 12 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s12">
+        <h2>Section 12: Loyalty (Square Loyalty)</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Loyalty</strong> (<code>/admin/loyalty</code>).</p>
+
+        <h3>12.1 How It Works</h3>
+        <ul>
+            <li>The website uses your <strong>Square Loyalty</strong> programme, the same one as the till.</li>
+            <li>Customers join with the <strong>phone number</strong> they give at checkout. Paid online orders earn points.</li>
+            <li>Signed-in customers can spend a reward at checkout. Points are held while the order is unpaid and given back if it isn't paid.</li>
+            <li>Earning rules and rewards are set in the <strong>Square Dashboard → Loyalty</strong>, not on the website.</li>
+        </ul>
+
+        <h3>12.2 The Loyalty Screen</h3>
+        <table>
+            <thead><tr><th>Area</th><th>What It Shows</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Status banner</strong></td><td>Shows whether loyalty is connected (live or test) and the current reward, e.g. "$3 off for 100 points". "Not active yet" means the Square account in use has no loyalty programme.</td></tr>
+                <tr><td><strong>Last 30 days</strong></td><td>Orders that earned points · Points given online · Customers earning online · Rewards used online · Waiting to reach Square</td></tr>
+                <tr><td><strong>Look up a customer's points</strong></td><td>Enter a phone number to see their balance, lifetime points and member-since date.</td></tr>
+                <tr><td><strong>Website orders in the programme</strong></td><td>Order, customer, phone, points earned, and reward status (used, given back, or held until paid).</td></tr>
+            </tbody>
+        </table>
+        <p>If Square was briefly unreachable, points wait and are retried automatically. Press <strong>Retry waiting orders</strong> to send them now. In-store activity and full reports stay in the Square Dashboard.</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 13 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s13">
+        <h2>Section 13: Analytics &amp; Measurement</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Analytics</strong> (<code>/admin/analytics</code>). Choose <em>Last 7, 30 or 90 days</em> at the top right.</p>
+
+        <h3>13.1 What the Screen Shows</h3>
+        <table>
+            <thead><tr><th>Area</th><th>What It Shows</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Headline tiles</strong></td><td>Visitors (browsing sessions) · Page views · Orders completed and their value · Shopper conversion (visitors who completed an order)</td></tr>
+                <tr><td><strong>Discovery</strong></td><td>Page views, product views, searches, searches with no results, category views, country views, recipe views, story views</td></tr>
+                <tr><td><strong>Commerce</strong></td><td>Added to / removed from basket, checkouts started, payments attempted, payments successful, orders completed</td></tr>
+                <tr><td><strong>Pickup</strong></td><td>Pickup chosen, pickup times viewed, pickup slot chosen, and the average number of slots customers saw</td></tr>
+                <tr><td><strong>Shopping funnel</strong></td><td>How many sessions viewed a product → added to basket → started checkout → completed an order</td></tr>
+                <tr><td><strong>Top lists</strong></td><td>Top searches, searches with no results, most-viewed products, most-visited pages</td></tr>
             </tbody>
         </table>
 
-        <h3>7.2 Scheduling Holiday Closures</h3>
-        <p>For statutory holidays (e.g. Christmas, New Year's Day, Canada Day, Thanksgiving), enter the specific date and reason. The storefront will warn customers ahead of time.</p>
+        <h3>13.2 Using It Week to Week</h3>
+        <ul>
+            <li><strong>Searches with no results</strong> show what customers want but can't find: ideas for new stock, or words to add to product names and French names.</li>
+            <li>A big drop between "Started checkout" and "Completed an order" is worth investigating (pickup times, payment methods).</li>
+            <li>A low average number of pickup slots means customers see few times. Check <strong>Hours & Closures</strong> and the pickup settings.</li>
+        </ul>
 
-        <h3>7.3 Emergency Snowstorm / Weather Closure Toggle</h3>
-        <div class="callout callout-danger">
-            <strong>Emergency Weather Switch</strong>
-            During severe New Brunswick snowstorms or power outages, Store Managers can activate the <strong>"Emergency Store Closure"</strong> switch. This immediately displays a prominent closure banner across the website and pauses new pickup orders to keep staff and shoppers safe.
+        <div class="callout callout-info">
+            <strong>Google Analytics</strong>
+            The banner at the top says whether Google Analytics 4 is connected. The website is ready for it: once the GA4 measurement ID is added in the hosting settings, the same events also go to Google Analytics for deeper reports. Names, emails and phone numbers are never sent.
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- SECTION 8: SQUARE POS & PAYMENT GATEWAYS -->
-    <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 8: Square POS & Payment Gateways</h2>
-        <p>Accessible to Store Managers under <strong>Store Controls &rarr; Payment Methods</strong> (<code>/admin/payments</code>).</p>
+    <div class="page-break" id="s14">
+        <h2>Section 14: Payment Methods & Delivery Switch</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Payment Methods</strong> (<code>/admin/payments</code>).</p>
 
-        <h3>8.1 Payment Channels Supported</h3>
-        <ul>
-            <li><strong>Square Web Payments:</strong> Secure tokenized checkout for Visa, MasterCard, American Express, and Interac Debit.</li>
-            <li><strong>Cash on Express In-Store Pickup:</strong> Allows shoppers to pay at the physical counter when collecting their order.</li>
-            <li><strong>Interac e-Transfer:</strong> Manual e-transfer payment instructions for local shoppers.</li>
-        </ul>
+        <h3>14.1 Payment Methods</h3>
+        <table>
+            <thead><tr><th>Method</th><th>How It Works</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Pay by Card</strong></td><td>Visa, Mastercard, Amex and debit cards through Square's secure card form.</td></tr>
+                <tr><td><strong>Apple Pay / Google Pay</strong></td><td>One-tap wallet payment on supported phones and browsers, through Square.</td></tr>
+                <tr><td><strong>Interac e-Transfer</strong></td><td>The customer sends money to the store's e-Transfer email. Staff confirm it in the Orders Queue before packing. Customers are asked to pay within 24 hours. Cancel unpaid ones by hand with <strong>Cancel (Not Paid)</strong>.</td></tr>
+            </tbody>
+        </table>
+        <p>Use the switch to turn a method on or off, and the arrows to change the order shown at checkout. Changes apply to new checkouts at once. At least one method must stay on.</p>
 
-        <h3>8.2 Safe Handling of Square Credentials</h3>
-        <p>The store's Square connection is governed by three secure keys:</p>
-        <ol>
-            <li><strong>Square Application ID:</strong> Identifies your registered Square merchant application.</li>
-            <li><strong>Square Access Token:</strong> The authorization key that allows the store to charge cards and sync inventory.</li>
-            <li><strong>Square Location ID:</strong> Identifies your physical retail store register in Moncton.</li>
-        </ol>
+        <h3>14.2 Delivery On / Off</h3>
+        <p>The <strong>Delivery</strong> switch controls whether customers can choose delivery at checkout. When it is off, checkout offers <strong>Pickup only</strong> and delivery fees are hidden. Orders already placed are not affected.</p>
 
         <div class="callout callout-warning">
-            <strong>Security Notice for Store Owners</strong>
-            Never share your Square Access Token via unencrypted email or text message. Only Store Managers have access to the Payment Methods screen. Store Associates are blocked from viewing these credentials.
+            <strong>Square Keys Are Not Shown in the Portal</strong>
+            For security, the Square access token, location ID and application ID are stored only in the hosting environment (Render). They are not visible or editable in the portal. Never send these keys by email or text message. Ask your developer to change them, for example when switching to a new Square account.
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 9: STAFF & ACCESS MANAGEMENT -->
+    <!-- SECTION 14 -->
     <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 9: Staff & Access Management (Handover System)</h2>
-        <p>Accessible to Store Managers under <strong>Store Controls &rarr; Staff & Access</strong> (<code>/admin/staff</code>).</p>
-        <p>This dedicated portal was engineered specifically for the client handover so the store owner can independently add new employees, issue passwords, and manage departing staff without calling an IT developer.</p>
+    <div class="page-break" id="s15">
+        <h2>Section 15: Square Check & Catalogue Pull</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Square Check</strong> (<code>/admin/square-check</code>).</p>
 
-        <h3>9.1 Onboarding a New Employee</h3>
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">1</span>
-                <span class="step-title">Click "+ Add Staff Member"</span>
-            </div>
-            <p>In the top-right corner of the Staff Management portal, click the red button.</p>
+        <h3>15.1 Check Square (Read-Only)</h3>
+        <p>Press the check button to compare Square's categories, sub-categories, items and prices with the website. <strong>Nothing is changed on either side.</strong> You'll see counts for both, then either <span class="pill pill-active">Square and the website are in step</span> or a list of differences to look at.</p>
+
+        <h3>15.2 Pull Everything from Square</h3>
+        <p><strong>Pull from Square now</strong> copies every item, category, price, photo and stock count from Square onto the website, and hides demo products that aren't in Square. It runs in the background and the page updates by itself, showing when the last pull finished or failed.</p>
+        <ul>
+            <li><strong>When to use it:</strong> after switching Square accounts (e.g. from test to live), after big catalogue changes, or if the check shows differences.</li>
+            <li>It changes <strong>the website only</strong>, never Square.</li>
+        </ul>
+
+        <div class="callout callout-info">
+            <strong>Normal Day-to-Day Sync</strong>
+            Square sends changes to the website automatically, so you don't need to pull after every edit. The page header shows whether you are connected to <strong>live</strong> or <strong>sandbox (test)</strong> Square.
         </div>
+    </div>
 
+    <!-- ========================================== -->
+    <!-- SECTION 15 -->
+    <!-- ========================================== -->
+    <div class="page-break" id="s16">
+        <h2>Section 16: Staff & Access Management</h2>
+        <p>Managers only. Sidebar: <strong>Store Controls → Staff & Access</strong> (<code>/admin/staff</code>). The owner can add employees, issue passwords and remove departing staff without calling a developer.</p>
+
+        <h3>16.1 Onboarding a New Employee</h3>
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">2</span>
-                <span class="step-title">Enter Employee Details</span>
-            </div>
+            <div class="step-header"><span class="step-number">1</span><span class="step-title">Click "+ Add Staff Member"</span></div>
+            <p>The red button at the top right.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">2</span><span class="step-title">Enter Employee Details</span></div>
             <ul>
-                <li><strong>Full Name:</strong> e.g., <em>"Bukola Adeleke"</em>.</li>
-                <li><strong>Email Address:</strong> This will be their unique username to log in (e.g., <code>bukola@isaleeeko.ca</code>).</li>
-                <li><strong>Phone Number:</strong> Optional contact number.</li>
+                <li><strong>Full Name:</strong> e.g. <em>"Bukola Adeleke"</em>.</li>
+                <li><strong>Email Address (Login Username):</strong> e.g. <code>bukola@isaleeko.com</code>.</li>
+                <li><strong>Contact Phone Number:</strong> optional.</li>
             </ul>
         </div>
-
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">3</span>
-                <span class="step-title">Select Staff Role</span>
-            </div>
+            <div class="step-header"><span class="step-number">3</span><span class="step-title">Choose the Role</span></div>
             <ul>
-                <li><span class="pill pill-associate">Store Associate</span> — For cashier, packaging, and kitchen staff. Can fulfill orders and update stock. Payment tokens and staff controls are hidden.</li>
-                <li><span class="pill pill-manager">Store Manager</span> — For owners and head managers. Full administrative authority.</li>
+                <li><span class="pill pill-associate">Store Associate</span>: till, packing and kitchen staff. Handles orders, issues, products, categories, recipes, stories and hours.</li>
+                <li><span class="pill pill-manager">Store Manager</span>: owners and head managers. Has full access, including staff, settings, promotions, loyalty, analytics, payments and Square Check.</li>
             </ul>
         </div>
-
         <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">4</span>
-                <span class="step-title">Copy Temporary Password</span>
-            </div>
-            <p>The system auto-generates a secure temporary password (e.g. <code>temp8391!#</code>). Click the <strong>Copy</strong> button and send it to the employee via WhatsApp, SMS, or email.</p>
+            <div class="step-header"><span class="step-number">4</span><span class="step-title">Copy the Temporary Password</span></div>
+            <p>A secure temporary password is generated. Click <strong>Copy</strong>, then <strong>Create Staff Account</strong>, and send the password to the employee privately.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-header"><span class="step-number">5</span><span class="step-title">Employee Signs In & Sets Their Own Password</span></div>
+            <p>They sign in at <code>/admin/login</code> and change the password with the key icon (Section 1.3).</p>
         </div>
 
-        <div class="step-card">
-            <div class="step-header">
-                <span class="step-number">5</span>
-                <span class="step-title">Employee Logs In & Updates Password</span>
-            </div>
-            <p>The employee goes to <code>/admin/login</code>, enters their email and temporary password, and uses the key icon in the topbar to change it to their personal password.</p>
-        </div>
-
-        <h3>9.2 Resetting an Employee's Forgotten Password</h3>
+        <h3>16.2 Resetting a Forgotten Password</h3>
         <ol>
-            <li>Find the employee in the <strong>Staff Roster Table</strong>.</li>
-            <li>Click <strong>Edit</strong>.</li>
-            <li>In the yellow <em>"Reset Password"</em> box, click <strong>Generate Random</strong> (or type a new custom password).</li>
-            <li>Click <strong>Save Changes</strong>. Provide the new password to the employee.</li>
+            <li>Find the employee in the staff list (search by name, email or phone).</li>
+            <li>Click <strong>Edit & Password</strong>.</li>
+            <li>In the <em>Reset Password</em> box, press <strong>Generate Random</strong> or type a new password.</li>
+            <li>Save, and give the new password to the employee.</li>
         </ol>
 
-        <h3>9.3 Handling Departed Staff (Deactivation vs Deletion)</h3>
+        <h3>16.3 Departing Staff</h3>
         <ul>
-            <li><strong>Instant Deactivation:</strong> Click <strong>Deactivate</strong>. The employee is immediately locked out from the portal. They cannot log in, but their past fulfillment audit logs remain intact.</li>
-            <li><strong>Revoke Access (Delete):</strong> Click the <strong>Trash icon</strong>. If the employee has processed orders, the system automatically revokes all admin rights while preserving order audit history. If no orders exist, the account is cleanly erased.</li>
-            <li><strong>Self-Protection Guard:</strong> A manager cannot deactivate or delete their own active account, preventing accidental lockouts.</li>
+            <li><strong>Deactivate (Toggle):</strong> the employee is locked out at once. Their past order history stays.</li>
+            <li><strong>Revoke access (Trash icon):</strong> if the employee has handled orders, their admin rights are removed and the history is kept. Otherwise the account is deleted.</li>
+            <li><strong>Self-Protection Guard:</strong> you can't deactivate or delete your own account, so you can't lock yourself out by accident.</li>
         </ul>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 10: CHECKLISTS & EMERGENCY RECOVERY -->
+    <!-- SECTION 16 -->
     <!-- ========================================== -->
-    <div class="page-break">
-        <h2>Section 10: Daily Store Checklists & Emergency Recovery</h2>
+    <div class="page-break" id="s17">
+        <h2>Section 17: Daily Checklists & Emergency Recovery</h2>
 
-        <h3>10.1 Morning Opening Checklist (15 Minutes Before Opening)</h3>
+        <h3>17.1 Morning Opening Checklist (15 Minutes Before Opening)</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Step</th>
-                    <th>Action</th>
-                    <th>Location in Admin</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Step</th><th>Action</th><th>Where</th></tr></thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Sign in to operations portal on the store tablet/counter computer.</td>
-                    <td><code>/admin/login</code></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Check <strong>Store Status Pill</strong> to confirm hours are scheduled for today.</td>
-                    <td>Dashboard Header</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Review <strong>Active Fulfillment Backlog</strong> for overnight web orders.</td>
-                    <td><code>/admin/orders</code></td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>Check <strong>Low Stock Alerts</strong> for items that sold out overnight.</td>
-                    <td><code>/admin/products</code></td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td>Print packing slips for morning pickup slots.</td>
-                    <td>Orders Desk</td>
-                </tr>
+                <tr><td>1</td><td>Sign in on the store tablet or counter computer.</td><td><code>/admin/login</code></td></tr>
+                <tr><td>2</td><td>Check the <strong>Store Status Pill</strong> shows the right hours for today. Add a closure if the weather forces you to close.</td><td>Dashboard · Hours & Closures</td></tr>
+                <tr><td>3</td><td>Confirm any <strong>e-Transfers</strong> that arrived overnight.</td><td>Orders → e-Transfers to Confirm</td></tr>
+                <tr><td>4</td><td>Start the <strong>New</strong> orders, oldest pickup slot first.</td><td>Orders → New</td></tr>
+                <tr><td>5</td><td>Check <strong>Issues Desk</strong> for New Intake, Safety / Allergen and website cases.</td><td><code>/admin/issues</code></td></tr>
+                <tr><td>6</td><td>Review <strong>Low Stock</strong> and reorder in Square.</td><td>Dashboard · Square</td></tr>
             </tbody>
         </table>
 
-        <h3>10.2 Evening Closing Checklist (At Store Closing)</h3>
+        <h3>17.2 Evening Closing Checklist</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Step</th>
-                    <th>Action</th>
-                    <th>Location in Admin</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Step</th><th>Action</th><th>Where</th></tr></thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Verify all orders marked <em>"Ready for Pickup"</em> were collected by customers.</td>
-                    <td><code>/admin/orders</code></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Record any delivered local delivery batches as <em>"Completed"</em>.</td>
-                    <td><code>/admin/orders</code></td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Review Today's Gross Sales tile for end-of-day register reconciliation.</td>
-                    <td>Dashboard Overview</td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>Sign out of the operations portal (click door/exit icon in topbar).</td>
-                    <td>Topbar Profile</td>
-                </tr>
+                <tr><td>1</td><td>Make sure every order handed over today is marked <strong>Completed</strong>.</td><td>Orders → Ready</td></tr>
+                <tr><td>2</td><td>Mark missed pickups <strong>Uncollected</strong>, or reschedule them.</td><td>Orders → Ready / Uncollected</td></tr>
+                <tr><td>3</td><td>Leave no substitution question open on a packed order.</td><td>Orders → Preparing</td></tr>
+                <tr><td>4</td><td>Compare <strong>Today's Sales</strong> with Square for end-of-day reconciliation.</td><td>Dashboard · Square Dashboard</td></tr>
+                <tr><td>5</td><td>Sign out (door / exit icon).</td><td>Top bar</td></tr>
             </tbody>
         </table>
 
-        <h3>10.3 Emergency Terminal Recovery (For IT & Developers)</h3>
-        <p>If store managers ever lose all passwords or accidentally lock themselves out, access can be instantly restored in 5 seconds directly from the server terminal without database surgery:</p>
-        
+        <h3>17.3 Weekly (Manager)</h3>
+        <ul>
+            <li>Run <strong>Square Check</strong> and deal with any differences.</li>
+            <li>Check <strong>Loyalty → Waiting to reach Square</strong> is 0, or press Retry.</li>
+            <li>Review active <strong>Promotions</strong> and their end dates.</li>
+            <li>Check <strong>Analytics → Searches with no results</strong> and the shopping funnel.</li>
+            <li>Add upcoming holidays in <strong>Hours & Closures</strong>.</li>
+        </ul>
+
+        <h3>17.4 Emergency Access Recovery (For IT & Developers)</h3>
+        <p>If every manager is locked out, a developer can restore access from the server terminal:</p>
         <div class="step-card">
-            <p>Open a terminal on the host server and run:</p>
-            <code>php artisan staff:create owner@isaleeeko.ca --name="Store Owner" --password="EmergencyPassword123!" --role=manager</code>
-            <p style="margin-top: 6pt; margin-bottom: 0;">This command creates or reactivates the account as a verified Store Manager with full access restored immediately.</p>
+            <p>Run on the host server (Render → web service → <strong>Shell</strong>, available on paid Render plans):</p>
+            <code>php artisan staff:create owner@isaleeko.com --name="Store Owner" --password="&lt;new strong password&gt;" --role=manager</code>
+            <p style="margin-top: 6pt; margin-bottom: 0;">This creates or reactivates the account as an active Store Manager. Sign in, then change the password straight away.</p>
         </div>
 
         <div style="margin-top: 24pt; padding-top: 12pt; border-top: 1pt solid #EEEEEE; text-align: center; font-size: 8.5pt; color: #888888;">
-            Ìsàlèè Èkó Operations Portal Manual · Version 1.0 · Official Handover Document · Moncton, NB, Canada
+            Ìsàlèè Èkó Operations Portal Manual · Version 2.1 · Official Handover Document · Saint John, NB, Canada
         </div>
     </div>
 

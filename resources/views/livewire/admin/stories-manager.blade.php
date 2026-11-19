@@ -4,6 +4,7 @@
 
     $input = 'w-full px-3 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-sm text-[#111111] focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]';
     $label = 'block text-xs font-bold text-[#111111] mb-1.5';
+    $help = 'mt-1 text-[11px] text-[#686868]';
 @endphp
 
 <div class="space-y-6 sm:space-y-8">
@@ -244,6 +245,41 @@
                             <input id="story-minutes" type="number" min="1" max="120" wire:model="readMinutes" class="{{ $input }}" placeholder="Auto">
                             @error('readMinutes') <p class="mt-1 text-xs text-[#DF2600]">{{ $message }}</p> @enderror
                         </div>
+                    </div>
+
+                    {{-- Content → commerce: products and recipes shown with the story, and the story shown on their pages --}}
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        @foreach ([
+                            ['label' => 'Products in this story', 'help' => 'Shown as “Shop this story”, and the story appears on these product pages.', 'model' => 'productSearch', 'placeholder' => 'Search products…', 'linked' => $linkedProducts, 'matches' => $productMatches, 'add' => 'addProduct', 'remove' => 'removeProduct'],
+                            ['label' => 'Recipes in this story', 'help' => 'Shown as “Cook from this story”, and the story appears on these recipe pages.', 'model' => 'recipeSearch', 'placeholder' => 'Search recipes…', 'linked' => $linkedRecipes, 'matches' => $recipeMatches, 'add' => 'addRecipe', 'remove' => 'removeRecipe'],
+                        ] as $picker)
+                            <div>
+                                <label for="picker-{{ $picker['model'] }}" class="{{ $label }}">{{ $picker['label'] }}</label>
+                                <div class="relative">
+                                    <input id="picker-{{ $picker['model'] }}" type="search" wire:model.live.debounce.300ms="{{ $picker['model'] }}" placeholder="{{ $picker['placeholder'] }}" autocomplete="off" class="{{ $input }}">
+                                    @if ($picker['matches']->isNotEmpty())
+                                        <ul class="absolute z-10 mt-1 w-full max-h-56 overflow-y-auto rounded-xl border border-[#EEEEEE] bg-white shadow-lg">
+                                            @foreach ($picker['matches'] as $match)
+                                                <li>
+                                                    <button type="button" wire:click="{{ $picker['add'] }}({{ $match->id }})" class="w-full px-3 py-2 text-left text-sm text-[#111111] hover:bg-[#FFF0EC]">{{ $match->name }}</button>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                                <p class="{{ $help }}">{{ $picker['help'] }}</p>
+                                @if ($picker['linked']->isNotEmpty())
+                                    <ul class="mt-2 flex flex-wrap gap-1.5">
+                                        @foreach ($picker['linked'] as $item)
+                                            <li class="inline-flex items-center gap-1 rounded-full bg-[#F6F6F6] pl-3 pr-1 py-1 text-xs font-bold text-[#111111]">
+                                                {{ $item->name }}
+                                                <button type="button" wire:click="{{ $picker['remove'] }}({{ $item->id }})" class="size-5 rounded-full text-[#686868] hover:bg-[#EEEEEE] hover:text-[#DF2600]" aria-label="Remove {{ $item->name }}">×</button>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-3 sm:gap-6 text-sm text-[#111111]">

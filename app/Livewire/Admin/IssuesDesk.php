@@ -146,6 +146,33 @@ class IssuesDesk extends Component
         $this->closeResolutionModal();
     }
 
+    /**
+     * Website enquiries with no order items: staff reply by email or phone,
+     * then close the case here.
+     */
+    public function markEnquiryResolved(): void
+    {
+        $issue = OrderIssue::with('items')->findOrFail($this->selectedIssueId);
+
+        if (! $issue->isPending() || $issue->items->isNotEmpty()) {
+            return;
+        }
+
+        $issue->update([
+            'status' => OrderIssue::STATUS_RESOLVED,
+            'first_response_at' => $issue->first_response_at ?? now(),
+            'resolved_at' => now(),
+        ]);
+
+        $issue->events()->create([
+            'type' => 'resolved',
+            'actor' => 'staff',
+            'note' => 'Resolved by '.(auth()->user()?->name ?? 'staff').'.',
+        ]);
+
+        session()->flash('success', "Case #{$issue->reference} marked as resolved.");
+    }
+
     public function addStaffNote(): void
     {
         if (! $this->selectedIssueId || trim($this->newStaffNote) === '') {
@@ -266,6 +293,9 @@ class IssuesDesk extends Component
                 $q->where(function ($sub) use ($term) {
                     $sub->where('reference', 'like', "%{$term}%")
                         ->orWhere('description', 'like', "%{$term}%")
+                        ->orWhere('contact_name', 'like', "%{$term}%")
+                        ->orWhere('contact_email', 'like', "%{$term}%")
+                        ->orWhere('contact_phone', 'like', "%{$term}%")
                         ->orWhereHas('order', fn ($o) => $o->where('number', 'like', "%{$term}%")->orWhere('contact_name', 'like', "%{$term}%")->orWhere('contact_phone', 'like', "%{$term}%"));
                 });
             })

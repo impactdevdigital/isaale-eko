@@ -33,9 +33,12 @@ class OrderIssueItem extends Model
         return $this->belongsTo(OrderItem::class, 'order_item_id');
     }
 
-    public function typeLabel(): string
+    /**
+     * @return array<string, string>
+     */
+    public static function typeLabels(): array
     {
-        return match ($this->issue_type) {
+        return [
             self::TYPE_WRONG_PRODUCT => 'Wrong product received',
             self::TYPE_WRONG_QUANTITY => 'Wrong quantity received',
             self::TYPE_MISSING_ITEM => 'Item missing from order',
@@ -45,7 +48,11 @@ class OrderIssueItem extends Model
             self::TYPE_LATE_OR_UNDELIVERED => 'Late or undelivered',
             self::TYPE_OTHER_FULFILMENT_ERROR => 'Other fulfilment error',
             self::TYPE_CHANGE_OF_MIND => 'Change of mind (non-food)',
-            default => ucfirst(str_replace('_', ' ', $this->issue_type)),
-        };
+        ];
+    }
+
+    public function typeLabel(): string
+    {
+        return self::typeLabels()[$this->issue_type] ?? ucfirst(str_replace('_', ' ', $this->issue_type));
     }
 }

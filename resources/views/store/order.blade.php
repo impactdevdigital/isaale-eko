@@ -54,6 +54,19 @@
                 <a href="{{ route('shop') }}" class="flex h-[42px] items-center justify-center rounded-full border border-ink text-[15px] font-bold">Keep shopping</a>
             </div>
 
+            @if ($order->isConfirmed())
+                <a href="{{ route('help', ['order' => $order->number]) }}" class="mt-4 text-body-xs font-bold text-body-muted underline hover:text-ink">Something wrong with this order? Report a problem</a>
+            @endif
+
+            @if (auth()->guest() && $order->status !== Order::STATUS_PAYMENT_FAILED)
+                {{-- Guests: the order is already filed under their email, so signing in with it shows it in their history. --}}
+                <div class="mt-6 flex w-full max-w-[492px] flex-col items-center gap-3 rounded-lg bg-brand-yellow-0 px-5 py-4 sm:flex-row sm:text-left" role="note">
+                    <x-store.icon name="lovely" class="size-6 shrink-0" />
+                    <p class="flex-1 text-body-sm text-ink">Keep your order history and earn rewards. Sign in or create an account{{ $order->contact_email ? ' with '.$order->contact_email : '' }} to get started.</p>
+                    <button type="button" x-data @click="$dispatch('sign-in-open')" class="flex h-9 shrink-0 items-center rounded-full border border-ink px-4 text-[13px] font-bold transition-colors hover:bg-ink hover:text-white">Sign in</button>
+                </div>
+            @endif
+
             @if (auth()->id() && $order->user_id === auth()->id() && $order->status !== Order::STATUS_PAYMENT_FAILED)
                 <div class="mt-4 flex flex-col items-center gap-1">
                     <livewire:store.save-basket-button :order-id="$order->id" variant="inline" />

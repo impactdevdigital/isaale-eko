@@ -25,7 +25,7 @@ class RefundCalculator
             return (int) intdiv($lineTotal * $ii->quantity, $orderQty);
         });
 
-        $deliveryFeeCents = $includeDeliveryFee ? (int) $issue->order->delivery_fee_cents : 0;
+        $deliveryFeeCents = $includeDeliveryFee ? (int) $issue->order?->delivery_fee_cents : 0;
 
         return [
             'amount_cents' => $itemsCents + $deliveryFeeCents,

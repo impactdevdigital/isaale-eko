@@ -85,11 +85,10 @@
                     <div class="flex gap-2.5 bg-brand-yellow-10 px-3.5 py-3 text-brand-yellow-70">
                         <x-store.icon name="box" class="mt-0.5 size-4 shrink-0" />
                         <div>
-                            <p class="text-[12px] leading-4 font-bold">Low stock · Only {{ $stock }} left</p>
+                            <p class="text-[12px] leading-4 font-bold">{{ __('Low Stock') }}</p>
                             <p class="text-[10px] leading-[13px] font-medium">{{ __('Ready to deliver · Order while stock lasts') }}</p>
                         </div>
                     </div>
-                    <p class="border border-sale-50 px-2 py-1 text-[10px] leading-[13px] font-medium uppercase text-sale-50">{{ $stock }} remaining in stock</p>
                     @break
                 @case('out_of_stock')
                     <div class="flex gap-2.5 bg-grayscale-20 px-3.5 py-3 text-body-muted">
@@ -188,10 +187,21 @@
 
     @if ($recipes->isNotEmpty())
         <section class="mt-16 flex flex-col gap-4">
-            <x-store.section-heading :title="__('Cook With :name', ['name' => $product->localized_name])" subtitle="Recipes that put this ingredient to work" link="All recipes" />
+            <x-store.section-heading :title="__('Cook With :name', ['name' => $product->localized_name])" subtitle="Recipes that put this ingredient to work" link="All recipes" :href="route('recipes.index')" />
             <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($recipes as $recipe)
                     <x-store.recipe-card :recipe="$recipe" />
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    @if ($stories->isNotEmpty())
+        <section class="mt-16 flex flex-col gap-4">
+            <x-store.section-heading :title="__('The Story Behind It')" :subtitle="__('Where it comes from and how it’s enjoyed')" :link="__('All stories')" :href="route('stories.index')" />
+            <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                @foreach ($stories as $story)
+                    <x-store.story-card :story="$story" wire:key="product-story-{{ $story->id }}" />
                 @endforeach
             </div>
         </section>

@@ -60,6 +60,25 @@ class Analytics
         ];
     }
 
+    /**
+     * Save an event for the admin Analytics screen only, without sending it
+     * to Google (e.g. page views, which gtag already counts itself).
+     */
+    public static function record(string $name, array $properties = []): void
+    {
+        try {
+            AnalyticsEvent::create([
+                'name' => $name,
+                'user_id' => auth()->id(),
+                'session_id' => session()->getId(),
+                'locale' => app()->getLocale(),
+                'properties' => $properties ?: null,
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
     public static function googleEnabled(): bool
     {
         return filled(config('services.google_analytics.measurement_id'));

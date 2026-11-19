@@ -9,7 +9,7 @@
             <p class="text-body-xs font-semibold uppercase">Everything for</p>
             <h3 class="py-[3px] text-h3">{{ $recipe->name }}</h3>
             <p class="text-body-sm">{{ $recipe->tagline }}</p>
-            <a href="#" class="mt-3 inline-flex h-[30px] items-center rounded-full border border-white pl-2 pr-2.5 text-button-sm transition-colors hover:bg-white hover:text-ink">Cook this</a>
+            <a href="{{ route('recipes.show', $recipe) }}" class="mt-3 inline-flex h-[30px] items-center rounded-full border border-white pl-2 pr-2.5 text-button-sm transition-colors hover:bg-white hover:text-ink">Cook this</a>
         </div>
     </div>
 

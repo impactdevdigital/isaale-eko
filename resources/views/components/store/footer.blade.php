@@ -13,7 +13,8 @@
             __('Brand updates') => route('updates.index'),
         ],
         __('Help') => [
-            __('Delivery & pickup') => '#',
+            __('Help & Contact') => route('help'),
+            __('Report a problem') => route('help'),
             __('Privacy Policy') => route('privacy-policy'),
             __('Refund Policy') => route('refund-policy'),
         ],

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -31,6 +32,18 @@ class Story extends Model
         'read_minutes' => 'integer',
         'published_at' => 'datetime',
     ];
+
+    /** Products the story features ("Shop this story"). */
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class)->withPivot('sort_order')->orderByPivot('sort_order');
+    }
+
+    /** Recipes the story links to. */
+    public function recipes(): BelongsToMany
+    {
+        return $this->belongsToMany(Recipe::class)->withPivot('sort_order')->orderByPivot('sort_order');
+    }
 
     public function comments(): HasMany
     {

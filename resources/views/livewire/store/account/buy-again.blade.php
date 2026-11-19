@@ -30,7 +30,7 @@
                                 @if (! $line->available())
                                     <p class="mt-1 text-body-xs font-bold text-price-40">Not available today — left out</p>
                                 @elseif ($line->status === \App\Services\Baskets\BasketLine::STOCK_LOWERED)
-                                    <p class="mt-1 text-body-xs font-bold text-brand-yellow-90">Only {{ $line->quantity }} left</p>
+                                    <p class="mt-1 text-body-xs font-bold text-brand-yellow-90">Low Stock</p>
                                 @endif
                             </div>
                             @if ($line->available())

@@ -39,6 +39,28 @@
                 {{ $story->bodyHtml() }}
             </div>
 
+            @if ($storyProducts->isNotEmpty())
+                <section class="mt-12 flex flex-col gap-4" aria-labelledby="shop-story-title">
+                    <h2 id="shop-story-title" class="text-[18px] leading-6 font-extrabold text-ink">{{ __('Shop this story') }}</h2>
+                    <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+                        @foreach ($storyProducts as $item)
+                            <x-store.product-card :product="$item" wire:key="story-product-{{ $item->id }}" />
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            @if ($storyRecipes->isNotEmpty())
+                <section class="mt-12 flex flex-col gap-4" aria-labelledby="cook-story-title">
+                    <h2 id="cook-story-title" class="text-[18px] leading-6 font-extrabold text-ink">{{ __('Cook from this story') }}</h2>
+                    <div class="grid gap-3 md:grid-cols-2">
+                        @foreach ($storyRecipes as $recipe)
+                            <x-store.recipe-card :recipe="$recipe" wire:key="story-recipe-{{ $recipe->id }}" />
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             @if ($story->allow_comments || $comments->isNotEmpty())
                 <section class="mt-16" aria-labelledby="comments-title">
                     @if ($comments->isNotEmpty())

@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             SetLocale::class,
+            \App\Http\Middleware\RecordPageView::class,
         ]);
         $middleware->alias([
             'locale' => SetLocale::class,

@@ -87,10 +87,11 @@ class ProductPage extends Component
 
         RateLimiter::hit($key);
 
-        StockNotification::firstOrCreate([
-            'product_id' => $this->product->id,
-            'email' => strtolower($this->email),
-        ]);
+        // Asking again after an earlier "back in stock" email starts a fresh request.
+        StockNotification::updateOrCreate(
+            ['product_id' => $this->product->id, 'email' => strtolower($this->email)],
+            ['notified_at' => null],
+        );
 
         $this->subscribed = true;
     }
@@ -135,6 +136,7 @@ class ProductPage extends Component
                 ->take(3)
                 ->get(),
             'related' => $this->related(),
+            'stories' => $product->stories()->published()->latest('published_at')->take(3)->get(),
         ])->title($product->name);
     }
 }

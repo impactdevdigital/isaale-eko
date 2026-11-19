@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ìsàlèè Èkó — MVP Deliverables Status Report</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 18mm 16mm 18mm 16mm;
+            @bottom-right {
+                content: counter(page);
+                font-size: 9pt;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                color: #888888;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.55;
+            font-size: 10pt;
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Page Layout & Breaks */
+        .page-break {
+            page-break-after: always;
+            break-after: page;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5 {
+            color: #111111;
+            font-weight: 800;
+            margin-top: 0;
+            line-height: 1.25;
+        }
+
+        h1 { font-size: 24pt; margin-bottom: 8pt; }
+        h2 { font-size: 16pt; margin-top: 18pt; margin-bottom: 8pt; border-bottom: 1.5pt solid #EEEEEE; padding-bottom: 4pt; color: #111111; }
+        h3 { font-size: 12pt; margin-top: 14pt; margin-bottom: 6pt; color: #DF2600; }
+        h4 { font-size: 10.5pt; margin-top: 10pt; margin-bottom: 4pt; }
+        p { margin-top: 0; margin-bottom: 8pt; color: #333333; }
+        ul, ol { margin-top: 0; margin-bottom: 8pt; padding-left: 18pt; }
+        li { margin-bottom: 4pt; color: #333333; }
+
+        /* Cover Page */
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40pt 20pt 30pt 20pt;
+            border: 2pt solid #EEEEEE;
+            border-top: 6pt solid #DF2600;
+            border-radius: 4pt;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+        }
+
+        .cover-header {
+            text-align: left;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            background: #FFF0EC;
+            color: #DF2600;
+            font-weight: 800;
+            font-size: 9pt;
+            letter-spacing: 1.5pt;
+            text-transform: uppercase;
+            padding: 4pt 10pt;
+            border-radius: 4pt;
+            margin-bottom: 16pt;
+        }
+
+        .cover-title {
+            font-size: 32pt;
+            font-weight: 900;
+            letter-spacing: -0.5pt;
+            color: #111111;
+            line-height: 1.15;
+            margin-bottom: 12pt;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            font-weight: 500;
+            color: #555555;
+            max-width: 480pt;
+            line-height: 1.45;
+            margin-bottom: 24pt;
+        }
+
+        .cover-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16pt;
+            padding-top: 20pt;
+            border-top: 1pt solid #E5E5E5;
+        }
+
+        .meta-label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 1pt;
+            font-weight: 700;
+            color: #777777;
+            margin-bottom: 2pt;
+        }
+
+        .meta-value {
+            font-size: 10pt;
+            font-weight: 700;
+            color: #111111;
+        }
+
+        .cover-footer {
+            padding-top: 20pt;
+            border-top: 1pt solid #EEEEEE;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 8.5pt;
+            color: #777777;
+        }
+
+        /* Callout Banners */
+        .callout {
+            padding: 10pt 12pt;
+            border-radius: 6pt;
+            margin: 10pt 0;
+            font-size: 9.5pt;
+            border: 1pt solid transparent;
+        }
+
+        .callout-info {
+            background-color: #F0F7FF;
+            border-color: #CCE4FF;
+            color: #004488;
+        }
+
+        .callout-success {
+            background-color: #EDF9F2;
+            border-color: #BBEBD1;
+            color: #005A32;
+        }
+
+        .callout-warning {
+            background-color: #FFF9EA;
+            border-color: #FFE6A8;
+            color: #8C5B00;
+        }
+
+        .callout-danger {
+            background-color: #FFF0EC;
+            border-color: #FFCFC5;
+            color: #B31E00;
+        }
+
+        .callout strong {
+            display: block;
+            margin-bottom: 2pt;
+            font-size: 9.5pt;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10pt 0;
+            font-size: 9pt;
+        }
+
+        th, td {
+            padding: 6pt 8pt;
+            text-align: left;
+            border-bottom: 1pt solid #EEEEEE;
+        }
+
+        th {
+            background-color: #FAFAFA;
+            font-weight: 700;
+            color: #444444;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+            border-top: 1pt solid #EEEEEE;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #FCFCFC;
+        }
+
+        /* Badges & Pills */
+        .pill {
+            display: inline-block;
+            padding: 2pt 6pt;
+            border-radius: 10pt;
+            font-size: 8pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+        }
+
+        .pill-manager { background: #111111; color: #ffffff; }
+        .pill-associate { background: #EBF4FF; color: #0066CC; }
+        .pill-active { background: #DAF4E7; color: #007D49; }
+        .pill-pending { background: #FFF9EA; color: #D58700; }
+        .pill-danger { background: #FFF0EC; color: #DF2600; }
+
+        /* Step Process Box */
+        .step-card {
+            border: 1pt solid #EEEEEE;
+            border-radius: 6pt;
+            padding: 10pt 12pt;
+            margin-bottom: 8pt;
+            background: #FFFFFF;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 8pt;
+            margin-bottom: 4pt;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18pt;
+            height: 18pt;
+            background: #DF2600;
+            color: #ffffff;
+            font-size: 9pt;
+            font-weight: 800;
+            border-radius: 50%;
+        }
+
+        .step-title {
+            font-weight: 700;
+            font-size: 10pt;
+            color: #111111;
+        }
+
+        /* Keyboard / Code */
+        kbd, code {
+            font-family: Consolas, 'SF Mono', Menlo, Monaco, monospace;
+            font-size: 8.5pt;
+            background: #F4F4F4;
+            border: 1pt solid #E0E0E0;
+            padding: 1pt 4pt;
+            border-radius: 3pt;
+            color: #DF2600;
+        }
+
+        /* Table of Contents */
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 16pt 0;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 5pt 0;
+            border-bottom: 1pt dotted #DDDDDD;
+            font-size: 9.5pt;
+        }
+
+        .toc-title {
+            font-weight: 600;
+            color: #111111;
+        }
+
+        .toc-page {
+            font-weight: 700;
+            color: #DF2600;
+        }
+    </style>
+    <style>
+        .pill-excluded { background: #F1F1F1; color: #686868; }
+        .pill-measure { background: #EBF4FF; color: #0055D4; }
+        .status-col { width: 100pt; white-space: nowrap; }
+        .item-col { width: 150pt; }
+        td .pill { font-size: 7pt; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8pt; margin: 12pt 0 14pt; }
+        .summary-tile { border: 1pt solid #EEEEEE; border-radius: 6pt; padding: 10pt; background: #FFFFFF; }
+        .summary-num { font-size: 22pt; font-weight: 900; line-height: 1; margin-bottom: 4pt; }
+        .summary-label { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5pt; color: #555555; }
+        .num-green { color: #007D49; } .num-amber { color: #D58700; } .num-blue { color: #0055D4; } .num-grey { color: #888888; }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; break-inside: avoid; }
+        h3 { page-break-after: avoid; break-after: avoid; }
+        .journey { display: flex; flex-wrap: wrap; gap: 4pt; align-items: center; margin: 6pt 0 12pt; font-weight: 800; font-size: 10pt; }
+        .journey span.step { background: #FFF0EC; color: #DF2600; padding: 3pt 8pt; border-radius: 4pt; }
+        .journey span.arrow { color: #BBBBBB; }
+        .callout li strong, .callout p strong { display: inline; margin: 0; font-size: inherit; }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- COVER PAGE -->
+    <!-- ========================================== -->
+    <div class="cover-page page-break">
+        <div class="cover-header">
+            <div class="brand-badge">ÌSÀLÈÈ ÈKÓ · MVP DELIVERY REPORT</div>
+            <div class="cover-title">MVP Deliverables Status Report</div>
+            <div class="cover-subtitle">
+                A plain-language check of everything agreed for the Ìsàlèè Èkó MVP against what has been built: what is delivered, what can only be measured once the website is live, and what is outside the current scope.
+            </div>
+        </div>
+
+        <div class="cover-details-grid">
+            <div>
+                <div class="meta-label">Platform</div>
+                <div class="meta-value">Ìsàlèè Èkó Online Store & Operations Portal</div>
+            </div>
+            <div>
+                <div class="meta-label">Store Location</div>
+                <div class="meta-value">Saint John, NB, Canada · Atlantic Time</div>
+            </div>
+            <div>
+                <div class="meta-label">Website</div>
+                <div class="meta-value">https://isaleeko.com</div>
+            </div>
+            <div>
+                <div class="meta-label">Commerce System of Record</div>
+                <div class="meta-value">Square (Catalogue, Payments, Orders, Loyalty)</div>
+            </div>
+            <div>
+                <div class="meta-label">Review Date</div>
+                <div class="meta-value">19 November 2026</div>
+            </div>
+            <div>
+                <div class="meta-label">Document Version</div>
+                <div class="meta-value">Version 2.0 (Updated Client Edition)</div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div>
+                <strong>Confidential & Proprietary</strong><br>
+                Prepared exclusively for the management of Ìsàlèè Èkó.
+            </div>
+            <div>
+                Published: November 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SUMMARY -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>1. Summary</h2>
+        <p>The MVP set out to let customers move through one simple journey online, and to reduce the store's reliance on manual WhatsApp ordering:</p>
+        <div class="journey">
+            <span class="step">Discover</span><span class="arrow">→</span>
+            <span class="step">Understand</span><span class="arrow">→</span>
+            <span class="step">Choose</span><span class="arrow">→</span>
+            <span class="step">Buy</span><span class="arrow">→</span>
+            <span class="step">Receive</span><span class="arrow">→</span>
+            <span class="step">Reorder</span>
+        </div>
+        <p>We checked each agreed item against the application. The tiles below count the 98 items in section 2.</p>
+
+        <div class="summary-grid">
+            <div class="summary-tile"><div class="summary-num num-green">90</div><div class="summary-label">Delivered</div></div>
+            <div class="summary-tile"><div class="summary-num num-amber">1</div><div class="summary-label">To be implemented</div></div>
+            <div class="summary-tile"><div class="summary-num num-blue">2</div><div class="summary-label">Not measured yet</div></div>
+            <div class="summary-tile"><div class="summary-num num-grey">5</div><div class="summary-label">Excluded</div></div>
+        </div>
+
+        <div class="callout callout-success">
+            <strong>Where the project stands</strong>
+            The agreed functionality is built and tested. Customers can browse the Square catalogue, search, shop by country, read stories linked to products and recipes, cook from recipes, pay by card, Apple Pay, Google Pay or Interac e-Transfer, collect in store, earn Square Loyalty points, reorder in one tap, ask to be emailed when an item is back in stock, and report a problem online. Staff run orders (with a full timeline), customer cases, content, analytics and settings from the Operations Portal. The automated test suite (288 checks) passes in full.
+        </div>
+
+        <div class="callout callout-warning">
+            <strong>The immediate next step: going live</strong>
+            On receipt of the final project payment, the production environment will be provisioned, the website deployed and the platform made accessible to customers. The accessibility audit and Core Web Vitals measurement are then carried out on the live website.
+        </div>
+
+        <h3>How to read the status labels</h3>
+        <table>
+            <thead><tr><th>Label</th><th>Meaning</th></tr></thead>
+            <tbody>
+                <tr><td><span class="pill pill-active">Delivered</span></td><td>Functionality completed and available.</td></tr>
+                <tr><td><span class="pill pill-pending">To be implemented</span></td><td>Agreed, but still to be done.</td></tr>
+                <tr><td><span class="pill pill-measure">Not measured yet</span></td><td>Can only be properly assessed once the website is live.</td></tr>
+                <tr><td><span class="pill pill-excluded">Excluded</span></td><td>Not part of the current delivery scope.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Outside the current scope</h3>
+        <ul>
+            <li><strong>Delivery / logistics provider.</strong> No driver allocation, last-mile tracking, provider statuses or delivery analytics. Checkout already has a delivery option with a postal-code check and fee, and managers can switch delivery on or off. It is currently set up for <strong>Pickup</strong>.</li>
+            <li><strong>Ask Asha AI.</strong> The floating Asha button is hidden on the homepage and the Meet Asha page says "Coming soon".</li>
+            <li><strong>Community Hub.</strong> A teaser page is live at <code>/community</code> with an email sign-up for launch news. Events, ticketing, memberships and profiles remain Phase 2.</li>
+            <li><strong>Coupons and promotional codes</strong>, <strong>WhatsApp integration</strong>, <strong>SMS integration</strong>, and <strong>retention-event analytics</strong>. Loyalty figures are available on the staff Loyalty screen.</li>
+        </ul>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STATUS BY AREA -->
+    <!-- ========================================== -->
+    <div>
+        <h2>2. Status by Area</h2>
+
+        <h3>2.1 Foundation</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Production repository</td><td><span class="pill pill-active">Delivered</span></td><td>Private GitHub repository. Every change goes in through a reviewed pull request.</td></tr>
+                <tr><td>Development environment</td><td><span class="pill pill-active">Delivered</span></td><td>Used for building and testing, with a Square test (sandbox) account.</td></tr>
+                <tr><td>Production environment</td><td><span class="pill pill-pending">To be implemented</span></td><td>Will be provisioned and made live on receipt of the final project payment. The live website is then open to customers.</td></tr>
+                <tr><td>Database architecture</td><td><span class="pill pill-active">Delivered</span></td><td>PostgreSQL database with versioned schema changes.</td></tr>
+                <tr><td>Authentication foundation</td><td><span class="pill pill-active">Delivered</span></td><td>Customers sign in with a one-time code sent to their email (no password to forget). Staff use a separate, password-protected Operations Portal.</td></tr>
+                <tr><td>User roles & access control</td><td><span class="pill pill-active">Delivered</span></td><td>Two staff roles, Store Manager and Store Associate. Payment, staff, settings, promotions, loyalty, analytics and Square screens are for managers only.</td></tr>
+                <tr><td>Environment configuration</td><td><span class="pill pill-active">Delivered</span></td><td>Keys and passwords live in the hosting environment, never in the code.</td></tr>
+                <tr><td>Core application structure</td><td><span class="pill pill-active">Delivered</span></td><td>Laravel application with a separate storefront and Operations Portal, plus 288 automated tests.</td></tr>
+                <tr><td>Square authentication foundation</td><td><span class="pill pill-active">Delivered</span></td><td>Connects with the store's Square access token and location. The Square Check screen confirms the connection and shows whether it is test or live.</td></tr>
+                <tr><td>Security foundations</td><td><span class="pill pill-active">Delivered</span></td><td>See section 2.13.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.2 Square Commerce Integration</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Catalogue integration</td><td><span class="pill pill-active">Delivered</span></td><td>Items, photos, categories, prices and stock come from Square. Changes reach the website automatically, and managers can also run a full refresh with <strong>Pull from Square now</strong>.</td></tr>
+                <tr><td>Product / variation mapping</td><td><span class="pill pill-active">Delivered</span></td><td>Each Square item and variation (size, pack) is linked to its website product by Square ID.</td></tr>
+                <tr><td>Category mapping</td><td><span class="pill pill-active">Delivered</span></td><td>Square categories and sub-categories map onto the storefront departments.</td></tr>
+                <tr><td>Price synchronisation</td><td><span class="pill pill-active">Delivered</span></td><td>Prices are set in Square only. The website cannot change them.</td></tr>
+                <tr><td>Inventory synchronisation</td><td><span class="pill pill-active">Delivered</span></td><td>Stock counts follow Square, including in-store sales at the till.</td></tr>
+                <tr><td>Customer synchronisation</td><td><span class="pill pill-active">Delivered</span></td><td>Each website order is matched to the customer in Square by email, or creates the customer if new.</td></tr>
+                <tr><td>Order integration</td><td><span class="pill pill-active">Delivered</span></td><td>Website orders appear in Square, and their progress updates there.</td></tr>
+                <tr><td>Payment integration</td><td><span class="pill pill-active">Delivered</span></td><td>Card, Apple Pay and Google Pay go through Square. Interac e-Transfer orders are confirmed by staff and then recorded in Square.</td></tr>
+                <tr><td>Loyalty integration</td><td><span class="pill pill-active">Delivered</span></td><td>Uses the store's Square Loyalty programme: customers join with their phone number, earn on paid online orders, and can spend a reward online.</td></tr>
+                <tr><td>Webhook processing</td><td><span class="pill pill-active">Delivered</span></td><td>Handles Square catalogue, stock and payment events. Each message's signature is checked, and repeated messages are ignored.</td></tr>
+                <tr><td>Synchronisation & reconciliation</td><td><span class="pill pill-active">Delivered</span></td><td><strong>Square Check</strong> compares items, categories and prices with Square. Card payments left unresolved by a timeout are settled automatically, and loyalty points that failed to reach Square are retried.</td></tr>
+                <tr><td>API error handling</td><td><span class="pill pill-active">Delivered</span></td><td>A slow or failed Square response never charges a customer twice, and customers see a clear message.</td></tr>
+                <tr><td>Square is the source of truth for stock</td><td><span class="pill pill-active">Delivered</span></td><td>The Operations Portal has no stock or price editing, so it does not compete with Square.</td></tr>
+                <tr><td>In Stock / Low Stock / Out of Stock labels</td><td><span class="pill pill-active">Delivered</span></td><td>Shown on product cards and pages. Managers set the low-stock level in Store Settings.</td></tr>
+                <tr><td>Exact stock quantities hidden</td><td><span class="pill pill-active">Delivered</span></td><td>Customers only see <strong>In Stock</strong>, <strong>Low Stock</strong> or <strong>Out of Stock</strong>. No inventory numbers appear anywhere on the customer-facing website, including Buy Again and the basket.</td></tr>
+                <tr><td>Checkout revalidation</td><td><span class="pill pill-active">Delivered</span></td><td>Before payment, the checkout rechecks stock, the latest Square price, pickup-slot availability and any loyalty reward. It explains any change before the customer pays.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.3 Catalogue & Product Discovery</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>All Products, Categories</td><td><span class="pill pill-active">Delivered</span></td><td>Mobile-first shop with department menus, filters (category, price, availability) and sorting.</td></tr>
+                <tr><td>New Arrivals, Best Sellers</td><td><span class="pill pill-active">Delivered</span></td><td>Worked out automatically. Managers can change the "new" period and the best-seller lookback window.</td></tr>
+                <tr><td>Search, results, no-results</td><td><span class="pill pill-active">Delivered</span></td><td>Searches English and French product names. When nothing matches, a full-width empty state appears.</td></tr>
+                <tr><td>Shop by Country</td><td><span class="pill pill-active">Delivered</span></td><td>Country pages with banners (e.g. Nigeria, Ghana, Cameroon, Jamaica, Sudan).</td></tr>
+                <tr><td>Merchandising</td><td><span class="pill pill-active">Delivered</span></td><td>Featured products and categories, homepage banners, and best-seller and trending badges.</td></tr>
+                <tr><td>Recommendations & related products</td><td><span class="pill pill-active">Delivered</span></td><td>Product pages show related products, "Cook with" recipes and linked stories. Returning customers see "Your Usuals" on the homepage.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.4 Product Pages</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Name, images, price, availability, origin, description, size, category, add to cart, related products</td><td><span class="pill pill-active">Delivered</span></td><td>All shown, with quantity selector and wishlist.</td></tr>
+                <tr><td>Ingredients, preparation/use, dietary and storage information</td><td><span class="pill pill-active">Delivered</span></td><td>Entered into the product description ("Good to know"), which staff edit in the Operations Portal, in English and French. There are no separate fields for each.</td></tr>
+                <tr><td>Cultural / product context</td><td><span class="pill pill-active">Delivered</span></td><td>Each product page shows its description, the recipes that use it, and <strong>The Story Behind It</strong>: published stories linked to that product.</td></tr>
+                <tr><td>Available, low stock, out of stock, unavailable states</td><td><span class="pill pill-active">Delivered</span></td><td>Out-of-stock products let customers ask to be emailed when the item is back.</td></tr>
+                <tr><td>Loading, error, add-to-cart success states</td><td><span class="pill pill-active">Delivered</span></td><td>Adding an item opens the basket drawer to confirm it.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.5 Cart & Checkout</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Add, remove, adjust quantities, subtotal, discounts</td><td><span class="pill pill-active">Delivered</span></td><td>In the basket drawer and the full basket page. Extras: Save Basket, and Build My Basket (fill a basket to a budget).</td></tr>
+                <tr><td>Select fulfilment & proceed to checkout</td><td><span class="pill pill-active">Delivered</span></td><td>Pickup, or Delivery when switched on.</td></tr>
+                <tr><td>Revalidation before completion</td><td><span class="pill pill-active">Delivered</span></td><td>Stock, price, slot and fulfilment eligibility (see 2.2).</td></tr>
+                <tr><td>Customer information: name, email, phone</td><td><span class="pill pill-active">Delivered</span></td><td>Phone is required and links the order to Square Loyalty.</td></tr>
+                <tr><td>Pickup date & time window</td><td><span class="pill pill-active">Delivered</span></td><td>Slots come from opening hours, closures and the pickup settings (lead time, slot gap, booking horizon).</td></tr>
+                <tr><td>Scheduled third-party delivery</td><td><span class="pill pill-excluded">Excluded</span></td><td>Delivery dates, windows and logistics-provider integration are outside the current scope.</td></tr>
+                <tr><td>Guest checkout</td><td><span class="pill pill-active">Delivered</span></td><td>No account or code needed to check out.</td></tr>
+                <tr><td>Account invitation after purchase</td><td><span class="pill pill-active">Delivered</span></td><td>Guests see a short note on the order confirmation page: "Keep your order history and earn rewards. Sign in or create an account to get started." It doesn't interrupt the confirmation. Guest orders are already saved under the customer's email, so when they sign in or sign up with that email, the order appears in their history.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.6 Order Management & Operations</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>New orders, order details, customer info, payment status, fulfilment method, order status</td><td><span class="pill pill-active">Delivered</span></td><td>The Orders Queue has filter tabs, search, and an order detail drawer.</td></tr>
+                <tr><td>Order timeline</td><td><span class="pill pill-active">Delivered</span></td><td>Each order shows a time-stamped history of every status change, with who made it, in Atlantic Time (New Brunswick).</td></tr>
+                <tr><td>Preparing as acceptance</td><td><span class="pill pill-active">Delivered</span></td><td>There is no separate "Accepted" step. Staff press <strong>Accept &amp; Prepare</strong>, and the customer's tracker shows "Accepted · preparing". <strong>Delivered</strong> is kept as the final delivery status.</td></tr>
+                <tr><td>Exceptions: unavailable products</td><td><span class="pill pill-active">Delivered</span></td><td>Substitutions: staff offer a replacement, record the customer's answer, or refund the item. Unanswered requests are refunded automatically.</td></tr>
+                <tr><td>Exceptions: failed payments</td><td><span class="pill pill-active">Delivered</span></td><td>Shown as "Payment declined" or "Payment pending". Stuck card payments are settled automatically.</td></tr>
+                <tr><td>Exceptions: refunds</td><td><span class="pill pill-active">Delivered</span></td><td>Through the Issues Desk and cancellations, using the policy refund rules.</td></tr>
+                <tr><td>Exceptions: inventory</td><td><span class="pill pill-active">Delivered</span></td><td>Low-stock alerts on the dashboard. Checkout adjusts quantities when stock runs short.</td></tr>
+                <tr><td>Statuses: New, Preparing, Ready / Awaiting Pickup, Picked Up, Completed, Cancelled, Refunded, Delivered</td><td><span class="pill pill-active">Delivered</span></td><td>There are also Uncollected, Awaiting e-Transfer and Payment declined.</td></tr>
+                <tr><td>Exceptions and statuses tied to a logistics provider (Awaiting Driver, Out for Delivery, Delivery Issue, provider errors)</td><td><span class="pill pill-excluded">Excluded</span></td><td>Part of the delivery/logistics scope.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.7 Customer Accounts & Retention</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Dashboard: recent orders, Buy Again, loyalty balance, profile</td><td><span class="pill pill-active">Delivered</span></td><td>The account overview shows all four.</td></tr>
+                <tr><td>Order history, order detail, reorder</td><td><span class="pill pill-active">Delivered</span></td><td>Any past order can be rebuilt into the basket, with quantities adjusted to what is in stock.</td></tr>
+                <tr><td>Profile: name, email, phone, saved information</td><td><span class="pill pill-active">Delivered</span></td><td>Includes an address book. Email and phone changes are confirmed with a code.</td></tr>
+                <tr><td>Preferences: email, community, marketing consent</td><td><span class="pill pill-active">Delivered</span></td><td>Each choice is stored as a consent with its date and source. Email choices sync with Brevo.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.8 Buy Again</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>View products from previous orders</td><td><span class="pill pill-active">Delivered</span></td><td>"Your Usuals": what the customer buys most, at their usual quantities.</td></tr>
+                <tr><td>Add individual products / add all available</td><td><span class="pill pill-active">Delivered</span></td><td>One-tap "Reorder your usuals", or rebuild any order item by item.</td></tr>
+                <tr><td>Availability check & current pricing</td><td><span class="pill pill-active">Delivered</span></td><td>Uses today's prices and stock before anything is added to the basket.</td></tr>
+                <tr><td>Unavailable products & stock labels</td><td><span class="pill pill-active">Delivered</span></td><td>Unavailable items are greyed out and marked "Not available today". Items running short show <strong>Low Stock</strong>, never a quantity.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.9 Loyalty</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Points balance, rewards, earning & redemption information</td><td><span class="pill pill-active">Delivered</span></td><td>On the customer's Rewards page and in checkout, reflecting the rules in Square.</td></tr>
+                <tr><td>Loyalty history</td><td><span class="pill pill-active">Delivered</span></td><td>Pulled from the customer's Square Loyalty account.</td></tr>
+                <tr><td>Staff loyalty view</td><td><span class="pill pill-active">Delivered</span></td><td>Managers can see online points and rewards, look up any customer's points by phone, and retry orders still waiting to reach Square.</td></tr>
+                <tr><td>Final loyalty rules</td><td><span class="pill pill-active">Delivered</span></td><td>Rules are configured and managed in the Square Dashboard. Changing them needs no website development; the website reflects them automatically.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.10 Content & Discovery</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Recipes: listing, detail, product links, shop the ingredients</td><td><span class="pill pill-active">Delivered</span></td><td>"Add all ingredients to basket", plus extras: Cook With What I Have, Cook on a Budget, and Saved Meals.</td></tr>
+                <tr><td>Food Stories: editorial & cultural storytelling</td><td><span class="pill pill-active">Delivered</span></td><td>Cover photos, scheduled publishing, trending, and reader comments with approval.</td></tr>
+                <tr><td>Product stories & story relationships</td><td><span class="pill pill-active">Delivered</span></td><td>Uses the existing story structure, with no separate Product Story type. Staff link any story to products and recipes. The story page shows "Shop this story" and "Cook from this story", and product and recipe pages show "The Story Behind It". Links appear only where staff have made them.</td></tr>
+                <tr><td>Store Updates: announcements, new arrivals, promotions</td><td><span class="pill pill-active">Delivered</span></td><td>Published as "Brand Updates", which can also link to products.</td></tr>
+                <tr><td>Content → Commerce</td><td><span class="pill pill-active">Delivered</span></td><td>Recipe → Ingredients → Product cards → Add to basket. Stories link to products and recipes, and back again.</td></tr>
+                <tr><td>Community Hub (full platform)</td><td><span class="pill pill-excluded">Excluded</span></td><td>The teaser page with coming-soon messaging is live, as agreed.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.11 Email & Customer Communication</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Order confirmation (Resend)</td><td><span class="pill pill-active">Delivered</span></td><td>Sent when an order is paid or an e-Transfer is confirmed.</td></tr>
+                <tr><td>Transactional notifications (Resend)</td><td><span class="pill pill-active">Delivered</span></td><td>Sign-in codes, substitution questions, pickup reminders, uncollected-order notices and refund notices.</td></tr>
+                <tr><td>Newsletter sign-up</td><td><span class="pill pill-active">Delivered</span></td><td>On the website footer, checkout, Food Stories, the Community Hub and account preferences.</td></tr>
+                <tr><td>Brevo integration (new arrivals, promotions, newsletters)</td><td><span class="pill pill-active">Delivered</span></td><td>Every new subscriber is added to the Brevo list with their name, and removed when they opt out. Sign-ups collected earlier are sent across automatically. It starts working as soon as the Brevo API key and list ID are added at go-live.</td></tr>
+                <tr><td>Back-in-stock notifications</td><td><span class="pill pill-active">Delivered</span></td><td>Customers leave their email on a sold-out product. When Square shows it back in stock, they receive one email with a link to the product.</td></tr>
+                <tr><td>Consent mechanisms</td><td><span class="pill pill-active">Delivered</span></td><td>Opt-in only, recorded per channel, with the option to withdraw from the account.</td></tr>
+                <tr><td>WhatsApp and SMS integration</td><td><span class="pill pill-excluded">Excluded</span></td><td>Outside the current scope.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.12 Analytics & Measurement</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Analytics & Measurement module (admin)</td><td><span class="pill pill-active">Delivered</span></td><td>A new manager screen showing visitors, page views, the shopping funnel, every tracked event for the last 7, 30 or 90 days, top searches, searches with no results, most-viewed products and most-visited pages.</td></tr>
+                <tr><td>Discovery events: page views, searches, no-result searches, category views, country views, recipe views, story views</td><td><span class="pill pill-active">Delivered</span></td><td>Tracked automatically.</td></tr>
+                <tr><td>Commerce events: added to / removed from cart, checkout started, payment attempted, payment successful, order completed</td><td><span class="pill pill-active">Delivered</span></td><td>Tracked automatically, with order value and products.</td></tr>
+                <tr><td>Fulfilment events: pickup chosen, pickup slots available, pickup slot chosen</td><td><span class="pill pill-active">Delivered</span></td><td>The module also shows the average number of pickup slots customers saw.</td></tr>
+                <tr><td>Google Analytics readiness</td><td><span class="pill pill-active">Delivered</span></td><td>The events already follow Google Analytics 4's structure. Adding the GA4 measurement ID connects it, with no application changes.</td></tr>
+                <tr><td>Delivery analytics and retention events</td><td><span class="pill pill-excluded">Excluded</span></td><td>Outside the current scope. Loyalty figures are on the staff Loyalty screen.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.13 Security, Accessibility & Performance</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>HTTPS</td><td><span class="pill pill-active">Delivered</span></td><td>Automatic certificate on the custom domain. Cookies are secure-only.</td></tr>
+                <tr><td>Secure authentication</td><td><span class="pill pill-active">Delivered</span></td><td>One-time codes expire, are limited in attempts and resend timing, and are rate-limited. Staff passwords are stored encrypted (hashed).</td></tr>
+                <tr><td>Protected credentials & secure environment variables</td><td><span class="pill pill-active">Delivered</span></td><td>Square, email, Brevo and analytics keys are stored only in the hosting environment.</td></tr>
+                <tr><td>Least-privilege API access</td><td><span class="pill pill-active">Delivered</span></td><td>Each integration (Square, Resend, Brevo, Google Analytics) gets only the access its own functions need.</td></tr>
+                <tr><td>Webhook validation</td><td><span class="pill pill-active">Delivered</span></td><td>Square signatures are verified.</td></tr>
+                <tr><td>Server-side transaction validation & idempotency</td><td><span class="pill pill-active">Delivered</span></td><td>Totals are recalculated on the server. Payments, orders, refunds and loyalty use one-time keys, so nothing is charged or applied twice.</td></tr>
+                <tr><td>Protected admin & access controls</td><td><span class="pill pill-active">Delivered</span></td><td>Staff login and two roles. Deactivated staff are signed out on their next click.</td></tr>
+                <tr><td>Accessibility (semantic HTML, keyboard navigation, labels, focus states, form errors, contrast, touch targets, screen readers)</td><td><span class="pill pill-measure">Not measured yet</span></td><td>Built with these principles: labelled controls, visible focus states and readable errors. A formal WCAG audit covering every listed point will be carried out on the live website.</td></tr>
+                <tr><td>Mobile-first, responsive</td><td><span class="pill pill-active">Delivered</span></td><td>Designed from the mobile Figma screens first.</td></tr>
+                <tr><td>Image optimisation, slower connections</td><td><span class="pill pill-active">Delivered</span></td><td>Site images are WebP, and long lists load images lazily.</td></tr>
+                <tr><td>Core Web Vitals</td><td><span class="pill pill-measure">Not measured yet</span></td><td>No results are reported here. They will be measured once the website is live.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.14 Contact, Help & Customer Support</h3>
+        <table>
+            <thead><tr><th class="item-col">Item</th><th class="status-col">Status</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Online Report a Problem form</td><td><span class="pill pill-active">Delivered</span></td><td>New <strong>Help &amp; Contact</strong> page (<code>/help</code>), linked from the header Help menu, the footer and every order page. It captures the customer's name, email, phone, order number, issue type and description.</td></tr>
+                <tr><td>Issues Desk case creation</td><td><span class="pill pill-active">Delivered</span></td><td>Every submission opens an Issues Desk case. With a matching order number and email, the customer can tick the affected items, so staff can refund or replace straight from the case. General questions can be answered by email and marked resolved.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- EXTRAS -->
+    <!-- ========================================== -->
+    <div class="page-break" style="break-before: page; page-break-before: always;">
+        <h2>3. Delivered Beyond the Brief</h2>
+        <p>These features were added during the build, mostly from your feedback, and are live today:</p>
+        <table>
+            <thead><tr><th class="item-col">Feature</th><th>What it does</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Issues Desk</strong></td><td>Staff log customer problems reported by phone, WhatsApp, email or in store, then refund, schedule a replacement, offer choices or decline, with a case diary and response-time targets.</td></tr>
+                <tr><td><strong>No silent substitutions</strong></td><td>Staff must offer the customer a replacement or refund before swapping an item.</td></tr>
+                <tr><td><strong>Uncollected orders & rescheduling</strong></td><td>Pickup reminders, a grace period, and a choice to hold or auto-cancel with a policy refund. Staff and customers can reschedule pickup.</td></tr>
+                <tr><td><strong>Interac e-Transfer</strong></td><td>Payment instructions for customers, with a staff "confirm received" step before packing.</td></tr>
+                <tr><td><strong>Apple Pay & Google Pay</strong></td><td>One-tap wallet payments through Square.</td></tr>
+                <tr><td><strong>Your Usuals, Saved Baskets, Saved Meals, Wishlist</strong></td><td>Several quick ways for customers to reorder.</td></tr>
+                <tr><td><strong>Build My Basket (budget)</strong></td><td>Fills a basket with the customer's usual items up to a budget they set.</td></tr>
+                <tr><td><strong>Cook With What I Have / Cook on a Budget</strong></td><td>Recipe finders that suggest dishes and add only the missing ingredients.</td></tr>
+                <tr><td><strong>English / Français</strong></td><td>Language switch, with staff-editable French product names and descriptions.</td></tr>
+                <tr><td><strong>Back-in-stock requests</strong></td><td>Customers can leave their email on a sold-out item and are emailed once it's back (see 2.11).</td></tr>
+                <tr><td><strong>Promotions</strong></td><td>Automatic offers with an end date, budget cap and per-customer limit. The customer gets either a promotion or a loyalty reward, whichever saves more.</td></tr>
+                <tr><td><strong>Square Catalogue Check</strong></td><td>A read-only comparison of Square and the website, with a one-click full refresh.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- NEXT STEPS -->
+    <!-- ========================================== -->
+    <div class="page-break">
+        <h2>4. Recommended Next Steps</h2>
+        <p>In order. Item 1 is what moves the platform from finished to live.</p>
+
+        <div class="step-card avoid-break">
+            <div class="step-header"><span class="step-number">1</span><span class="step-title">Go live</span></div>
+            <p>On receipt of the final project payment, the production server will be provisioned, the website deployed and the platform made accessible to customers. This includes switching Square to the live account and keys, registering the live webhook, and moving hosting to paid plans so background tasks run on schedule (Square sync, reminders, back-in-stock emails and Brevo retries).</p>
+        </div>
+        <div class="step-card avoid-break">
+            <div class="step-header"><span class="step-number">2</span><span class="step-title">Analytics & conversion tracking</span></div>
+            <p>Event tracking and the Analytics & Measurement module are in place. Add the Google Analytics 4 measurement ID at go-live to send the same discovery, commerce and pickup events to Google Analytics.</p>
+        </div>
+        <div class="step-card avoid-break">
+            <div class="step-header"><span class="step-number">3</span><span class="step-title">Brevo marketing email</span></div>
+            <p>Add the Brevo API key and newsletter list ID at go-live. Existing and new subscribers then flow into Brevo, ready for newsletter, new-arrivals and promotions campaigns.</p>
+        </div>
+        <div class="step-card avoid-break">
+            <div class="step-header"><span class="step-number">4</span><span class="step-title">Product commissioning</span></div>
+            <p>Complete product descriptions in Square and the Operations Portal (ingredients, preparation/use, dietary and storage information), and link stories to their products and recipes.</p>
+        </div>
+        <div class="step-card avoid-break">
+            <div class="step-header"><span class="step-number">5</span><span class="step-title">Richer product information (optional)</span></div>
+            <p>If you later want ingredients, preparation, dietary and storage information in separate fields, these can be added. Today they are entered in the product description.</p>
+        </div>
+        <div class="step-card avoid-break">
+            <div class="step-header"><span class="step-number">6</span><span class="step-title">After launch: accessibility audit & Core Web Vitals</span></div>
+            <p>Carry out the formal WCAG accessibility audit and measure Core Web Vitals on the live website.</p>
+        </div>
+
+        <div class="callout callout-success">
+            <strong>Completed in this update</strong>
+            <ul style="margin: 4pt 0 0;">
+                <li>Exact stock quantities hidden; customers see <strong>Low Stock</strong> instead of "Only [quantity]".</li>
+                <li>Guest order-confirmation prompt: "Keep your order history and earn rewards. Sign in or create an account."</li>
+                <li>Back-in-stock email notifications.</li>
+                <li>Online Report a Problem form with Issues Desk case creation.</li>
+                <li>Stories linked to products and recipes.</li>
+                <li>Time-stamped order timeline in Atlantic Time, with Preparing as the acceptance step.</li>
+                <li>Brevo integration and the Analytics & Measurement module.</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 24pt; padding-top: 12pt; border-top: 1pt solid #EEEEEE; text-align: center; font-size: 8.5pt; color: #888888;">
+            Ìsàlèè Èkó MVP Deliverables Status Report · Version 2.0 · 19 November 2026 · Saint John, NB, Canada
+        </div>
+    </div>
+
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Product;
+use App\Models\Recipe;
 use App\Models\Story;
 use App\Models\StoryComment;
 use Carbon\CarbonImmutable;
@@ -65,6 +67,16 @@ class StoriesManager extends Component
 
     public ?int $deletingId = null;
 
+    /** Products and recipes the story features, in display order. @var int[] */
+    public array $productIds = [];
+
+    /** @var int[] */
+    public array $recipeIds = [];
+
+    public string $productSearch = '';
+
+    public string $recipeSearch = '';
+
     protected $queryString = [
         'tab' => ['except' => 'stories'],
         'typeFilter' => ['except' => ''],
@@ -104,6 +116,8 @@ class StoriesManager extends Component
         $this->allowComments = $story->allow_comments;
         $this->status = $story->status;
         $this->publishedAt = $story->published_at?->setTimezone(config('shop.timezone'))->format('Y-m-d\TH:i') ?? '';
+        $this->productIds = $story->products()->pluck('products.id')->all();
+        $this->recipeIds = $story->recipes()->pluck('recipes.id')->all();
         $this->showEditor = true;
     }
 
@@ -177,6 +191,9 @@ class StoriesManager extends Component
             ? tap(Story::findOrFail($this->editingId))->update($data)
             : Story::create($data);
 
+        $story->products()->sync(self::ordered(Product::whereKey($this->productIds)->pluck('id')->all(), $this->productIds));
+        $story->recipes()->sync(self::ordered(Recipe::whereKey($this->recipeIds)->pluck('id')->all(), $this->recipeIds));
+
         session()->flash('success', "Saved “{$story->title}”.".($story->isPublished() ? ' It’s live on the store.' : ''));
         $this->closeEditor();
     }
@@ -222,9 +239,50 @@ class StoriesManager extends Component
         StoryComment::whereKey($id)->delete();
     }
 
+    public function addProduct(int $id): void
+    {
+        if (! in_array($id, $this->productIds, true) && Product::whereKey($id)->exists()) {
+            $this->productIds[] = $id;
+        }
+
+        $this->productSearch = '';
+    }
+
+    public function removeProduct(int $id): void
+    {
+        $this->productIds = array_values(array_diff($this->productIds, [$id]));
+    }
+
+    public function addRecipe(int $id): void
+    {
+        if (! in_array($id, $this->recipeIds, true) && Recipe::whereKey($id)->exists()) {
+            $this->recipeIds[] = $id;
+        }
+
+        $this->recipeSearch = '';
+    }
+
+    public function removeRecipe(int $id): void
+    {
+        $this->recipeIds = array_values(array_diff($this->recipeIds, [$id]));
+    }
+
+    /**
+     * Pivot rows keeping the order staff picked them in.
+     *
+     * @param  int[]  $existing
+     * @param  int[]  $picked
+     * @return array<int, array{sort_order: int}>
+     */
+    private static function ordered(array $existing, array $picked): array
+    {
+        return collect($picked)->intersect($existing)->values()
+            ->mapWithKeys(fn ($id, $i) => [$id => ['sort_order' => $i]])->all();
+    }
+
     private function resetEditor(): void
     {
-        $this->reset('editingId', 'type', 'title', 'slug', 'excerpt', 'body', 'coverImage', 'coverUpload', 'authorName', 'readMinutes', 'isTrending', 'allowComments', 'status', 'publishedAt');
+        $this->reset('editingId', 'type', 'title', 'slug', 'excerpt', 'body', 'coverImage', 'coverUpload', 'authorName', 'readMinutes', 'isTrending', 'allowComments', 'status', 'publishedAt', 'productIds', 'recipeIds', 'productSearch', 'recipeSearch');
         $this->resetErrorBag();
     }
 
@@ -251,6 +309,14 @@ class StoriesManager extends Component
             'stories' => $stories,
             'comments' => $comments,
             'pendingCount' => StoryComment::where('status', StoryComment::STATUS_PENDING)->count(),
+            'linkedProducts' => $this->showEditor ? Product::whereKey($this->productIds)->get()->sortBy(fn ($p) => array_search($p->id, $this->productIds))->values() : collect(),
+            'linkedRecipes' => $this->showEditor ? Recipe::whereKey($this->recipeIds)->get()->sortBy(fn ($r) => array_search($r->id, $this->recipeIds))->values() : collect(),
+            'productMatches' => $this->showEditor && mb_strlen(trim($this->productSearch)) >= 2
+                ? Product::where('is_hidden', false)->whereKeyNot($this->productIds)->search(trim($this->productSearch))->orderBy('name')->take(8)->get()
+                : collect(),
+            'recipeMatches' => $this->showEditor && mb_strlen(trim($this->recipeSearch)) >= 2
+                ? Recipe::whereKeyNot($this->recipeIds)->whereLike('name', '%'.str_replace(['%', '_'], '', trim($this->recipeSearch)).'%')->orderBy('name')->take(8)->get()
+                : collect(),
         ])->layout('layouts.admin', ['header' => 'Stories & Updates']);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\User;
+use App\Services\Store\BackInStock;
 use App\Support\FrenchNames;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -71,6 +72,7 @@ class CatalogSync
 
         $this->syncStock(full: true);
         Cache::forever(self::STATE_KEY, $started->toIso8601ZuluString());
+        $this->notifyRestocked();
 
         return $this->stats;
     }
@@ -132,6 +134,7 @@ class CatalogSync
         $this->apply($objects);
         $this->syncStock(full: false, since: $since);
         Cache::forever(self::STATE_KEY, $started->toIso8601ZuluString());
+        $this->notifyRestocked();
 
         return $this->stats;
     }
@@ -155,7 +158,24 @@ class CatalogSync
                 ->update(['stock_quantity' => max(0, (int) floor((float) $count['quantity']))]);
         }
 
+        if ($updated) {
+            $this->notifyRestocked();
+        }
+
         return $updated;
+    }
+
+    /**
+     * Email shoppers waiting on products that are back. A mail problem
+     * never fails the sync; the scheduled stock:notify retries.
+     */
+    private function notifyRestocked(): void
+    {
+        try {
+            app(BackInStock::class)->send();
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

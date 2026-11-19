@@ -393,7 +393,7 @@
 
         <div class="callout callout-success">
             <strong>Where the project stands</strong>
-            The agreed functionality is built and tested. Customers can browse the Square catalogue, search, shop by country, read stories linked to products and recipes, cook from recipes, pay by card, Apple Pay, Google Pay or Interac e-Transfer, collect in store, earn Square Loyalty points, reorder in one tap, ask to be emailed when an item is back in stock, and report a problem online. Staff run orders (with a full timeline), customer cases, content, analytics and settings from the Operations Portal. The automated test suite (288 checks) passes in full.
+            The agreed functionality is built and tested. Customers can browse the Square catalogue, search, shop by country, read stories linked to products and recipes, cook from recipes, pay by card, Apple Pay, Google Pay or Interac e-Transfer, collect in store, earn Square Loyalty points, reorder in one tap, ask to be emailed when an item is back in stock, and report a problem online. Staff run orders (with a full timeline), customer cases, content, analytics and settings from the Operations Portal. The automated test suite (294 checks) passes in full.
         </div>
 
         <div class="callout callout-warning">
@@ -438,7 +438,7 @@
                 <tr><td>Authentication foundation</td><td><span class="pill pill-active">Delivered</span></td><td>Customers sign in with a one-time code sent to their email (no password to forget). Staff use a separate, password-protected Operations Portal.</td></tr>
                 <tr><td>User roles & access control</td><td><span class="pill pill-active">Delivered</span></td><td>Two staff roles, Store Manager and Store Associate. Payment, staff, settings, promotions, loyalty, analytics and Square screens are for managers only.</td></tr>
                 <tr><td>Environment configuration</td><td><span class="pill pill-active">Delivered</span></td><td>Keys and passwords live in the hosting environment, never in the code.</td></tr>
-                <tr><td>Core application structure</td><td><span class="pill pill-active">Delivered</span></td><td>Laravel application with a separate storefront and Operations Portal, plus 288 automated tests.</td></tr>
+                <tr><td>Core application structure</td><td><span class="pill pill-active">Delivered</span></td><td>Laravel application with a separate storefront and Operations Portal, plus 294 automated tests.</td></tr>
                 <tr><td>Square authentication foundation</td><td><span class="pill pill-active">Delivered</span></td><td>Connects with the store's Square access token and location. The Square Check screen confirms the connection and shows whether it is test or live.</td></tr>
                 <tr><td>Security foundations</td><td><span class="pill pill-active">Delivered</span></td><td>See section 2.13.</td></tr>
             </tbody>
@@ -475,7 +475,7 @@
                 <tr><td>New Arrivals, Best Sellers</td><td><span class="pill pill-active">Delivered</span></td><td>Worked out automatically. Managers can change the "new" period and the best-seller lookback window.</td></tr>
                 <tr><td>Search, results, no-results</td><td><span class="pill pill-active">Delivered</span></td><td>Searches English and French product names. When nothing matches, a full-width empty state appears.</td></tr>
                 <tr><td>Shop by Country</td><td><span class="pill pill-active">Delivered</span></td><td>Country pages with banners (e.g. Nigeria, Ghana, Cameroon, Jamaica, Sudan).</td></tr>
-                <tr><td>Merchandising</td><td><span class="pill pill-active">Delivered</span></td><td>Featured products and categories, homepage banners, and best-seller and trending badges.</td></tr>
+                <tr><td>Merchandising</td><td><span class="pill pill-active">Delivered</span></td><td>Featured products and categories, best-seller and trending badges, and <strong>homepage banners</strong> that staff add, edit, schedule and reorder in Admin → Homepage Banners (with optional French text).</td></tr>
                 <tr><td>Recommendations & related products</td><td><span class="pill pill-active">Delivered</span></td><td>Product pages show related products, "Cook with" recipes and linked stories. Returning customers see "Your Usuals" on the homepage.</td></tr>
             </tbody>
         </table>
@@ -691,6 +691,7 @@
                 <li>Stories linked to products and recipes.</li>
                 <li>Time-stamped order timeline in Atlantic Time, with Preparing as the acceptance step.</li>
                 <li>Brevo integration and the Analytics & Measurement module.</li>
+                <li>Homepage banners editable by staff in the Operations Portal.</li>
             </ul>
         </div>
 

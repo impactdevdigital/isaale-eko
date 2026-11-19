@@ -2,41 +2,41 @@
 
 namespace App\Support;
 
+use App\Models\Banner;
+
 /**
- * Editorial content for the storefront (promo banners) until it moves to the admin.
+ * Editorial content for the storefront. Homepage banners are edited by
+ * staff in Admin → Homepage Banners.
  */
 class StorefrontContent
 {
     /**
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, ?string>>
      */
     public static function heroSlides(): array
     {
-        return [
-            [
-                'eyebrow' => __('Good food, on its way'),
-                'title' => __('Free Delivery Over $40.'),
-                'body' => __('From jollof to jerk, plantain to egusi — authentic favourites for your favourite dishes.'),
-                'cta' => __('Fill your box'),
-                'image' => 'images/store/banners/free-delivery.webp',
-                'tint' => 'bg-trend-60',
-            ],
-            [
-                'eyebrow' => __('This week only'),
-                'title' => __('20% Off Pantry Staples'),
-                'body' => __('Stock up on everyday essentials.'),
-                'cta' => __('Shop deals'),
-                'image' => 'images/store/banners/pantry-staples.webp',
-                'tint' => 'bg-sale-50',
-            ],
-        ];
+        return self::slides('hero');
     }
 
     /**
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, ?string>>
      */
     public static function promoSlides(): array
     {
-        return array_reverse(self::heroSlides());
+        return self::slides('promo');
+    }
+
+    /**
+     * @return array<int, array<string, ?string>>
+     */
+    private static function slides(string $placement): array
+    {
+        return Banner::live()
+            ->where('placement', $placement)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (Banner $banner) => $banner->toSlide())
+            ->all();
     }
 }

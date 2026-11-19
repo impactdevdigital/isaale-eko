@@ -14,7 +14,7 @@ function bannerStaff(string $role = User::ROLE_ASSOCIATE): User
 
 it('starts with the banners that used to be in the code', function () {
     expect(Banner::where('placement', 'hero')->orderBy('sort_order')->pluck('title')->all())
-        ->toBe(['Free Delivery Over $40.', '20% Off Pantry Staples'])
+        ->toBe(['Free Delivery Over $40.', '20% Off Pantry Staples', 'Visit Us in Saint John'])
         ->and(Banner::where('placement', 'promo')->count())->toBe(2);
 
     $this->get('/')->assertOk()
@@ -37,7 +37,7 @@ it('lets staff add a banner with a photo, link and French text', function () {
         ->assertHasNoErrors();
 
     $banner = Banner::where('title', 'Fresh Ugu Every Friday')->sole();
-    expect($banner->sort_order)->toBe(2)
+    expect($banner->sort_order)->toBe(3)
         ->and($banner->image)->toStartWith('storage/banners/');
     Storage::disk('public')->assertExists(str_replace('storage/', '', $banner->image));
 

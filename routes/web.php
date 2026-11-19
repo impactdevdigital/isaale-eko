@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Store\AboutController;
 use App\Http\Controllers\Store\AccountController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\LanguageController;
@@ -75,6 +76,7 @@ Route::get('/community', \App\Livewire\Store\CommunityHub::class)->name('communi
 // Help & Contact: "Report a problem" opens an Issues Desk case
 Route::get('/help', \App\Livewire\Store\HelpCentre::class)->name('help');
 Route::redirect('/contact', '/help');
+Route::get('/about', AboutController::class)->name('about');
 
 // Policy Pages
 Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');

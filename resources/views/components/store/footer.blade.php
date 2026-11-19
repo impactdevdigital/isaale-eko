@@ -19,7 +19,7 @@
             __('Refund Policy') => route('refund-policy'),
         ],
         __('Community') => [
-            __('About Ìsàlèè Èkó') => '#',
+            __('About Ìsàlèè Èkó') => route('about'),
             __('Join our community') => route('community'),
         ],
     ];

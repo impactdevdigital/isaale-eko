@@ -24,7 +24,7 @@ class StoreNavigation
             ['label' => __('New arrivals'), 'url' => route('shop', ['sort' => 'new'])],
             ['label' => __('Best sellers'), 'url' => route('shop', ['sort' => 'bestsellers'])],
             ['label' => __('Community'), 'url' => route('community')],
-            ['label' => __('About'), 'url' => '#'],
+            ['label' => __('About'), 'url' => route('about')],
         ];
     }
 

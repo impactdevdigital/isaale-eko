@@ -118,6 +118,9 @@
         </div>
 
         <aside class="flex flex-col gap-4 lg:pt-2">
+            <a href="{{ route('about') }}" class="group block overflow-hidden rounded-lg">
+                <img src="{{ asset('images/store/about/shopfront-sign.webp') }}" alt="The Ìsàlèè Èkó shopfront sign" loading="lazy" class="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]">
+            </a>
             <div class="rounded-lg bg-[#F6F6F6] p-6">
                 <h2 class="text-[18px] font-bold text-ink">Contact us</h2>
                 <ul class="mt-3 flex flex-col gap-2 text-body-sm">
@@ -127,7 +130,7 @@
                     @if ($supportPhone)
                         <li><x-store.icon name="phone" class="mr-1 inline size-4" /> <a href="tel:{{ preg_replace('/[^0-9+]/', '', $supportPhone) }}" class="font-bold underline">{{ $supportPhone }}</a></li>
                     @endif
-                    <li class="text-body-muted">{{ config('shop.pickup.location', 'Saint John, NB, Canada') }}</li>
+                    <li class="text-body-muted">{{ config('shop.pickup.location', 'Saint John, NB, Canada') }} · <a href="{{ route('about') }}" class="font-bold text-ink underline">Opening hours &amp; directions</a></li>
                 </ul>
             </div>
             <div class="rounded-lg border border-grayscale-30 p-6 text-body-sm text-body-muted">

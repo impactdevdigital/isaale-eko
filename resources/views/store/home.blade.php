@@ -1,6 +1,8 @@
 <x-layouts::store>
     <div class="page-container flex flex-col pt-6 md:pt-6">
-        <x-store.banner-carousel :slides="$heroSlides" tall />
+        @if ($heroSlides)
+            <x-store.banner-carousel :slides="$heroSlides" tall />
+        @endif
 
         {{-- Your usuals: returning customers only --}}
         <livewire:store.home-usuals />
@@ -25,7 +27,9 @@
             </div>
         </section>
 
-        <x-store.banner-carousel :slides="$promoSlides" class="mt-10" />
+        @if ($promoSlides)
+            <x-store.banner-carousel :slides="$promoSlides" class="mt-10" />
+        @endif
 
         {{-- More from the shelves --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">

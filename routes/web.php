@@ -122,6 +122,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/categories', CategoriesManager::class)->name('categories');
         Route::get('/recipes', RecipesManager::class)->name('recipes');
         Route::get('/stories', StoriesManager::class)->name('stories');
+        Route::get('/banners', \App\Livewire\Admin\BannersManager::class)->name('banners');
         Route::get('/settings', StoreSettings::class)->middleware('admin:manager')->name('settings');
         Route::get('/hours', StoreHoursEditor::class)->name('hours');
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');

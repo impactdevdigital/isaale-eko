@@ -31,17 +31,21 @@
             aria-roledescription="slide"
             aria-label="{{ $i + 1 }} of {{ count($slides) }}"
         >
-            <img src="{{ asset($slide['image']) }}" alt="" class="absolute inset-0 size-full object-cover object-right" @if ($i > 0) loading="lazy" @endif>
+            <img src="{{ $slide['image'] }}" alt="" class="absolute inset-0 size-full object-cover object-right" @if ($i > 0) loading="lazy" @endif>
 
             <div class="relative flex h-full max-w-[460px] flex-col justify-center gap-2 px-6 md:box-content md:px-[72px]">
                 @if ($slide['eyebrow'] && $tall)
                     <p class="text-eyebrow uppercase text-grayscale-10">{{ $slide['eyebrow'] }}</p>
                 @endif
                 <h2 class="text-hero-mobile text-white md:text-hero">{{ $slide['title'] }}</h2>
-                <p class="pb-2 text-lead-mobile text-grayscale-10 md:pt-1.5 md:pb-4 md:text-lead">{{ $slide['body'] }}</p>
-                <div>
-                    <a href="#" class="inline-flex items-center rounded-full bg-surface py-3 pl-5 pr-[22px] text-[14px] leading-[18px] font-extrabold text-ink transition-colors hover:bg-brand-yellow-50">{{ $slide['cta'] }}</a>
-                </div>
+                @if ($slide['body'])
+                    <p class="pb-2 text-lead-mobile text-grayscale-10 md:pt-1.5 md:pb-4 md:text-lead">{{ $slide['body'] }}</p>
+                @endif
+                @if ($slide['cta'] && ($slide['url'] ?? null))
+                    <div>
+                        <a href="{{ $slide['url'] }}" class="inline-flex items-center rounded-full bg-surface py-3 pl-5 pr-[22px] text-[14px] leading-[18px] font-extrabold text-ink transition-colors hover:bg-brand-yellow-50">{{ $slide['cta'] }}</a>
+                    </div>
+                @endif
             </div>
         </div>
     @endforeach

@@ -10,16 +10,14 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 
 /**
- * About Ìsàlèè Èkó / Visit the store: store photos, opening hours
+ * About Ìsàlèè Èkó: the client's story copy, store photos, opening hours
  * (from Admin → Hours & Closures) and how to find the shop.
  */
 class AboutController extends Controller
 {
     public const GALLERY = [
-        ['file' => 'aisle', 'alt' => 'Shelves of groceries and beauty products inside the store'],
         ['file' => 'grains-aisle', 'alt' => 'Aisle of flours, grains and garri'],
         ['file' => 'pantry-corner', 'alt' => 'Milk, Milo, tomato paste and noodles on the shelves'],
-        ['file' => 'shelves', 'alt' => 'A long wall of groceries and household products'],
         ['file' => 'own-brand-spices', 'alt' => 'Ìsàlèè Èkó own-brand spice jars'],
         ['file' => 'own-brand-grains', 'alt' => 'Ìsàlèè Èkó own-brand bagged beans and grains'],
     ];

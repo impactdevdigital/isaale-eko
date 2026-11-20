@@ -27,6 +27,7 @@ class BannersManager extends Component
         'bg-stock-50' => 'Green',
         'bg-brand-yellow-90' => 'Brown',
         'bg-ink' => 'Black',
+        'bg-[#F3E3CC]' => 'Cream',
     ];
 
     public bool $showEditor = false;
@@ -58,6 +59,8 @@ class BannersManager extends Component
     public $imageUpload = null;
 
     public string $tint = 'bg-trend-60';
+
+    public string $style = 'light';
 
     public bool $isActive = true;
 
@@ -93,6 +96,7 @@ class BannersManager extends Component
         $this->ctaUrl = (string) $banner->cta_url;
         $this->image = $banner->image;
         $this->tint = $banner->tint;
+        $this->style = $banner->style ?: 'light';
         $this->isActive = $banner->is_active;
         $this->startsAt = $this->local($banner->starts_at);
         $this->endsAt = $this->local($banner->ends_at);
@@ -123,6 +127,7 @@ class BannersManager extends Component
             'ctaUrl' => ['nullable', 'string', 'max:255', 'required_with:ctaLabel', 'regex:#^(/|https?://)#'],
             'imageUpload' => [$this->image ? 'nullable' : 'required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'tint' => ['required', Rule::in(array_keys(self::TINTS))],
+            'style' => ['required', Rule::in(array_keys(Banner::STYLES))],
             'startsAt' => ['nullable', 'date'],
             'endsAt' => ['nullable', 'date', 'after:startsAt'],
         ], [
@@ -155,6 +160,7 @@ class BannersManager extends Component
             'cta_url' => $this->ctaUrl ?: null,
             'image' => $image,
             'tint' => $this->tint,
+            'style' => $this->style,
             'is_active' => $this->isActive,
             'starts_at' => $this->utc($this->startsAt),
             'ends_at' => $this->utc($this->endsAt),
@@ -214,7 +220,7 @@ class BannersManager extends Component
 
     private function resetEditor(): void
     {
-        $this->reset('editingId', 'placement', 'eyebrow', 'eyebrowFr', 'title', 'titleFr', 'body', 'bodyFr', 'ctaLabel', 'ctaLabelFr', 'ctaUrl', 'image', 'imageUpload', 'tint', 'isActive', 'startsAt', 'endsAt');
+        $this->reset('editingId', 'placement', 'eyebrow', 'eyebrowFr', 'title', 'titleFr', 'body', 'bodyFr', 'ctaLabel', 'ctaLabelFr', 'ctaUrl', 'image', 'imageUpload', 'tint', 'style', 'isActive', 'startsAt', 'endsAt');
         $this->resetErrorBag();
     }
 

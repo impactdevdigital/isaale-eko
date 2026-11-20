@@ -44,6 +44,11 @@ class ProductListing extends Component
         'over-15' => ['Above $15', 1500, null],
     ];
 
+    /** Extra bands for links such as homepage banners; not shown as filters. */
+    public const LINK_PRICES = [
+        'under-10' => ['Under $10', null, 1000],
+    ];
+
     #[Url(except: '')]
     public string $q = '';
 
@@ -174,7 +179,7 @@ class ProductListing extends Component
             $query->whereHas('country', fn ($query) => $query->where('slug', $this->country));
         }
 
-        if ($band = self::PRICES[$this->price] ?? null) {
+        if ($band = self::PRICES[$this->price] ?? self::LINK_PRICES[$this->price] ?? null) {
             $query->priceBetween($band[1], $band[2]);
         }
 

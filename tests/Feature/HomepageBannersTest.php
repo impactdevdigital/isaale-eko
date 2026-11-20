@@ -12,14 +12,42 @@ function bannerStaff(string $role = User::ROLE_ASSOCIATE): User
     return User::factory()->create(['is_admin' => true, 'is_active' => true, 'role' => $role]);
 }
 
-it('starts with the banners that used to be in the code', function () {
-    expect(Banner::where('placement', 'hero')->orderBy('sort_order')->pluck('title')->all())
-        ->toBe(['Free Delivery Over $40.', '20% Off Pantry Staples', 'Visit Us in Saint John'])
-        ->and(Banner::where('placement', 'promo')->count())->toBe(2);
+it('starts with the banners from the Figma designs', function () {
+    expect(Banner::live()->where('placement', 'hero')->orderBy('sort_order')->pluck('title')->all())
+        ->toBe(['Earn $3 in Rewards for Every $100 You Spend.', 'Time for a Pantry Reset?', 'What’s Cooking This Week?'])
+        ->and(Banner::live()->where('placement', 'promo')->orderBy('sort_order')->pluck('title')->all())
+        ->toBe(['Good Groceries Don’t Have to Cost a Fortune.', 'Ask Asha', 'Busy Day? No Problem.', 'Missing Home?'])
+        ->and(Banner::where('title', 'Visit Us in Saint John')->sole()->is_active)->toBeFalse();
 
     $this->get('/')->assertOk()
-        ->assertSee('Free Delivery Over $40.')
-        ->assertSee('href="'.url('/shop').'"', false);
+        ->assertSee('Earn $3 in Rewards for Every $100 You Spend.')
+        ->assertSee('The Ìsàlèè Èkó Pantry Festival')
+        ->assertSee('images/store/banners/pantry-reset.webp', false)
+        ->assertSee('href="'.url('/shop?price=under-10').'"', false)
+        ->assertDontSee('Free Delivery Over $40.');
+
+    foreach (Banner::all() as $banner) {
+        expect(public_path($banner->image))->toBeFile();
+    }
+});
+
+it('shows dark text on light banners', function () {
+    $slide = Banner::where('title', 'Time for a Pantry Reset?')->sole()->toSlide();
+
+    expect($slide['text'])->toBe('text-ink')
+        ->and($slide['button'])->toContain('bg-ink');
+
+    Livewire::actingAs(bannerStaff())->test(BannersManager::class)
+        ->call('edit', Banner::where('title', 'Ask Asha')->sole()->id)
+        ->set('style', 'dark')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Banner::where('title', 'Ask Asha')->sole()->style)->toBe('dark');
+});
+
+it('links the under $10 banner to a working price filter', function () {
+    $this->get('/shop?price=under-10')->assertOk();
 });
 
 it('lets staff add a banner with a photo, link and French text', function () {
@@ -37,7 +65,7 @@ it('lets staff add a banner with a photo, link and French text', function () {
         ->assertHasNoErrors();
 
     $banner = Banner::where('title', 'Fresh Ugu Every Friday')->sole();
-    expect($banner->sort_order)->toBe(3)
+    expect($banner->sort_order)->toBe(4)
         ->and($banner->image)->toStartWith('storage/banners/');
     Storage::disk('public')->assertExists(str_replace('storage/', '', $banner->image));
 
@@ -58,26 +86,26 @@ it('checks banner details before saving', function () {
 });
 
 it('hides, schedules and ends banners on the homepage', function () {
-    $pantry = Banner::where('placement', 'hero')->where('title', '20% Off Pantry Staples')->sole();
-    $delivery = Banner::where('placement', 'hero')->where('title', 'Free Delivery Over $40.')->sole();
+    $pantry = Banner::where('placement', 'hero')->where('title', 'Time for a Pantry Reset?')->sole();
+    $delivery = Banner::where('placement', 'hero')->where('title', 'Earn $3 in Rewards for Every $100 You Spend.')->sole();
 
     Livewire::actingAs(bannerStaff())->test(BannersManager::class)->call('toggleActive', $pantry->id);
     Banner::where('placement', 'promo')->delete();
     $delivery->update(['ends_at' => now()->subMinute()]);
 
-    $this->get('/')->assertOk()->assertDontSee('20% Off Pantry Staples')->assertDontSee('Free Delivery Over $40.');
+    $this->get('/')->assertOk()->assertDontSee('Time for a Pantry Reset?')->assertDontSee('Earn $3 in Rewards for Every $100 You Spend.');
 
     $delivery->update(['ends_at' => null, 'starts_at' => now()->addDay()]);
     expect($delivery->fresh()->stateLabel())->toBe('Scheduled');
-    $this->get('/')->assertDontSee('Free Delivery Over $40.');
+    $this->get('/')->assertDontSee('Earn $3 in Rewards for Every $100 You Spend.');
 });
 
 it('reorders slides within a slideshow', function () {
-    $pantry = Banner::where('placement', 'hero')->where('title', '20% Off Pantry Staples')->sole();
+    $pantry = Banner::where('placement', 'hero')->where('title', 'Time for a Pantry Reset?')->sole();
 
     Livewire::actingAs(bannerStaff())->test(BannersManager::class)->call('move', $pantry->id, -1);
 
-    expect(Banner::where('placement', 'hero')->orderBy('sort_order')->pluck('title')->first())->toBe('20% Off Pantry Staples');
+    expect(Banner::where('placement', 'hero')->orderBy('sort_order')->pluck('title')->first())->toBe('Time for a Pantry Reset?');
 });
 
 it('is open to all staff but not to customers', function () {

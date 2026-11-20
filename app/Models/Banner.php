@@ -16,6 +16,16 @@ class Banner extends Model
         'promo' => 'Middle of homepage',
     ];
 
+    /**
+     * Text and button colours: [label, text classes, button classes].
+     * Kept here so Tailwind builds these classes.
+     */
+    public const STYLES = [
+        'light' => ['White text, white button', 'text-white', 'bg-surface text-ink hover:bg-brand-yellow-50'],
+        'light-yellow' => ['White text, yellow button', 'text-white', 'bg-brand-yellow text-ink hover:bg-brand-yellow-50'],
+        'dark' => ['Dark text, black button', 'text-ink', 'bg-ink text-white hover:bg-grayscale-90'],
+    ];
+
     protected $guarded = [];
 
     protected $casts = [
@@ -69,7 +79,7 @@ class Banner extends Model
     /**
      * The slide in the shape the banner carousel uses, in the shopper's language.
      *
-     * @return array{eyebrow: ?string, title: string, body: ?string, cta: ?string, url: ?string, image: string, tint: string}
+     * @return array{eyebrow: ?string, title: string, body: ?string, cta: ?string, url: ?string, image: string, tint: string, text: string, button: string}
      */
     public function toSlide(): array
     {
@@ -84,6 +94,8 @@ class Banner extends Model
             'url' => $this->href(),
             'image' => $this->imageUrl(),
             'tint' => $this->tint ?: 'bg-trend-60',
+            'text' => (self::STYLES[$this->style] ?? self::STYLES['light'])[1],
+            'button' => (self::STYLES[$this->style] ?? self::STYLES['light'])[2],
         ];
     }
 }

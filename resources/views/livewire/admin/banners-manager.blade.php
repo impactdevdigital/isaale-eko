@@ -98,8 +98,8 @@
                             @if ($previewImage)
                                 <img src="{{ $previewImage }}" alt="" class="absolute inset-0 size-full object-cover object-right">
                             @endif
-                            <div class="relative flex h-full max-w-[60%] flex-col justify-center gap-1 px-5 text-white">
-                                @if ($eyebrow && $placement === 'hero')
+                            <div class="relative flex h-full max-w-[60%] flex-col justify-center gap-1 px-5 {{ (Banner::STYLES[$style] ?? Banner::STYLES['light'])[1] }}">
+                                @if ($eyebrow)
                                     <p class="text-[10px] font-black uppercase tracking-[1px]">{{ $eyebrow }}</p>
                                 @endif
                                 <p class="text-xl sm:text-2xl font-bold leading-tight">{{ $title ?: 'Your headline' }}</p>
@@ -107,7 +107,7 @@
                                     <p class="text-xs">{{ $body }}</p>
                                 @endif
                                 @if ($ctaLabel)
-                                    <span class="mt-1 w-fit rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-[#111111]">{{ $ctaLabel }}</span>
+                                    <span class="mt-1 w-fit rounded-full px-3 py-1.5 text-xs font-extrabold {{ (Banner::STYLES[$style] ?? Banner::STYLES['light'])[2] }}">{{ $ctaLabel }}</span>
                                 @endif
                             </div>
                         </div>
@@ -134,6 +134,16 @@
                                 </div>
                                 <p class="{{ $help }}">Shows behind the photo while it loads and around the text.</p>
                             </div>
+                            <div class="sm:col-span-2">
+                                <label for="banner-style" class="{{ $label }}">Text colour</label>
+                                <select id="banner-style" wire:model.live="style" class="{{ $input }}">
+                                    @foreach (Banner::STYLES as $value => [$text])
+                                        <option value="{{ $value }}">{{ $text }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="{{ $help }}">Use dark text on light photos so the headline is easy to read.</p>
+                                @error('style') <p class="{{ $error }}">{{ $message }}</p> @enderror
+                            </div>
                         </div>
 
                         <div>
@@ -146,8 +156,8 @@
 
                         <div class="grid gap-4 sm:grid-cols-2">
                             @foreach ([
-                                ['eyebrow', 'Small heading above (top slideshow only)', 'e.g. This week only', 60],
-                                ['title', 'Headline *', 'e.g. Free Delivery Over $40.', 60],
+                                ['eyebrow', 'Small heading above', 'e.g. This week only', 60],
+                                ['title', 'Headline *', 'e.g. Time for a Pantry Reset?', 60],
                                 ['body', 'Short text', 'One line about the offer', 160],
                                 ['ctaLabel', 'Button text', 'e.g. Shop now', 30],
                             ] as [$field, $text, $placeholder, $max])

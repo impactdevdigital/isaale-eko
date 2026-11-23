@@ -19,6 +19,9 @@ docker compose build app
 
 echo "==> Restarting containers"
 docker compose up -d --remove-orphans
+# worker and scheduler share the app image but have no build step, so compose
+# does not notice the new image: restart them on it explicitly.
+docker compose up -d --no-deps --force-recreate worker scheduler
 
 echo "==> Waiting for the site"
 for i in $(seq 1 60); do

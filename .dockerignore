@@ -26,3 +26,6 @@ database/*.sqlite
 tests
 tools
 *.log
+
+# Server env files anywhere in the tree (deploy/vps/.env)
+**/.env

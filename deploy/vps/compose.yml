@@ -1,0 +1,97 @@
+# Isaale Eko on the client's own server (Docker Compose).
+# Run from this folder:  ./deploy.sh   (see docs/deploy-vps.md)
+#
+# Only Caddy publishes ports (80/443). Docker skips the ufw firewall for published
+# ports, so never add `ports:` to db, app or the workers.
+
+name: isaale-eko
+
+x-app: &app
+  image: isaale-eko:latest
+  restart: unless-stopped
+  env_file: .env
+  environment:
+    DB_CONNECTION: pgsql
+    DB_HOST: db
+    DB_PORT: "5432"
+    LOG_CHANNEL: stderr
+  volumes:
+    - storage:/var/www/html/storage/app
+
+services:
+  # The website (PHP-FPM + Nginx on :8080). Runs migrations and shop:install on start.
+  app:
+    <<: *app
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      LOG_CHANNEL: stderr
+      AUTORUN_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Background jobs: emails, Square webhook syncs.
+  worker:
+    <<: *app
+    entrypoint: ["php", "/var/www/html/artisan", "queue:work", "--tries=3", "--max-time=3600", "--sleep=3"]
+    stop_signal: SIGTERM
+    healthcheck:
+      disable: true
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # Laravel scheduler: Square catalogue sync every 5 minutes, etc.
+  scheduler:
+    <<: *app
+    entrypoint: ["php", "/var/www/html/artisan", "schedule:work"]
+    stop_signal: SIGTERM
+    healthcheck:
+      disable: true
+    depends_on:
+      app:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # HTTPS in front of the app. SITE_ADDRESS in .env: ":80" for plain HTTP on the IP,
+  # or a domain (e.g. staging.isaleeko.com) for automatic Let's Encrypt certificates.
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  storage:
+  caddy_data:
+  caddy_config:

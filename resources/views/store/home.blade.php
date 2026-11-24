@@ -10,9 +10,28 @@
         {{-- Fresh this week --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
             <x-store.section-heading title="Fresh This Week" subtitle="Popular picks. Great prices. Real flavour." link="View all" :href="route('shop')" />
-            <div class="flex snap-x gap-2.5 overflow-x-auto [scrollbar-width:none] md:grid md:grid-cols-4 md:overflow-visible lg:grid-cols-6 xl:grid-cols-7">
-                @foreach ($freshThisWeek as $product)
-                    <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" />
+            {{-- Four products, the "Better Shopping Marketplace" banner, four products
+                 (Figma Best Seller, nodes 1253:68168 / 1253:69588 / 1253:70590). Stacked below lg. --}}
+            @php [$freshLeft, $freshRight] = $freshThisWeek->take(8)->values()->split(2)->pad(2, collect())->all(); @endphp
+            <div class="grid gap-[22px] rounded-lg bg-surface-quiet px-4 lg:grid-cols-[310fr_280fr_310fr] lg:gap-4 xl:grid-cols-[363fr_506fr_363fr]">
+                @foreach ([$freshLeft, null, $freshRight] as $group)
+                    @if ($group === null)
+                        <div class="relative min-h-[681px] overflow-hidden bg-[#DFDFDF]">
+                            <img src="{{ asset('images/store/home/best-seller-banner.png') }}" alt="" loading="lazy" width="433" height="576"
+                                 class="pointer-events-none absolute inset-x-0 top-[44.2%] h-auto w-full max-w-none lg:top-[55.65%] xl:top-[37.58%]">
+                            <div class="relative flex max-w-[460px] flex-col items-start gap-2 p-6">
+                                <h3 class="text-h2-mobile font-bold text-black capitalize">Better Shopping Marketplace</h3>
+                                <p class="pt-1.5 pb-4 text-[16px] leading-[26px] font-medium text-black">Find everyday products from our trusted store focused on value and reliability.</p>
+                                <a href="{{ route('shop') }}" wire:navigate class="rounded-full bg-ink py-3 pr-[22px] pl-5 text-[14px] leading-[18px] font-extrabold text-white transition-opacity hover:opacity-85">Shop Now</a>
+                            </div>
+                        </div>
+                    @elseif ($group->isNotEmpty())
+                        <div class="grid grid-cols-2 content-start gap-x-[9px] gap-y-2.5 py-4">
+                            @foreach ($group as $product)
+                                <x-store.product-card :product="$product" />
+                            @endforeach
+                        </div>
+                    @endif
                 @endforeach
             </div>
         </section>

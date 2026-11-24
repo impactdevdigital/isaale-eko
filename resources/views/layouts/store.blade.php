@@ -56,10 +56,7 @@
     @guest
         <livewire:store.sign-in />
     @endguest
-    {{-- Asha isn't live yet: no floating button on the homepage (client request). --}}
-    @unless (request()->routeIs('home'))
-        <x-store.asha-launcher />
-    @endunless
+    {{-- Asha isn't live yet: floating button hidden on all pages (client request). Restore with <x-store.asha-launcher /> --}}
 
     @livewireScripts
 

@@ -26,7 +26,7 @@
                     Community Hub<br>is coming soon
                 </h1>
                 <p class="max-w-[496px] text-[16px] leading-[26px] font-medium text-body-muted">
-                    We’re building a space for recipes, stories, food finds and conversations. Join our WhatsApp community for now and be the first to hear when the full hub launches.
+                    A space where food, culture and community come together through cultural celebrations, community gatherings, exhibitions, food experiences and events that bring Africans, Caribbeans and the wider community closer, creating opportunities to connect, share, celebrate and experience the richness of our cultures.
                 </p>
             </div>
 

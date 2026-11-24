@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Store\Kitchen;
 
-use App\Services\Analytics;
 use App\Actions\Kitchen\AddRecipeToCart;
 use App\Models\Recipe;
+use App\Services\Analytics;
 use App\Services\Kitchen\RecipeResolver;
 use App\Support\Cart;
+use App\Support\Seo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -138,9 +140,52 @@ class RecipeDetail extends Component
         session()->flash('cart_success', 'Ingredient added to your basket!');
     }
 
+    /**
+     * Recipe structured data so the dish can show as a rich recipe result.
+     */
+    private function seo(): void
+    {
+        $recipe = $this->recipe;
+        $image = $recipe->image_url ?: $recipe->image;
+        $description = $recipe->description ?: $recipe->intro ?: $recipe->tagline
+            ?: "How to cook {$recipe->title}, with every ingredient ready to add to your Ìsàlèè Èkó basket.";
+
+        Seo::description($description)
+            ->image($image)
+            ->type('article')
+            ->canonical(route('kitchen.recipe', $recipe));
+
+        $ingredients = $recipe->ingredients()->get()
+            ->map(fn ($i) => trim(collect([$i->quantity ?? null, $i->unit ?? null, $i->name ?? null])->filter()->implode(' ')))
+            ->filter()->values();
+        if ($ingredients->isEmpty()) {
+            $ingredients = $recipe->products()->get()->map(fn ($p) => $p->localized_name)->values();
+        }
+
+        Seo::schema(array_filter([
+            '@type' => 'Recipe',
+            'name' => $recipe->title ?: $recipe->name,
+            'description' => Str::limit(strip_tags((string) $description), 500),
+            'image' => $image ? [Seo::absolute($image)] : null,
+            'author' => ['@type' => 'Organization', 'name' => Seo::SITE_NAME],
+            'recipeCuisine' => $recipe->country?->name ?? $recipe->cuisine,
+            'recipeYield' => $recipe->base_servings ? $recipe->base_servings.' servings' : null,
+            'prepTime' => $recipe->prep_minutes ? 'PT'.$recipe->prep_minutes.'M' : null,
+            'totalTime' => $recipe->duration_minutes ? 'PT'.$recipe->duration_minutes.'M' : null,
+            'keywords' => collect([$recipe->cuisine, ...($recipe->diet_tags ?? [])])->filter()->implode(', ') ?: null,
+            'recipeIngredient' => $ingredients->all() ?: null,
+            'recipeInstructions' => collect($recipe->parsedSteps())->map(fn ($step) => [
+                '@type' => 'HowToStep',
+                'name' => $step['title'],
+                'text' => $step['body'] ?: $step['title'],
+            ])->all() ?: null,
+        ]));
+    }
+
     public function render(RecipeResolver $resolver)
     {
         $resolved = $resolver->resolve($this->recipe, $this->people);
+        $this->seo();
 
         // Find recipes for "Cook Next"
         $cookNext = Recipe::approved()
@@ -155,6 +200,6 @@ class RecipeDetail extends Component
             'stories' => $this->recipe->stories()->published()->latest('published_at')->take(3)->get(),
             'isSaved' => Auth::check() && Auth::user()->savedRecipes()->whereKey($this->recipe->id)->exists(),
             'cuisines' => config('kitchen.cuisines', []),
-        ])->title("{$this->recipe->title} — Ìsalèè Kitchen");
+        ])->title("{$this->recipe->title} Recipe");
     }
 }

@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Store;
 
-use App\Services\Analytics;
 use App\Models\Product;
 use App\Models\StockNotification;
+use App\Services\Analytics;
 use App\Support\Cart;
+use App\Support\Seo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -123,9 +125,60 @@ class ProductPage extends Component
         );
     }
 
+    /**
+     * Description, sharing image and Product structured data, so the item
+     * can show with its price and stock in Google results.
+     */
+    private function seo(Product $product): void
+    {
+        $variation = $product->defaultVariation;
+        $images = array_values(array_filter(array_map([Seo::class, 'absolute'], $product->images())));
+        $description = $product->localized_description
+            ?: "Buy {$product->localized_name} online at Ìsàlèè Èkó, African and Caribbean groceries in Saint John, NB.";
+
+        Seo::description($description)->type('product');
+        if ($images) {
+            Seo::image($images[0]);
+        }
+
+        $availability = match ($product->stockState()) {
+            'in_stock' => 'https://schema.org/InStock',
+            'low_stock' => 'https://schema.org/LimitedAvailability',
+            default => 'https://schema.org/OutOfStock',
+        };
+
+        Seo::schema(array_filter([
+            '@type' => 'Product',
+            'name' => $product->localized_name,
+            'description' => Str::limit(strip_tags((string) $description), 500),
+            'image' => $images ?: null,
+            'sku' => $variation?->sku ?: (string) $product->id,
+            'category' => $product->category?->name,
+            'countryOfOrigin' => $product->country?->name,
+            'url' => route('product', $product),
+            'offers' => $variation && $variation->price_cents > 0 ? [
+                '@type' => 'Offer',
+                'url' => route('product', $product),
+                'priceCurrency' => config('shop.currency', 'CAD'),
+                'price' => number_format($variation->price_cents / 100, 2, '.', ''),
+                'availability' => $availability,
+                'itemCondition' => 'https://schema.org/NewCondition',
+                'seller' => ['@type' => 'Organization', 'name' => Seo::SITE_NAME],
+            ] : null,
+        ]));
+
+        Seo::breadcrumbs(array_values(array_filter([
+            ['Home', route('home')],
+            ['Shop', route('shop')],
+            $product->category ? [$product->category->name, route('shop', ['category' => $product->category->slug])] : null,
+            [$product->localized_name, null],
+        ])));
+    }
+
     public function render()
     {
         $product = $this->product;
+        $this->seo($product);
 
         return view('livewire.store.product-page', [
             'variation' => $product->defaultVariation,

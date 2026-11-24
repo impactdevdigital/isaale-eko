@@ -11,6 +11,7 @@ use App\Models\Recipe;
 use App\Services\Messaging\LogSmsSender;
 use App\Services\Messaging\SmsSender;
 use App\Support\Cart;
+use App\Support\Seo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // One set of search/sharing tags per request (see App\Support\Seo).
+        $this->app->scoped(Seo::class);
+
         // Swap for a real SMS provider once one is chosen.
         $this->app->bind(SmsSender::class, LogSmsSender::class);
 

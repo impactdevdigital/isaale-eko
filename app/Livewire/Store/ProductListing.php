@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Services\Analytics;
+use App\Support\Seo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Layout;
@@ -118,6 +119,15 @@ class ProductListing extends Component
         $category = $this->category ? Category::where('slug', $this->category)->first() : null;
         $products = $this->query($category)->paginate(self::PER_PAGE);
         $this->trackDiscovery($category, $products->total());
+
+        if ($countryPage) {
+            Seo::description($countryPage->banner_description
+                ?: "Shop {$countryPage->name} groceries online at Ìsàlèè Èkó: familiar staples, pantry favourites and flavours from home, in Saint John, NB.")
+                ->image($countryPage->banner_image);
+        } elseif ($category) {
+            Seo::description("Shop {$category->name} online at Ìsàlèè Èkó: African and Caribbean groceries in Saint John, NB, ready for pickup.")
+                ->image($category->image);
+        }
 
         return view('livewire.store.product-listing', [
             'products' => $products,

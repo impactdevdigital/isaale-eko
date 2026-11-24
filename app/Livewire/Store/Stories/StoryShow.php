@@ -2,13 +2,15 @@
 
 namespace App\Livewire\Store\Stories;
 
-use App\Services\Analytics;
 use App\Livewire\Store\Stories\Concerns\SubscribesToStories;
 use App\Models\Story;
 use App\Models\StoryComment;
+use App\Services\Analytics;
+use App\Support\Seo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -113,6 +115,24 @@ class StoryShow extends Component
 
     public function render()
     {
+        $story = $this->story;
+        $description = $story->excerpt ?: Str::limit(strip_tags((string) $story->body), 160);
+
+        Seo::description($description)->image($story->cover_image)->type('article');
+        Seo::schema(array_filter([
+            '@type' => $story->isFoodStory() ? 'BlogPosting' : 'NewsArticle',
+            'headline' => Str::limit($story->title, 110),
+            'description' => $description,
+            'image' => $story->cover_image ? [Seo::absolute($story->cover_image)] : null,
+            'datePublished' => $story->published_at?->toIso8601String(),
+            'dateModified' => $story->updated_at?->toIso8601String(),
+            'author' => $story->author_name
+                ? ['@type' => 'Person', 'name' => $story->author_name]
+                : ['@type' => 'Organization', 'name' => Seo::SITE_NAME],
+            'publisher' => ['@type' => 'Organization', 'name' => Seo::SITE_NAME, 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-small.svg')]],
+            'mainEntityOfPage' => $story->url(),
+        ]));
+
         return view('livewire.store.stories.story-show', [
             'comments' => $this->story->approvedComments()->get(),
             'trending' => self::trending($this->story->id),

@@ -40,6 +40,15 @@ return [
         'measurement_id' => env('GA_MEASUREMENT_ID'),
     ],
 
+    // Search Console / Bing Webmaster ownership tags (the "content" value only).
+    'google' => [
+        'site_verification' => env('GOOGLE_SITE_VERIFICATION'),
+    ],
+
+    'bing' => [
+        'site_verification' => env('BING_SITE_VERIFICATION'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
@@ -54,11 +63,11 @@ return [
     ],
 
     'square' => [
-        'env'         => env('SQUARE_ENV', 'sandbox'),
-        'token'       => env('SQUARE_ACCESS_TOKEN'),
+        'env' => env('SQUARE_ENV', 'sandbox'),
+        'token' => env('SQUARE_ACCESS_TOKEN'),
         'location_id' => env('SQUARE_LOCATION_ID'),
-        'app_id'      => env('SQUARE_APP_ID'),
-        'version'     => env('SQUARE_VERSION'),
+        'app_id' => env('SQUARE_APP_ID'),
+        'version' => env('SQUARE_VERSION'),
         'webhook_key' => env('SQUARE_WEBHOOK_SIGNATURE_KEY'),
         'webhook_url' => env('SQUARE_WEBHOOK_URL'),
         // Copy website orders into Square (items, customer, pickup/delivery). See OrderSync.
@@ -68,21 +77,21 @@ return [
         // SQUARE_PAYMENTS_* to a sandbox app to take test payments while the
         // catalogue still comes from the live account. See SquareGateway::payments().
         'payments' => [
-            'env'         => env('SQUARE_PAYMENTS_ENV'),
-            'token'       => env('SQUARE_PAYMENTS_ACCESS_TOKEN'),
+            'env' => env('SQUARE_PAYMENTS_ENV'),
+            'token' => env('SQUARE_PAYMENTS_ACCESS_TOKEN'),
             'location_id' => env('SQUARE_PAYMENTS_LOCATION_ID'),
-            'app_id'      => env('SQUARE_PAYMENTS_APP_ID'),
+            'app_id' => env('SQUARE_PAYMENTS_APP_ID'),
         ],
     ],
 
     'doordash' => [
-        'developer_id'   => env('DOORDASH_DEVELOPER_ID'),
-        'key_id'         => env('DOORDASH_KEY_ID'),
+        'developer_id' => env('DOORDASH_DEVELOPER_ID'),
+        'key_id' => env('DOORDASH_KEY_ID'),
         'signing_secret' => env('DOORDASH_SIGNING_SECRET'),
     ],
 
     'anthropic' => [
-        'key'   => env('ANTHROPIC_API_KEY'),
+        'key' => env('ANTHROPIC_API_KEY'),
         'model' => env('ASHA_MODEL'),
     ],
 

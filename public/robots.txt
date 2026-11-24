@@ -1,2 +1,14 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /orders/
+Disallow: /sign-in
+Disallow: /language/
+Disallow: /livewire/
+Disallow: /*?q=
+Disallow: /*&q=
+
+Sitemap: https://isaleeeko.com/sitemap.xml

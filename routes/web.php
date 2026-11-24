@@ -6,23 +6,24 @@ use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\LanguageController;
 use App\Http\Controllers\Store\OrderController;
 use App\Http\Controllers\Store\SessionController;
+use App\Http\Controllers\Store\SitemapController;
 use App\Livewire\Admin\AdminLogin;
+use App\Livewire\Admin\AnalyticsDashboard;
+use App\Livewire\Admin\BannersManager;
 use App\Livewire\Admin\CategoriesManager;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\IssuesDesk;
 use App\Livewire\Admin\LoyaltyTracker;
 use App\Livewire\Admin\OrdersQueue;
-
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
 use App\Livewire\Admin\PromotionsManager;
 use App\Livewire\Admin\RecipesManager;
-use App\Livewire\Admin\StoriesManager;
 use App\Livewire\Admin\SquareCatalogCheck;
 use App\Livewire\Admin\StaffManager;
 use App\Livewire\Admin\StoreHoursEditor;
 use App\Livewire\Admin\StoreSettings;
-use Illuminate\Support\Facades\Auth;
+use App\Livewire\Admin\StoriesManager;
 use App\Livewire\Store\Account\AccountManagement;
 use App\Livewire\Store\Account\AddressBook;
 use App\Livewire\Store\Account\BuyAgain;
@@ -36,52 +37,64 @@ use App\Livewire\Store\Account\SavedMeals;
 use App\Livewire\Store\Account\Wishlist;
 use App\Livewire\Store\CartPage;
 use App\Livewire\Store\Checkout;
+use App\Livewire\Store\CommunityHub;
+use App\Livewire\Store\HelpCentre;
+use App\Livewire\Store\Kitchen\CookOnABudget;
+use App\Livewire\Store\Kitchen\CookWithWhatIHave;
+use App\Livewire\Store\Kitchen\KitchenHome;
+use App\Livewire\Store\Kitchen\RecipeDetail;
 use App\Livewire\Store\ProductListing;
 use App\Livewire\Store\ProductPage;
+use App\Livewire\Store\RescheduleOrder;
+use App\Livewire\Store\Stories\BrandUpdatesIndex;
+use App\Livewire\Store\Stories\StoriesIndex;
+use App\Livewire\Store\Stories\StoryShow;
+use App\Livewire\Store\SubstitutionResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/language/{locale}', LanguageController::class)->name('language');
 Route::get('/', HomeController::class)->name('home');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/shop', ProductListing::class)->name('shop');
 Route::get('/shop/country/{countryPage:slug}', ProductListing::class)->name('shop.country');
 Route::get('/products/{product:slug}', ProductPage::class)->name('product');
 Route::get('/cart', CartPage::class)->name('cart');
 Route::get('/checkout', Checkout::class)->name('checkout');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-Route::get('/orders/{number}/substitutions/{id}', \App\Livewire\Store\SubstitutionResponse::class)
+Route::get('/orders/{number}/substitutions/{id}', SubstitutionResponse::class)
     ->name('orders.substitutions.review')
     ->middleware('signed');
-Route::get('/orders/{number}/reschedule', \App\Livewire\Store\RescheduleOrder::class)
+Route::get('/orders/{number}/reschedule', RescheduleOrder::class)
     ->name('orders.reschedule')
     ->middleware('signed');
 
 // Part G: Ìsalèè Kitchen & Ingredients Engine
-Route::get('/kitchen', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.index');
-Route::get('/recipes', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('recipes.index');
-Route::get('/kitchen/cook-with-what-i-have', \App\Livewire\Store\Kitchen\CookWithWhatIHave::class)->name('kitchen.pantry');
-Route::get('/kitchen/cook-on-a-budget', \App\Livewire\Store\Kitchen\CookOnABudget::class)->name('kitchen.budget');
-Route::get('/kitchen/cuisine/{cuisine}', \App\Livewire\Store\Kitchen\KitchenHome::class)->name('kitchen.cuisine');
-Route::get('/kitchen/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('kitchen.recipe');
-Route::get('/recipes/{recipe:slug}', \App\Livewire\Store\Kitchen\RecipeDetail::class)->name('recipes.show');
+Route::get('/kitchen', KitchenHome::class)->name('kitchen.index');
+Route::get('/recipes', KitchenHome::class)->name('recipes.index');
+Route::get('/kitchen/cook-with-what-i-have', CookWithWhatIHave::class)->name('kitchen.pantry');
+Route::get('/kitchen/cook-on-a-budget', CookOnABudget::class)->name('kitchen.budget');
+Route::get('/kitchen/cuisine/{cuisine}', KitchenHome::class)->name('kitchen.cuisine');
+Route::get('/kitchen/{recipe:slug}', RecipeDetail::class)->name('kitchen.recipe');
+Route::get('/recipes/{recipe:slug}', RecipeDetail::class)->name('recipes.show');
 
 // Discover: Food Stories and Brand Updates (Figma 07.03–07.05)
-Route::get('/food-stories', \App\Livewire\Store\Stories\StoriesIndex::class)->name('stories.index');
-Route::get('/food-stories/{story:slug}', \App\Livewire\Store\Stories\StoryShow::class)->name('stories.show');
-Route::get('/brand-updates', \App\Livewire\Store\Stories\BrandUpdatesIndex::class)->name('updates.index');
-Route::get('/brand-updates/{story:slug}', \App\Livewire\Store\Stories\StoryShow::class)->name('updates.show');
+Route::get('/food-stories', StoriesIndex::class)->name('stories.index');
+Route::get('/food-stories/{story:slug}', StoryShow::class)->name('stories.show');
+Route::get('/brand-updates', BrandUpdatesIndex::class)->name('updates.index');
+Route::get('/brand-updates/{story:slug}', StoryShow::class)->name('updates.show');
 
 // Community Hub teaser (Figma 07.07)
-Route::get('/community', \App\Livewire\Store\CommunityHub::class)->name('community');
+Route::get('/community', CommunityHub::class)->name('community');
 
 // Help & Contact: "Report a problem" opens an Issues Desk case
-Route::get('/help', \App\Livewire\Store\HelpCentre::class)->name('help');
+Route::get('/help', HelpCentre::class)->name('help');
 Route::redirect('/contact', '/help');
 Route::get('/about', AboutController::class)->name('about');
 
 // Policy Pages
 Route::view('/privacy-policy', 'store.privacy-policy')->name('privacy-policy');
 Route::view('/refund-policy', 'store.refund-policy')->name('refund-policy');
-
 
 // Customer accounts: password-free sign-in happens in the drawer.
 Route::get('/sign-in', [SessionController::class, 'create'])->middleware('guest')->name('login');
@@ -124,13 +137,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/categories', CategoriesManager::class)->name('categories');
         Route::get('/recipes', RecipesManager::class)->name('recipes');
         Route::get('/stories', StoriesManager::class)->name('stories');
-        Route::get('/banners', \App\Livewire\Admin\BannersManager::class)->name('banners');
+        Route::get('/banners', BannersManager::class)->name('banners');
         Route::get('/settings', StoreSettings::class)->middleware('admin:manager')->name('settings');
         Route::get('/hours', StoreHoursEditor::class)->name('hours');
         Route::get('/payments', PaymentMethods::class)->middleware('admin:manager')->name('payments');
         Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');
         Route::get('/loyalty', LoyaltyTracker::class)->middleware('admin:manager')->name('loyalty');
-        Route::get('/analytics', \App\Livewire\Admin\AnalyticsDashboard::class)->middleware('admin:manager')->name('analytics');
+        Route::get('/analytics', AnalyticsDashboard::class)->middleware('admin:manager')->name('analytics');
         Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
         Route::get('/square-check', SquareCatalogCheck::class)->middleware('admin:manager')->name('square-check');
     });

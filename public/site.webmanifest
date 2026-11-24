@@ -1,0 +1,13 @@
+{
+    "name": "Ìsàlèè Èkó",
+    "short_name": "Ìsàlèè Èkó",
+    "description": "African and Caribbean groceries in Saint John, NB.",
+    "start_url": "/",
+    "display": "browser",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFD21F",
+    "icons": [
+        { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+        { "src": "/images/logo-small.svg", "sizes": "any", "type": "image/svg+xml" }
+    ]
+}

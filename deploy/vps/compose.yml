@@ -73,7 +73,7 @@ services:
       retries: 20
 
   # HTTPS in front of the app. SITE_ADDRESS in .env: ":80" for plain HTTP on the IP,
-  # or a domain (e.g. staging.isaleeko.com) for automatic Let's Encrypt certificates.
+  # or a domain (e.g. staging.isaleeeko.com) for automatic Let's Encrypt certificates.
   caddy:
     image: caddy:2.10-alpine
     restart: unless-stopped

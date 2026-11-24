@@ -50,10 +50,10 @@ docker compose exec app php artisan ...    # any artisan command
 The server starts in **test mode**: Square sandbox keys, emails written to the log,
 plain HTTP on the IP. To go live, in `deploy/vps/.env`:
 
-1. Point the domain's DNS A record at `203.161.46.218`, set `SITE_ADDRESS=isaleeko.com`
-   (Caddy fetches the certificate), `APP_URL=https://isaleeko.com`, `SESSION_SECURE_COOKIE=true`.
+1. Point the domain's DNS A record at `203.161.46.218`, set `SITE_ADDRESS=isaleeeko.com`
+   (Caddy fetches the certificate), `APP_URL=https://isaleeeko.com`, `SESSION_SECURE_COOKIE=true`.
 2. Put in the production Square keys (`SQUARE_ENV=production`, token, location, app ID),
-   set the Square webhook to `https://isaleeko.com/api/webhooks/square` and copy its
+   set the Square webhook to `https://isaleeeko.com/api/webhooks/square` and copy its
    signature key into `SQUARE_WEBHOOK_SIGNATURE_KEY` / `SQUARE_WEBHOOK_URL`.
 3. Set a real mailer (`MAIL_MAILER=resend`, `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`).
 4. `docker compose up -d` then `docker compose exec app php artisan square:sync --full --retire-demo`.

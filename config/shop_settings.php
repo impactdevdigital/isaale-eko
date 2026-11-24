@@ -186,7 +186,7 @@ return [
             'support_email' => [
                 'label' => 'Support Email',
                 'type' => 'text',
-                'default' => 'support@isaleeko.com',
+                'default' => 'support@isaleeeko.com',
                 'rules' => 'required|email|max:120',
                 'help' => 'Customer service inquiry destination.'
             ],

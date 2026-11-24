@@ -1,4 +1,5 @@
-{{-- Auto-advancing promo banner with arrows, dots and a pause control (Alpine via Livewire). --}}
+{{-- Auto-advancing promo banner with arrows, dots and a pause control (Alpine via Livewire).
+     Heights follow Figma: top banner 214 / 330 / 372, middle banner 210 / 315 / 360 (phone / tablet / desktop). --}}
 @props(['slides', 'tall' => false, 'interval' => 6000])
 
 <section
@@ -18,8 +19,8 @@
     aria-roledescription="carousel"
     {{ $attributes->class([
         'relative isolate overflow-hidden rounded-hero-mobile md:rounded-hero',
-        'h-[232px] md:h-[420px]' => $tall,
-        'h-[250px] md:h-[360px]' => ! $tall,
+        'h-[214px] md:h-[330px] xl:h-[372px]' => $tall,
+        'h-[210px] md:h-[315px] xl:h-[360px]' => ! $tall,
     ]) }}
 >
     @foreach ($slides as $i => $slide)
@@ -32,14 +33,20 @@
             aria-label="{{ $i + 1 }} of {{ count($slides) }}"
         >
             <img src="{{ $slide['image'] }}" alt="" class="absolute inset-0 size-full object-cover object-right" @if ($i > 0) loading="lazy" @endif>
+            {{-- On phones the photo sits under the copy: a soft shade keeps it readable --}}
+            <div @class([
+                'absolute inset-0 bg-gradient-to-r to-transparent md:hidden',
+                'from-white/80 via-white/50' => ($slide['text'] ?? 'text-white') === 'text-ink',
+                'from-black/60 via-black/35' => ($slide['text'] ?? 'text-white') !== 'text-ink',
+            ])></div>
 
-            <div class="relative flex h-full max-w-[460px] flex-col justify-center gap-2 px-6 md:box-content md:px-[72px] {{ $slide['text'] ?? 'text-white' }}">
+            <div class="relative flex h-full max-w-[460px] flex-col justify-center gap-1.5 px-5 md:box-content md:gap-2 md:px-[72px] {{ $slide['text'] ?? 'text-white' }}">
                 @if ($slide['eyebrow'])
                     <p class="text-eyebrow uppercase opacity-90">{{ $slide['eyebrow'] }}</p>
                 @endif
-                <h2 class="text-hero-mobile md:text-hero">{{ $slide['title'] }}</h2>
+                <h2 class="max-w-[260px] text-h2-mobile md:max-w-none md:text-hero-mobile xl:text-hero">{{ $slide['title'] }}</h2>
                 @if ($slide['body'])
-                    <p class="pb-2 text-lead-mobile opacity-90 md:pt-1.5 md:pb-4 md:text-lead">{{ $slide['body'] }}</p>
+                    <p class="hidden pb-2 text-lead-mobile opacity-90 sm:block md:pt-1.5 md:pb-4 xl:text-lead">{{ $slide['body'] }}</p>
                 @endif
                 @if ($slide['cta'] && ($slide['url'] ?? null))
                     <div>

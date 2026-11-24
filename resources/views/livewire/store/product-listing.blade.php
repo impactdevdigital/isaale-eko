@@ -111,6 +111,8 @@
                     @if ($popular->isNotEmpty())
                         <x-store.product-row :title="'Popular '.($countryPage->demonym ?? $countryPage->name).' Favourites'" :products="$popular" />
                     @endif
+                @else
+                    <x-store.shop-banner :country="$filterCountry" :category="$selectedCategory" />
                 @endif
 
                 <section class="flex flex-col gap-6" wire:loading.class="opacity-60" aria-live="polite">

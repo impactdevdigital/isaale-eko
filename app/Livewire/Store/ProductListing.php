@@ -123,6 +123,7 @@ class ProductListing extends Component
             'products' => $products,
             'selectedCategory' => $category,
             'countryPage' => $countryPage,
+            'filterCountry' => ! $countryPage && $this->country !== '' ? Country::where('slug', $this->country)->first() : null,
             'popular' => $countryPage ? $this->popularIn($countryPage) : collect(),
             // Menu groups, plus top-level Square categories that aren't in the menu.
             'categoryTree' => Category::roots()

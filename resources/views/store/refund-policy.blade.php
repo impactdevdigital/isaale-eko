@@ -133,7 +133,7 @@
             <section>
                 <h2 class="text-[20px] font-bold text-ink mb-3">6. How to report an issue</h2>
                 <p>In the app or on our website: <strong>My Orders &rarr; Select Order &rarr; Report a Problem with This Order</strong></p>
-                <p class="mt-2 text-body-sm">Without an account, or if you prefer, send an email to <a href="mailto:support@isaleeko.com" class="font-bold underline text-ink hover:text-brand-yellow-80">support@isaleeko.com</a> or message us on WhatsApp at <a href="https://wa.me/15063337474" class="font-bold underline text-ink hover:text-brand-yellow-80">+1 506-333-7474</a>, including your order number.</p>
+                <p class="mt-2 text-body-sm">Without an account, or if you prefer, send an email to <a href="mailto:support@isaleeeko.com" class="font-bold underline text-ink hover:text-brand-yellow-80">support@isaleeeko.com</a> or message us on WhatsApp at <a href="https://wa.me/15063337474" class="font-bold underline text-ink hover:text-brand-yellow-80">+1 506-333-7474</a>, including your order number.</p>
                 <p class="mt-3 text-body-sm">You may be asked to provide:</p>
                 <ul class="list-disc pl-5 mt-2 space-y-1.5 text-body-sm">
                     <li>your order number;</li>
@@ -184,7 +184,7 @@
                 <h3 class="font-bold text-ink text-[16px] mb-2">&Igrave;s&agrave;l&egrave;&egrave; &Egrave;k&oacute; Customer Service</h3>
                 <p class="text-body-muted">Saint John, New Brunswick, Canada</p>
                 <div class="mt-3 space-y-1.5">
-                    <p><span class="font-semibold text-ink">Email:</span> <a href="mailto:support@isaleeko.com" class="underline text-brand-blue hover:text-ink">support@isaleeko.com</a></p>
+                    <p><span class="font-semibold text-ink">Email:</span> <a href="mailto:support@isaleeeko.com" class="underline text-brand-blue hover:text-ink">support@isaleeeko.com</a></p>
                     <p><span class="font-semibold text-ink">Phone &amp; WhatsApp:</span> <a href="https://wa.me/15063337474" class="underline text-brand-blue hover:text-ink">+1 506-333-7474</a></p>
                     <p class="text-body-xs text-body-muted mt-2">Response target: within 24 hours (immediate for food safety/allergens)</p>
                 </div>

@@ -195,7 +195,7 @@ class HelpCentre extends Component
         return view('livewire.store.help-centre', [
             'order' => $this->orderId ? Order::with('items')->find($this->orderId) : null,
             'issueTypes' => OrderIssueItem::typeLabels(),
-            'supportEmail' => Setting::get('support_email', 'support@isaleeko.com'),
+            'supportEmail' => Setting::get('support_email', 'support@isaleeeko.com'),
             'supportPhone' => Setting::get('support_phone'),
         ]);
     }

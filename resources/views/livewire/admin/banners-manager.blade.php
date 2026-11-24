@@ -172,7 +172,7 @@
                         <div>
                             <label for="banner-ctaUrl" class="{{ $label }}">Button goes to</label>
                             <input id="banner-ctaUrl" type="text" wire:model="ctaUrl" placeholder="/shop or /shop?sort=new or https://…" class="{{ $input }}">
-                            <p class="{{ $help }}">Copy the part of the store address after isaleeko.com, e.g. <code>/shop?sort=new</code>, <code>/recipes/jollof-rice</code> or <code>/shop/country/nigeria</code>.</p>
+                            <p class="{{ $help }}">Copy the part of the store address after isaleeeko.com, e.g. <code>/shop?sort=new</code>, <code>/recipes/jollof-rice</code> or <code>/shop/country/nigeria</code>.</p>
                             @error('ctaUrl') <p class="{{ $error }}">{{ $message }}</p> @enderror
                         </div>
 

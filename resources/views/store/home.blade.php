@@ -10,11 +10,31 @@
         {{-- Fresh this week --}}
         <section class="flex flex-col gap-4 pt-10 pb-2">
             <x-store.section-heading title="Fresh This Week" subtitle="Popular picks. Great prices. Real flavour." link="View all" :href="route('shop')" />
+            <div class="flex snap-x gap-2.5 overflow-x-auto [scrollbar-width:none] md:grid md:grid-cols-4 md:overflow-visible lg:grid-cols-6 xl:grid-cols-7">
+                @foreach ($freshThisWeek as $product)
+                    <x-store.product-card :product="$product" class="w-40 shrink-0 snap-start md:w-auto" />
+                @endforeach
+            </div>
+        </section>
+
+        {{-- Shop ingredients by recipe --}}
+        <section class="flex flex-col gap-4 pt-10 pb-2 md:pt-[55px]">
+            <x-store.section-heading eyebrow="Cook by craving" title="Shop Ingredients By Recipe" subtitle="Real recipes. Real ingredients. Real home cooking." link="View more recipes" />
+            <div class="flex snap-x gap-3 overflow-x-auto [scrollbar-width:none] lg:grid lg:grid-cols-3 lg:overflow-visible">
+                @foreach ($recipes as $recipe)
+                    <x-store.recipe-card :recipe="$recipe" class="w-[340px] shrink-0 snap-start lg:w-auto" />
+                @endforeach
+            </div>
+        </section>
+
+        {{-- Best Seller --}}
+        <section class="flex flex-col gap-4 pt-10 pb-2">
+            <x-store.section-heading title="Best Seller" subtitle="Some of the new products trend this week" link="View all" :href="route('shop', ['sort' => 'bestsellers'])" />
             {{-- Four products, the "Better Shopping Marketplace" banner, four products
                  (Figma Best Seller, nodes 1253:68168 / 1253:69588 / 1253:70590). Stacked below lg. --}}
-            @php [$freshLeft, $freshRight] = $freshThisWeek->take(8)->values()->split(2)->pad(2, collect())->all(); @endphp
+            @php [$bestLeft, $bestRight] = $bestSellers->take(8)->values()->split(2)->pad(2, collect())->all(); @endphp
             <div class="grid gap-[22px] rounded-lg bg-surface-quiet px-4 lg:grid-cols-[310fr_280fr_310fr] lg:gap-4 xl:grid-cols-[363fr_506fr_363fr]">
-                @foreach ([$freshLeft, null, $freshRight] as $group)
+                @foreach ([$bestLeft, null, $bestRight] as $group)
                     @if ($group === null)
                         <div class="relative min-h-[681px] overflow-hidden bg-[#DFDFDF]">
                             <img src="{{ asset('images/store/home/best-seller-banner.png') }}" alt="" loading="lazy" width="433" height="576"
@@ -32,16 +52,6 @@
                             @endforeach
                         </div>
                     @endif
-                @endforeach
-            </div>
-        </section>
-
-        {{-- Shop ingredients by recipe --}}
-        <section class="flex flex-col gap-4 pt-10 pb-2 md:pt-[55px]">
-            <x-store.section-heading eyebrow="Cook by craving" title="Shop Ingredients By Recipe" subtitle="Real recipes. Real ingredients. Real home cooking." link="View more recipes" />
-            <div class="flex snap-x gap-3 overflow-x-auto [scrollbar-width:none] lg:grid lg:grid-cols-3 lg:overflow-visible">
-                @foreach ($recipes as $recipe)
-                    <x-store.recipe-card :recipe="$recipe" class="w-[340px] shrink-0 snap-start lg:w-auto" />
                 @endforeach
             </div>
         </section>

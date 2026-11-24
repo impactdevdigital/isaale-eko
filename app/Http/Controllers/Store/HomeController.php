@@ -19,7 +19,10 @@ class HomeController extends Controller
         return view('store.home', [
             'heroSlides' => StorefrontContent::heroSlides(),
             'promoSlides' => StorefrontContent::promoSlides(),
-            'freshThisWeek' => $this->atLeast($this->collection('fresh-this-week'), 8),
+            'freshThisWeek' => $this->collection('fresh-this-week'),
+            'bestSellers' => $this->atLeast(
+                Product::forCard()->whereNotNull('bestseller_rank')->orderBy('bestseller_rank')->take(8)->get(), 8
+            ),
             'moreFromTheShelves' => $this->collection('more-from-the-shelves'),
             'recipes' => Recipe::where('is_featured', true)
                 ->orderBy('sort_order')
@@ -32,8 +35,8 @@ class HomeController extends Controller
     }
 
     /**
-     * The Fresh This Week block is two grids of four around a banner, so top
-     * a short collection up with the newest in-stock-ready products.
+     * The Best Seller block is two grids of four around a banner, so top a
+     * short list up with the newest products.
      *
      * @param  Collection<int, Product>  $products
      * @return Collection<int, Product>

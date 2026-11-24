@@ -20,6 +20,12 @@
     {{-- Keeps the copy readable where the photo reaches under it --}}
     <div class="absolute inset-y-0 left-0 -z-10 w-3/5 bg-gradient-to-r from-surface-quiet from-60% to-transparent"></div>
 
+    @if ($country?->flagUrl())
+        {{-- Flag of the chosen country (Figma 734:59291) --}}
+        <img src="{{ $country->flagUrl() }}" alt="{{ __(':country flag', ['country' => $country->localized_name]) }}"
+             class="absolute top-[44px] right-[65px] hidden h-[30px] w-11 rounded-[4px] object-cover shadow-sm md:block">
+    @endif
+
     <div class="flex max-w-[500px] flex-col gap-2">
         <p class="text-eyebrow uppercase text-body-muted">{{ __($eyebrow) }}</p>
         <h2 class="text-hero-mobile capitalize text-ink">{{ __($title) }}</h2>

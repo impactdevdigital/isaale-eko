@@ -27,7 +27,7 @@
 
 <footer class="bg-[#F6F6F6] pb-8">
     <!-- Links Row: pt-[52px], pb-12 matching Figma 07.01 footer -->
-    <div class="page-container pt-[52px] grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[210px_repeat(4,197px)] lg:justify-between">
+    <div class="page-container pt-[52px] grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[minmax(0,210px)_repeat(4,minmax(0,197px))] lg:justify-between">
         <div class="col-span-2 lg:col-span-1 flex flex-col gap-6">
             <img src="{{ asset('images/logo-small.svg') }}" alt="Ìsàlèè Èkó" class="h-[40px] w-[62px]">
             <p class="max-w-[211px] text-[12px] leading-[18px] font-normal text-[#686868]">{{ __('African and Caribbean food, delivered with care.') }}</p>

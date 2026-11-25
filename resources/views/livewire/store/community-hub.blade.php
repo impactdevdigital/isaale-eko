@@ -36,7 +36,22 @@
                         <x-store.icon name="check" class="size-4" /> You’re on the list. We’ll email you when the Community Hub launches.
                     </p>
                 @else
-                    <form wire:submit="subscribe" class="flex flex-col gap-3 sm:flex-row" novalidate>
+                    <form wire:submit="subscribe" class="flex flex-col gap-3" novalidate>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label for="community-first-name" class="sr-only">First name</label>
+                                <input id="community-first-name" type="text" wire:model="firstName" autocomplete="given-name" placeholder="First name"
+                                       class="h-[42px] w-full rounded-lg border border-[#DEDEDE] bg-surface px-4 text-[16px] leading-[26px] font-medium text-ink placeholder:text-body-muted focus:border-ink focus:outline-none">
+                                @error('firstName') <p class="mt-1 text-body-xs text-price-40">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label for="community-last-name" class="sr-only">Last name</label>
+                                <input id="community-last-name" type="text" wire:model="lastName" autocomplete="family-name" placeholder="Last name"
+                                       class="h-[42px] w-full rounded-lg border border-[#DEDEDE] bg-surface px-4 text-[16px] leading-[26px] font-medium text-ink placeholder:text-body-muted focus:border-ink focus:outline-none">
+                                @error('lastName') <p class="mt-1 text-body-xs text-price-40">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-3 sm:flex-row">
                         <div class="flex-1">
                             <label for="community-email" class="sr-only">Email address</label>
                             <input id="community-email" type="email" wire:model="email" autocomplete="email" placeholder="Your email address"
@@ -47,6 +62,7 @@
                                 class="h-[42px] shrink-0 rounded-full bg-ink px-5 text-[14px] leading-[18px] font-extrabold text-white transition-colors hover:bg-grayscale-90 disabled:opacity-60">
                             Get launch updates
                         </button>
+                        </div>
                     </form>
                 @endif
 

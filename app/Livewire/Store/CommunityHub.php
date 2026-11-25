@@ -17,16 +17,26 @@ use Livewire\Component;
 #[Title('Community Hub')]
 class CommunityHub extends Component
 {
+    public string $firstName = '';
+
+    public string $lastName = '';
+
     public string $email = '';
 
     public bool $subscribed = false;
 
     public function subscribe(): void
     {
-        $this->validate(
-            ['email' => ['required', 'email:rfc', 'max:255']],
-            ['email.required' => 'Enter your email address.', 'email.email' => 'Enter a valid email address.'],
-        );
+        $this->validate([
+            'firstName' => ['required', 'string', 'max:60'],
+            'lastName' => ['required', 'string', 'max:60'],
+            'email' => ['required', 'email:rfc', 'max:255'],
+        ], [
+            'firstName.required' => 'Enter your first name.',
+            'lastName.required' => 'Enter your last name.',
+            'email.required' => 'Enter your email address.',
+            'email.email' => 'Enter a valid email address.',
+        ]);
 
         $key = 'community-subscribe:'.request()->ip();
 
@@ -38,9 +48,15 @@ class CommunityHub extends Component
 
         RateLimiter::hit($key, 600);
 
-        app(ConsentService::class)->grant('email', Auth::id(), strtolower(trim($this->email)), 'community_hub');
+        app(ConsentService::class)->grant(
+            'email',
+            Auth::id(),
+            strtolower(trim($this->email)),
+            'community_hub',
+            trim($this->firstName).' '.trim($this->lastName),
+        );
 
-        $this->reset('email');
+        $this->reset('firstName', 'lastName', 'email');
         $this->subscribed = true;
     }
 

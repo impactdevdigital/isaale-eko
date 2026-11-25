@@ -3,8 +3,10 @@
 namespace App\Services\Marketing;
 
 use App\Models\Consent;
+use App\Services\ConsentService;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -56,13 +58,17 @@ class Brevo
      *
      * @throws RequestException
      */
-    public function subscribe(string $email, ?string $name = null, ?int $listId = null): void
+    public function subscribe(string $email, ?string $name = null, ?int $listId = null, array $extra = []): void
     {
         [$first, $last] = self::splitName($name);
 
+        if ($extra) {
+            $this->ensureAttributes();
+        }
+
         $this->http()->post('/contacts', array_filter([
             'email' => $email,
-            'attributes' => array_filter(['FIRSTNAME' => $first, 'LASTNAME' => $last]) ?: null,
+            'attributes' => array_filter(['FIRSTNAME' => $first, 'LASTNAME' => $last, ...$extra], fn ($v) => filled($v)) ?: null,
             'listIds' => [$listId ?? $this->listFor('email')],
             'updateEnabled' => true,
         ], fn ($value) => $value !== null))->throw();
@@ -97,7 +103,10 @@ class Brevo
         }
 
         try {
-            $this->subscribe($consent->email, $consent->name ?: $consent->user?->name, $listId);
+            $this->subscribe($consent->email, $consent->name ?: $consent->user?->name, $listId, [
+                'SIGNUP_SOURCE' => ConsentService::sourceLabel($consent->source),
+                'SIGNUP_PAGE' => $consent->page,
+            ]);
             $consent->forceFill(['brevo_synced_at' => now()])->save();
 
             return true;
@@ -119,6 +128,27 @@ class Brevo
 
         return [$parts[0] ?? null, $parts[1] ?? null];
     }
+
+    /**
+     * Brevo only stores contact attributes it knows, so create the sign-up
+     * source and page attributes once. "Already exists" counts as done.
+     */
+    private function ensureAttributes(): void
+    {
+        Cache::rememberForever('brevo.signup-attributes.v1', function () {
+            foreach (self::SIGNUP_ATTRIBUTES as $attribute) {
+                $response = $this->http()->post("/contacts/attributes/normal/{$attribute}", ['type' => 'text']);
+
+                if ($response->failed() && $response->status() !== 400) {
+                    $response->throw();
+                }
+            }
+
+            return true;
+        });
+    }
+
+    public const SIGNUP_ATTRIBUTES = ['SIGNUP_SOURCE', 'SIGNUP_PAGE'];
 
     private function http(): PendingRequest
     {

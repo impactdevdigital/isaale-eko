@@ -14,6 +14,7 @@ use App\Livewire\Admin\CategoriesManager;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\IssuesDesk;
 use App\Livewire\Admin\LoyaltyTracker;
+use App\Livewire\Admin\NewsletterSignups;
 use App\Livewire\Admin\OrdersQueue;
 use App\Livewire\Admin\PaymentMethods;
 use App\Livewire\Admin\ProductsList;
@@ -144,6 +145,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/promotions', PromotionsManager::class)->middleware('admin:manager')->name('promotions');
         Route::get('/loyalty', LoyaltyTracker::class)->middleware('admin:manager')->name('loyalty');
         Route::get('/analytics', AnalyticsDashboard::class)->middleware('admin:manager')->name('analytics');
+        Route::get('/newsletter', NewsletterSignups::class)->middleware('admin:manager')->name('newsletter');
         Route::get('/staff', StaffManager::class)->middleware('admin:manager')->name('staff');
         Route::get('/square-check', SquareCatalogCheck::class)->middleware('admin:manager')->name('square-check');
     });

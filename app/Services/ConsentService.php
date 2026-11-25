@@ -23,6 +23,7 @@ class ConsentService
             'name' => filled($name) ? trim($name) : null,
             'channel' => $channel,
             'source' => $source,
+            'page' => self::currentPage(),
             'granted_at' => now(),
         ]);
 
@@ -55,6 +56,46 @@ class ConsentService
         }
     }
 
+    /** Where each consent source sits on the website, for people reading the list. */
+    public const SOURCES = [
+        'footer_signup' => 'Newsletter form (page footer)',
+        'community_hub' => 'Community Hub launch updates',
+        'food_stories' => 'Food Stories sign-up',
+        'checkout' => 'Checkout opt-in',
+        'account' => 'Account preferences',
+        'in_store' => 'In store',
+    ];
+
+    public static function sourceLabel(?string $source): string
+    {
+        return self::SOURCES[$source] ?? str((string) $source)->replace('_', ' ')->ucfirst()->toString();
+    }
+
+    /**
+     * The storefront page the shopper was on. Livewire actions post to
+     * /livewire/update, so the page comes from the Referer header.
+     */
+    private static function currentPage(): ?string
+    {
+        if (app()->runningInConsole() && ! app()->runningUnitTests()) {
+            return null;
+        }
+
+        $url = request()->is('livewire/*') || request()->is('livewire-*/*')
+            ? request()->headers->get('referer')
+            : request()->fullUrl();
+
+        $host = $url ? parse_url($url, PHP_URL_HOST) : null;
+
+        if (! $host || ! in_array($host, [request()->getHost(), parse_url((string) config('app.url'), PHP_URL_HOST)], true)) {
+            return null;
+        }
+
+        $path = parse_url($url, PHP_URL_PATH) ?: '/';
+
+        return mb_substr($path, 0, 255);
+    }
+
     public function has(string $channel, ?int $userId, ?string $email): bool
     {
         return $this->query($channel, $userId, $email)->exists();
@@ -66,7 +107,7 @@ class ConsentService
             ->whereNull('revoked_at')
             ->where(function ($q) use ($userId, $email) {
                 $q->when($userId, fn ($x) => $x->where('user_id', $userId))
-                  ->when($email, fn ($x) => $x->orWhere('email', $email));
+                    ->when($email, fn ($x) => $x->orWhere('email', $email));
             });
     }
 }

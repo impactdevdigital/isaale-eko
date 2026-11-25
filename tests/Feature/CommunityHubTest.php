@@ -29,12 +29,14 @@ test('the WhatsApp button uses the configured invite link, or explains it is com
 test('launch updates sign readers up for email', function () {
     Livewire::test(CommunityHub::class)
         ->call('subscribe')
-        ->assertHasErrors(['email' => 'required'])
+        ->assertHasErrors(['firstName' => 'required', 'lastName' => 'required', 'email' => 'required'])
+        ->set('firstName', 'Ngozi')
+        ->set('lastName', 'Okeke')
         ->set('email', 'Ngozi@Example.com')
         ->call('subscribe')
         ->assertHasNoErrors()
         ->assertSet('subscribed', true)
         ->assertSee('You’re on the list');
 
-    expect(Consent::where('email', 'ngozi@example.com')->where('source', 'community_hub')->exists())->toBeTrue();
+    expect(Consent::where('email', 'ngozi@example.com')->where('source', 'community_hub')->where('name', 'Ngozi Okeke')->exists())->toBeTrue();
 });

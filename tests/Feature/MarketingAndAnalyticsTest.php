@@ -52,7 +52,10 @@ it('sends the footer newsletter signup to the Brevo list', function () {
         && $request['email'] === 'ada@example.com'
         && $request['listIds'] === [7]
         && $request['updateEnabled'] === true
-        && $request['attributes'] === ['FIRSTNAME' => 'Ada', 'LASTNAME' => 'Lovelace Obi']);
+        && $request['attributes'] === ['FIRSTNAME' => 'Ada', 'LASTNAME' => 'Lovelace Obi', 'SIGNUP_SOURCE' => 'Newsletter form (page footer)', 'SIGNUP_PAGE' => '/']);
+
+    // The sign-up source and page fields are created in Brevo first.
+    Http::assertSent(fn (Request $request) => $request->url() === 'https://api.brevo.com/v3/contacts/attributes/normal/SIGNUP_SOURCE');
 });
 
 it('validates the footer newsletter form', function () {
@@ -89,9 +92,9 @@ it('backfills older signups with brevo:sync and skips withdrawn ones', function 
 
     $this->artisan('brevo:sync')->expectsOutputToContain('1 sign-up(s) sent')->assertSuccessful();
 
-    Http::assertSentCount(1);
+    Http::assertSentCount(3); // the two Brevo sign-up fields are set up first, then the contact
     Http::assertSent(fn (Request $request) => $request['email'] === 'kemi@example.com'
-        && $request['attributes'] === ['FIRSTNAME' => 'Kemi', 'LASTNAME' => 'Adeyemi']);
+        && $request['attributes'] === ['FIRSTNAME' => 'Kemi', 'LASTNAME' => 'Adeyemi', 'SIGNUP_SOURCE' => 'Account preferences']);
 });
 
 it('leaves a signup for the next brevo:sync when Brevo fails', function () {

@@ -167,18 +167,18 @@
             @endunless
 
             <div class="flex items-center gap-3 bg-grayscale-0 px-3.5 py-3">
-                <x-store.icon name="bus" class="size-[18px]" />
+                <x-store.icon name="shopping-bag" class="size-[18px]" />
                 <div>
-                    <p class="text-[12px] leading-4 font-bold">{{ __('Free delivery over $40') }}</p>
-                    <p class="text-[10px] leading-[13px] text-body-muted">{{ __('Local delivery and pickup details at checkout') }}</p>
+                    <p class="text-[12px] leading-4 font-bold">{{ __('Order online, pick up in store') }}</p>
+                    <p class="text-[10px] leading-[13px] text-body-muted">{{ __('Choose your pickup time at checkout') }}</p>
                 </div>
             </div>
 
             <div class="flex flex-col gap-5 rounded-sm border border-grayscale-40 p-6">
-                <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="location" class="size-[22px] text-stock-50" /><span><strong>{{ __('Shipping to') }}</strong> <span class="text-body-muted">Saint John, NB, Canada</span></span></p>
-                <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="returns" class="size-[22px] text-stock-50" />{{ __('30-Day Returns') }}</p>
+                <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="location" class="size-[22px] text-stock-50" /><span><strong>{{ __('Pickup at') }}</strong> <span class="text-body-muted">333 Main St, Saint John, NB</span></span></p>
+                <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="returns" class="size-[22px] text-stock-50" /><span>{{ __('Problem with an item? Tell us within 24 hours.') }} <a href="{{ route('refund-policy') }}" class="font-bold underline">{{ __('Refund policy') }}</a></span></p>
                 <div>
-                    <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="shield" class="size-[22px] text-stock-50" />{{ __('Shopping Security') }}</p>
+                    <p class="flex items-center gap-3 text-[15px]"><x-store.icon name="shield" class="size-[22px] text-stock-50" />{{ __('Secure checkout') }}</p>
                     <p class="mt-3 flex flex-wrap gap-4 pl-[34px] text-body-sm text-stock-50"><span>✓ {{ __('Safe Payments') }}</span><span>✓ {{ __('Privacy Protection') }}</span></p>
                 </div>
             </div>

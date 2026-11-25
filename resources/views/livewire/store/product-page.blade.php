@@ -124,7 +124,7 @@
             </dl>
 
             {{-- Buy --}}
-            <div class="flex items-center gap-3 sm:gap-4">
+            <div class="flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-4">
                 <div @class(['flex h-11 shrink-0 items-center rounded-full border border-grayscale-40 bg-surface', 'opacity-50' => ! $canBuy])>
                     <button type="button" wire:click="decrement" @disabled(! $canBuy || $quantity <= 1) class="-m-px flex size-11 items-center justify-center rounded-full border border-grayscale-40 bg-surface text-[16px] leading-[21px] font-extrabold transition-colors enabled:hover:border-ink" aria-label="Decrease quantity">−</button>
                     <span class="w-[50px] text-center text-[16px] leading-[21px] font-extrabold" aria-live="polite">{{ $quantity }}</span>
@@ -132,19 +132,19 @@
                 </div>
 
                 @if ($canBuy)
-                    <button type="button" wire:click="addToBasket" class="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-brand-yellow text-[14px] font-extrabold transition-colors hover:bg-brand-yellow-60 sm:text-[16px]">
+                    <button type="button" wire:click="addToBasket" class="order-last flex h-12 basis-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand-yellow px-5 text-[16px] font-extrabold transition-colors hover:bg-brand-yellow-60 sm:order-none sm:h-11 sm:flex-1 sm:basis-auto">
                         Add to basket · {{ money($variation->price_cents * $quantity) }}
                         <x-store.icon name="shopping-bag" class="size-4" />
                     </button>
                 @else
-                    <span aria-disabled="true" class="flex h-11 flex-1 cursor-not-allowed items-center justify-center rounded-full bg-grayscale-20 text-[14px] font-extrabold text-grayscale-60 sm:text-[16px]">
+                    <span aria-disabled="true" class="order-last flex h-12 basis-full cursor-not-allowed items-center justify-center whitespace-nowrap rounded-full bg-grayscale-20 px-5 text-[16px] font-extrabold text-grayscale-60 sm:order-none sm:h-11 sm:flex-1 sm:basis-auto">
                         {{ $state === 'unavailable' ? 'Unavailable' : 'Add to basket · '.money($variation?->price_cents * $quantity) }}
                     </span>
                 @endif
 
                 @php($saved = auth()->user()?->wishlist()->whereKey($product->id)->exists())
                 <button type="button" wire:click="toggleWishlist" aria-pressed="{{ $saved ? 'true' : 'false' }}"
-                        @class(['flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors', 'border-price-40 bg-sale-0 text-price-40' => $saved, 'border-grayscale-40 hover:border-ink' => ! $saved])
+                        @class(['ml-auto flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors sm:ml-0', 'border-price-40 bg-sale-0 text-price-40' => $saved, 'border-grayscale-40 hover:border-ink' => ! $saved])
                         aria-label="{{ $saved ? __('Remove :name from wishlist', ['name' => $product->localized_name]) : __('Save :name to wishlist', ['name' => $product->localized_name]) }}">
                     <x-store.icon name="heart" class="size-4" />
                 </button>

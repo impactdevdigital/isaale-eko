@@ -17,12 +17,12 @@
 
     <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_400px] lg:gap-8">
         <section aria-labelledby="basket-title">
-            <div class="flex items-center gap-3 border-b border-grayscale-40 pb-5">
+            <div class="flex flex-wrap items-center gap-3 border-b border-grayscale-40 pb-5">
                 <x-store.icon name="shopping-bag" class="size-6" />
                 <h1 id="basket-title" class="text-h2-mobile md:text-h2">Your Basket</h1>
                 <span class="rounded-full bg-grayscale-30 px-2.5 py-1 text-[13px] font-bold text-body-muted">{{ $count }} {{ str('item')->plural($count) }}</span>
                 @if ($count > 0)
-                    <a href="#save-basket" class="ml-auto inline-flex h-9 items-center gap-2 rounded-full border border-ink px-4 text-[13px] font-bold transition-colors hover:bg-ink hover:text-white">
+                    <a href="#save-basket" class="inline-flex h-11 basis-full items-center justify-center gap-2 rounded-full border border-ink bg-surface px-4 text-[14px] font-extrabold transition-colors hover:bg-ink hover:text-white sm:ml-auto sm:h-9 sm:basis-auto sm:text-[13px] sm:font-bold">
                         <x-store.icon name="bookmark" class="size-4" /> Save basket
                     </a>
                 @endif

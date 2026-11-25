@@ -27,7 +27,7 @@
                     </div>
                 @else
                     @auth
-                        <form wire:submit="save" class="mt-4 flex items-start gap-2">
+                        <form wire:submit="save" class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-start">
                             <div class="flex-1">
                                 <label for="save-basket-name" class="sr-only">Basket name</label>
                                 <input id="save-basket-name" type="text" wire:model="basketName" maxlength="60" placeholder="e.g. Weekly shop"
@@ -36,7 +36,9 @@
                                     <p class="mt-1 text-body-xs text-price-40">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <button type="submit" class="h-11 shrink-0 rounded-full bg-ink px-5 text-[14px] font-bold text-white transition-colors hover:bg-grayscale-90">Save basket</button>
+                            <button type="submit" class="flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-ink px-5 text-[14px] font-bold text-white transition-colors hover:bg-grayscale-90 sm:w-auto">
+                                <x-store.icon name="bookmark" class="size-4" /> Save basket
+                            </button>
                         </form>
                     @else
                         <button type="button" x-data @click="$dispatch('sign-in-open')" class="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-ink text-[14px] font-bold transition-colors hover:bg-ink hover:text-white">

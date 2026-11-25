@@ -13,15 +13,30 @@
                 Counts come from the website's own event log, so they appear even before Google Analytics is connected.
             </p>
         </div>
-        <label class="flex items-center gap-2 text-sm font-bold text-[#111111]">
-            <span class="sr-only">Date range</span>
-            <select wire:model.live="days" class="px-3 py-2.5 rounded-xl border border-[#EEEEEE] bg-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]">
-                @foreach (AnalyticsDashboard::RANGES as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </select>
-        </label>
+        <div class="flex flex-wrap items-center gap-2">
+            <label class="flex items-center gap-2 text-sm font-bold text-[#111111]">
+                <span class="sr-only">Date range</span>
+                <select wire:model.live="days" @class(['px-3 py-2.5 rounded-xl border bg-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]', 'border-[#EEEEEE]' => $day, 'border-[#111111]' => ! $day])>
+                    @foreach (AnalyticsDashboard::RANGES as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <span class="text-xs font-bold text-[#686868]">or</span>
+            <label class="flex items-center gap-2 text-sm font-bold text-[#111111]">
+                <span class="sr-only">Pick a day</span>
+                <input type="date" wire:model.live="day" max="{{ $today }}"
+                       @class(['px-3 py-2 rounded-xl border bg-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#DF2600]/20 focus:border-[#DF2600]', 'border-[#111111]' => $day, 'border-[#EEEEEE]' => ! $day])>
+            </label>
+            @if ($day)
+                <button type="button" wire:click="clearDay" class="px-3 py-2.5 rounded-xl text-xs font-bold text-[#DF2600] hover:bg-[#FDF0ED]">Clear day</button>
+            @endif
+        </div>
     </div>
+
+    <p class="-mt-2 sm:-mt-4 text-sm text-[#686868]">
+        Showing <strong class="text-[#111111]">{{ $periodLabel }}</strong> <span class="text-xs">(store time, Atlantic)</span>
+    </p>
 
     <div @class([
         'p-4 sm:p-5 rounded-2xl border text-xs sm:text-sm',
@@ -73,6 +88,53 @@
             </section>
         @endforeach
     </div>
+
+    {{-- Day by day --}}
+    @if ($daily->isNotEmpty())
+        @php($peak = max(1, $daily->max('visitors')))
+        <section class="bg-white rounded-2xl border border-[#EEEEEE] p-4 sm:p-6" aria-labelledby="daily-title">
+            <h3 id="daily-title" class="text-sm font-extrabold text-[#111111]">Day by day</h3>
+            <p class="mt-1 text-xs text-[#686868]">Click a day to see all of its figures.</p>
+            <div class="mt-4 overflow-x-auto">
+                <table class="w-full min-w-[560px] text-sm">
+                    <thead>
+                        <tr class="text-left text-[11px] font-bold uppercase tracking-wider text-[#686868]">
+                            <th class="py-2 pr-3 font-bold">Day</th>
+                            <th class="py-2 pr-3 font-bold">Visitors</th>
+                            <th class="py-2 pr-3 text-right font-bold">Page views</th>
+                            <th class="py-2 pr-3 text-right font-bold">Added to basket</th>
+                            <th class="py-2 pr-3 text-right font-bold">Orders</th>
+                            <th class="py-2 text-right font-bold">Order value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#EEEEEE]">
+                        @foreach ($daily as $date => $row)
+                            <tr wire:key="day-{{ $date }}" wire:click="showDay('{{ $date }}')" class="cursor-pointer hover:bg-[#FAFAFA]">
+                                <td class="py-2 pr-3 whitespace-nowrap">
+                                    <button type="button" class="font-bold text-[#111111] hover:underline">{{ \Carbon\CarbonImmutable::parse($date)->format('D j M') }}</button>
+                                    @if ($date === $today)
+                                        <span class="ml-1 rounded-full bg-[#F6F6F6] px-2 py-0.5 text-[10px] font-bold text-[#686868]">Today</span>
+                                    @endif
+                                </td>
+                                <td class="py-2 pr-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-2 w-24 rounded-full bg-[#F6F6F6]" role="presentation">
+                                            <div class="h-2 rounded-full bg-[#DF2600]" style="width: {{ round($row['visitors'] / $peak * 100) }}%"></div>
+                                        </div>
+                                        <span class="font-extrabold text-[#111111]">{{ number_format($row['visitors']) }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-2 pr-3 text-right text-[#111111]">{{ number_format($row['page_views']) }}</td>
+                                <td class="py-2 pr-3 text-right text-[#111111]">{{ number_format($row['add_to_cart']) }}</td>
+                                <td class="py-2 pr-3 text-right font-extrabold text-[#111111]">{{ number_format($row['orders']) }}</td>
+                                <td class="py-2 text-right text-[#111111]">{{ money((int) round($row['revenue'] * 100)) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @endif
 
     {{-- Funnel --}}
     <section class="bg-white rounded-2xl border border-[#EEEEEE] p-4 sm:p-6" aria-labelledby="funnel-title">

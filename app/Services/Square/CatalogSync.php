@@ -284,6 +284,22 @@ class CatalogSync
     }
 
     /**
+     * The Square item has no photo. Keep a photo the shop holds itself (one
+     * uploaded or copied onto the site); drop one that was Square's, since
+     * the item no longer has it. Adopted items keep what they had.
+     */
+    private function imageWithoutSquarePhoto(?Product $product, bool $adopting): string
+    {
+        $current = $product?->image;
+
+        if ($current && ($adopting || ! str_contains($current, 'items-images'))) {
+            return $current;
+        }
+
+        return self::NO_IMAGE;
+    }
+
+    /**
      * @param  Collection<string, string|null>  $images
      */
     private function applyItem(array $object, Collection $images): void
@@ -331,7 +347,7 @@ class CatalogSync
             'name' => $name,
             'description' => $this->descriptionOf($data) ?? ($adopting ? $product->description : null),
             'category_id' => $categoryId ?? ($adopting ? $product->category_id : null),
-            'image' => $images->get($data['image_ids'][0] ?? '') ?? ($adopting ? $product->image : self::NO_IMAGE),
+            'image' => $images->get($data['image_ids'][0] ?? '') ?? $this->imageWithoutSquarePhoto($product, $adopting),
             'is_active' => $this->availableHere($object) && $variations->isNotEmpty() && ($data['ecom_visibility'] ?? null) !== 'HIDDEN',
         ]);
         $product->slug ??= $this->uniqueSlug(Product::class, $name);

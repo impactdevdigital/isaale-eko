@@ -249,12 +249,14 @@ class Seo
             'servesCuisine' => ['African', 'Caribbean'],
             'address' => [
                 '@type' => 'PostalAddress',
+                'streetAddress' => '333 Main St',
                 'addressLocality' => 'Saint John',
                 'addressRegion' => 'NB',
+                'postalCode' => 'E2K 1J1',
                 'addressCountry' => 'CA',
             ],
             'geo' => ['@type' => 'GeoCoordinates', 'latitude' => 45.2753734, 'longitude' => -66.0789801],
-            'hasMap' => 'https://www.google.com/maps/place/%C3%8Csal%C3%A8%C3%A8+%C3%88k%C3%B2/@45.2753734,-66.0789801,17z',
+            'hasMap' => 'https://maps.google.com/?cid=17562637912881559253',
             'areaServed' => 'Saint John, New Brunswick',
             'openingHoursSpecification' => $hours ?: null,
         ]);

@@ -7,6 +7,8 @@ BRANCH="${1:-main}"
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$REPO_DIR"
 
+PREVIOUS="$(git rev-parse HEAD)"
+
 echo "==> Updating code to origin/$BRANCH"
 git fetch --quiet origin "$BRANCH"
 git checkout --quiet -B "$BRANCH" "origin/$BRANCH"
@@ -22,6 +24,14 @@ docker compose up -d --remove-orphans
 # worker and scheduler share the app image but have no build step, so compose
 # does not notice the new image: restart them on it explicitly.
 docker compose up -d --no-deps --force-recreate worker scheduler
+
+# Caddy mounts the Caddyfile as a single file, and git replaces that file on
+# checkout, so a running Caddy keeps the old copy. Restart it when it changed.
+if ! git -C "$REPO_DIR" diff --quiet "$PREVIOUS" HEAD -- deploy/vps/Caddyfile; then
+  echo "==> Caddyfile changed: checking it and restarting Caddy"
+  docker compose run --rm --no-deps --entrypoint caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+  docker compose up -d --no-deps --force-recreate caddy
+fi
 
 echo "==> Waiting for the site"
 for i in $(seq 1 60); do

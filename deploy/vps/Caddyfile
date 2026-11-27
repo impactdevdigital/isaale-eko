@@ -9,4 +9,16 @@ header {
 	-Server
 }
 
+# One address for search engines: www goes to the main domain.
+@www host www.isaleeeko.com
+redir @www https://isaleeeko.com{uri} permanent
+
+# Staging serves the same app: keep it out of search results.
+@staging host staging.isaleeeko.com
+header @staging X-Robots-Tag "noindex, nofollow"
+
+# Leftovers from the old WordPress site: tell crawlers they are gone for good.
+@wordpress path /wp-* /wp-admin/* /wp-content/* /wp-includes/* /grocery /grocery/* /xmlrpc.php /feed /feed/*
+respond @wordpress "Gone" 410
+
 reverse_proxy app:8080
